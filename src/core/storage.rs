@@ -27,11 +27,11 @@ where
         return storage;
     }
 
-    pub fn get_data(self) -> ArrayBase<OwnedRepr<F>, IxDyn> {
-        return self.data;
+    pub fn get_data(&self) -> &ArrayBase<OwnedRepr<F>, IxDyn> {
+        return &(self.data);
     }
 
-    pub fn get_nbytes(self) -> usize {
+    pub fn get_nbytes(&self) -> usize {
         return self.nbytes;
     }
 
@@ -39,7 +39,7 @@ where
         return self.dtype;
     }
 
-    pub fn get_raw_shape(self) -> Vec<usize> {
+    pub fn get_raw_shape(&self) -> Vec<usize> {
         return self.data.shape().to_vec();
     }
 }

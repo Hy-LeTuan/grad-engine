@@ -51,7 +51,7 @@ where
         return tensor;
     }
 
-    pub fn from_tensor(x: ArrayBase<OwnedRepr<F>, IxDyn>) -> Self {
+    pub fn from_raw_array(x: ArrayBase<OwnedRepr<F>, IxDyn>) -> Self {
         let shape = x.shape().to_vec();
         let numel = x.len();
         let type_signature = F::dtype();
@@ -106,7 +106,7 @@ where
         return self.version;
     }
 
-    pub fn get_raw_data(self) -> ArrayBase<OwnedRepr<F>, IxDyn> {
+    pub fn get_raw_data(&self) -> &ArrayBase<OwnedRepr<F>, IxDyn> {
         return self.storage.get_data();
     }
 
@@ -130,9 +130,32 @@ where
         let data = self.get_raw_data();
         let new_raw_data = data + _rhs;
 
-        let tensor = Tensor::from_tensor(new_raw_data);
+        let tensor = Tensor::from_raw_array(new_raw_data);
 
         return tensor;
+    }
+}
+
+impl<'a, 'b, TensorType> Add<&'b Tensor<TensorType>> for &'a Tensor<TensorType>
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: &'b Tensor<TensorType>) -> Self::Output {
+        let new_raw_data = self.get_raw_data() + rhs.get_raw_data();
+        Tensor::from_raw_array(new_raw_data)
+    }
+}
+
+impl<TensorType> Add<Tensor<TensorType>> for Tensor<TensorType>
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        &self + &rhs
     }
 }
 
@@ -142,8 +165,14 @@ mod test {
     #[test]
     fn create_tensor() {
         let x = vec![1, 2, 3, 4];
-        let a = Tensor::new(x, vec![4, 1]);
+        let _a = Tensor::new(x, vec![4, 1]);
+    }
 
-        println!("shape: {:?}", a.get_shape());
+    #[test]
+    fn add_tensor() {
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1]);
+
+        let _c = a + b;
     }
 }
