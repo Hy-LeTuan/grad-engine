@@ -1,6 +1,7 @@
 use core::panic;
-use ndarray::{Array, ArrayD, IxDyn, IxDynImpl, ShapeBuilder};
+use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
 use num_traits::Zero;
+use std::ops;
 
 use super::super::config::CONFIG;
 use super::dtypes::DTypeMarker;
@@ -48,12 +49,10 @@ where
 
         return tensor;
     }
-}
 
-impl Tensor<f32> {
     pub fn zeros(shape: Vec<usize>) -> Self {
         let dyn_shape = IxDyn(&shape);
-        let data = ArrayD::<f32>::zeros(dyn_shape);
+        let data = ArrayD::<F>::zeros(dyn_shape);
         let numel = data.len();
         let type_signature = DTypes::Float32;
 
@@ -62,7 +61,7 @@ impl Tensor<f32> {
 
         let tensor = Tensor {
             storage: storage,
-            shape: vec![1, 2],
+            shape: shape,
             strides: vec![1, numel],
             numel: numel,
             version: CONFIG.version,
@@ -70,7 +69,46 @@ impl Tensor<f32> {
 
         return tensor;
     }
+
+    pub fn get_shape(self) -> Vec<usize> {
+        return self.shape;
+    }
+
+    pub fn get_strides(self) -> Vec<usize> {
+        return self.strides;
+    }
+
+    pub fn get_numel(self) -> usize {
+        return self.numel;
+    }
+
+    pub fn get_version(self) -> u64 {
+        return self.version;
+    }
+
+    pub fn get_raw_data(self) -> ArrayBase<OwnedRepr<F>, IxDyn> {
+        return self.storage.get_data();
+    }
+
+    pub fn get_nbytes(self) -> usize {
+        return self.storage.get_nbytes();
+    }
+
+    pub fn get_type(self) -> DTypes {
+        return self.storage.get_dtype();
+    }
 }
+
+// impl<F> ops::Add<F> for Tensor<F>
+// where
+//     F: DTypeMarker + Zero + Clone,
+// {
+//     type Output = Tensor<F>;
+//
+//     fn add(self, _rhs: F) -> Tensor<F> {
+//
+//     }
+// }
 
 mod test {
     use super::*;
