@@ -38,4 +38,8 @@ where
     pub fn get_dtype(self) -> DTypes {
         return self.dtype;
     }
+
+    pub fn get_raw_shape(self) -> Vec<usize> {
+        return self.data.shape().to_vec();
+    }
 }

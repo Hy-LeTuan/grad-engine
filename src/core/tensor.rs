@@ -1,7 +1,8 @@
+use crate::core::tensor::ops::Add;
 use core::panic;
-use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
+use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr, ScalarOperand};
 use num_traits::Zero;
-use std::ops;
+use std::ops::{self, AddAssign};
 
 use super::super::config::CONFIG;
 use super::dtypes::DTypeMarker;
@@ -29,7 +30,7 @@ where
         let type_signature = F::dtype();
         let nbytes = std::mem::size_of::<F>() * (numel as usize);
 
-        let data = Array::from_shape_vec(shape, x);
+        let data = Array::from_shape_vec(shape.clone(), x);
         let data = match data {
             Ok(x) => x,
             Err(e) => {
@@ -41,7 +42,26 @@ where
 
         let tensor = Tensor {
             storage: storage,
-            shape: vec![1, 2],
+            shape: shape,
+            strides: vec![1, numel],
+            numel: numel,
+            version: CONFIG.version,
+        };
+
+        return tensor;
+    }
+
+    pub fn from_tensor(x: ArrayBase<OwnedRepr<F>, IxDyn>) -> Self {
+        let shape = x.shape().to_vec();
+        let numel = x.len();
+        let type_signature = F::dtype();
+        let nbytes = std::mem::size_of::<F>() * (numel as usize);
+
+        let storage = Storage::new(x, nbytes, type_signature);
+
+        let tensor = Tensor {
+            storage: storage,
+            shape: shape,
             strides: vec![1, numel],
             numel: numel,
             version: CONFIG.version,
@@ -99,16 +119,22 @@ where
     }
 }
 
-// impl<F> ops::Add<F> for Tensor<F>
-// where
-//     F: DTypeMarker + Zero + Clone,
-// {
-//     type Output = Tensor<F>;
-//
-//     fn add(self, _rhs: F) -> Tensor<F> {
-//
-//     }
-// }
+impl<TensorType, ScalarType> ops::Add<ScalarType> for Tensor<TensorType>
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<ScalarType, Output = TensorType>,
+    ScalarType: AddAssign + ScalarOperand,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, _rhs: ScalarType) -> Tensor<TensorType> {
+        let data = self.get_raw_data();
+        let new_raw_data = data + _rhs;
+
+        let tensor = Tensor::from_tensor(new_raw_data);
+
+        return tensor;
+    }
+}
 
 mod test {
     use super::*;
@@ -117,5 +143,7 @@ mod test {
     fn create_tensor() {
         let x = vec![1, 2, 3, 4];
         let a = Tensor::new(x, vec![4, 1]);
+
+        println!("shape: {:?}", a.get_shape());
     }
 }
