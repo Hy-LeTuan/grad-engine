@@ -5,7 +5,7 @@ use ndarray::ScalarOperand;
 use num_traits::Zero;
 use std::ops::{Add, AddAssign};
 
-// OPERATIONS FOR ADDING SCALAR TO TENSOR
+// ADD FOR TENSOR AND SCALAR
 
 impl<'a, TensorType, ScalarType> Add<ScalarType> for &'a Tensor<TensorType>
 where
@@ -63,6 +63,33 @@ where
     }
 }
 
+impl<'a, TensorType> Add<&'a Tensor<TensorType>> for f64
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<f64, Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
+        let raw_data = rhs.get_raw_data();
+        let new_data = raw_data + self;
+
+        let tensor = Tensor::from_raw_array(new_data);
+
+        return tensor;
+    }
+}
+
+impl<TensorType> Add<Tensor<TensorType>> for f64
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<f64, Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
+        return self + &rhs;
+    }
+}
+
 impl<'a, TensorType> Add<&'a Tensor<TensorType>> for i32
 where
     TensorType: DTypeMarker + Zero + Clone + Add<i32, Output = TensorType>,
@@ -82,6 +109,33 @@ where
 impl<TensorType> Add<Tensor<TensorType>> for i32
 where
     TensorType: DTypeMarker + Zero + Clone + Add<i32, Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
+        return self + &rhs;
+    }
+}
+
+impl<'a, TensorType> Add<&'a Tensor<TensorType>> for i64
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<i64, Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
+        let raw_data = rhs.get_raw_data();
+        let new_data = raw_data + self;
+
+        let tensor = Tensor::from_raw_array(new_data);
+
+        return tensor;
+    }
+}
+
+impl<TensorType> Add<Tensor<TensorType>> for i64
+where
+    TensorType: DTypeMarker + Zero + Clone + Add<i64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
