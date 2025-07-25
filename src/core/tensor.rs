@@ -1,5 +1,5 @@
 use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
-use num_traits::Zero;
+use num_traits::{AsPrimitive, Zero};
 use std::fmt::Debug;
 
 use super::super::config::CONFIG;
@@ -94,11 +94,11 @@ where
     }
 
     pub fn get_shape(&self) -> &[usize] {
-        return &self.shape;
+        return &(self.shape);
     }
 
     pub fn get_strides(&self) -> &[usize] {
-        return &self.strides;
+        return &(self.strides);
     }
 
     pub fn get_numel(&self) -> usize {
@@ -110,18 +110,48 @@ where
     }
 
     pub fn get_raw_data(&self) -> &ArrayBase<OwnedRepr<F>, IxDyn> {
-        return self.storage.get_data();
+        return self.get_storage().get_data();
     }
 
-    pub fn get_nbytes(self) -> usize {
-        return self.storage.get_nbytes();
+    pub fn get_nbytes(&self) -> usize {
+        return self.get_storage().get_nbytes();
     }
 
     pub fn get_type(&self) -> DTypes {
-        return self.storage.get_dtype();
+        return self.get_storage().get_dtype();
     }
+}
 
-    pub fn as_float(&self) {}
+impl<F> Tensor<F>
+where
+    F: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f32>,
+{
+    pub fn as_float_32(&self) -> Tensor<f32> {
+        let tensor;
+
+        let old_raw_array = self.get_raw_data();
+        let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
+
+        tensor = Tensor::from_raw_array(new_raw_array);
+
+        return tensor;
+    }
+}
+
+impl<F> Tensor<F>
+where
+    F: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f64>,
+{
+    pub fn as_float_64(&self) -> Tensor<f64> {
+        let tensor;
+
+        let old_raw_array = self.get_raw_data();
+        let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
+
+        tensor = Tensor::from_raw_array(new_raw_array);
+
+        return tensor;
+    }
 }
 
 mod test {

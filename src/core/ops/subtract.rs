@@ -77,7 +77,7 @@ mod test {
 
     #[test]
     fn subtract_scalar() {
-        let a = Tensor::new(vec![1.0, 2.0, 3.0, 4.0], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]).as_float_32();
         let b = 4.0;
         let _c = a - b;
     }

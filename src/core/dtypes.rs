@@ -1,7 +1,9 @@
 #[derive(Debug, Copy, Clone)]
 pub enum DTypes {
+    Float64,
     Float32,
     Int64,
+    Int32,
     Bool,
 }
 
@@ -15,9 +17,21 @@ impl DTypeMarker for f32 {
     }
 }
 
+impl DTypeMarker for f64 {
+    fn dtype() -> DTypes {
+        return DTypes::Float64;
+    }
+}
+
 impl DTypeMarker for i64 {
     fn dtype() -> DTypes {
         return DTypes::Int64;
+    }
+}
+
+impl DTypeMarker for i32 {
+    fn dtype() -> DTypes {
+        return DTypes::Int32;
     }
 }
 
