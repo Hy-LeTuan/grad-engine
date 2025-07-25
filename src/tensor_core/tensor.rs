@@ -1,3 +1,4 @@
+use ndarray::Ix2;
 use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
 use num_traits::{AsPrimitive, Zero};
 use std::fmt::Debug;
@@ -8,11 +9,11 @@ use super::dtypes::DTypes;
 use super::storage::Storage;
 
 #[derive(Debug)]
-pub struct Tensor<F>
+pub struct Tensor<T>
 where
-    F: Zero + Clone,
+    T: Zero + Clone,
 {
-    storage: Storage<F>,
+    storage: Storage<T>,
     shape: Vec<usize>,
     strides: Vec<usize>,
     numel: usize,
@@ -20,14 +21,14 @@ where
     // autograd_meta: Option<AutogradMeta>,
 }
 
-impl<F> Tensor<F>
+impl<T> Tensor<T>
 where
-    F: DTypeMarker + Zero + Clone,
+    T: DTypeMarker + Zero + Clone,
 {
-    pub fn new(x: Vec<F>, shape: Vec<usize>) -> Self {
+    pub fn new(x: Vec<T>, shape: Vec<usize>) -> Self {
         let numel = x.len();
-        let type_signature = F::dtype();
-        let nbytes = std::mem::size_of::<F>() * (numel as usize);
+        let type_signature = T::dtype();
+        let nbytes = std::mem::size_of::<T>() * (numel as usize);
 
         let data = Array::from_shape_vec(shape.clone(), x);
         let data = match data {
@@ -50,11 +51,11 @@ where
         return tensor;
     }
 
-    pub fn from_raw_array(x: ArrayBase<OwnedRepr<F>, IxDyn>) -> Self {
+    pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>) -> Self {
         let shape = x.shape().to_vec();
         let numel = x.len();
-        let type_signature = F::dtype();
-        let nbytes = std::mem::size_of::<F>() * (numel as usize);
+        let type_signature = T::dtype();
+        let nbytes = std::mem::size_of::<T>() * (numel as usize);
 
         let storage = Storage::new(x, nbytes, type_signature);
 
@@ -71,7 +72,7 @@ where
 
     pub fn zeros(shape: Vec<usize>) -> Self {
         let dyn_shape = IxDyn(&shape);
-        let data = ArrayD::<F>::zeros(dyn_shape);
+        let data = ArrayD::<T>::zeros(dyn_shape);
         let numel = data.len();
         let type_signature = DTypes::Float32;
 
@@ -89,7 +90,7 @@ where
         return tensor;
     }
 
-    fn get_storage(&self) -> &Storage<F> {
+    fn get_storage(&self) -> &Storage<T> {
         return &self.storage;
     }
 
@@ -109,8 +110,12 @@ where
         return self.version;
     }
 
-    pub fn get_raw_data(&self) -> &ArrayBase<OwnedRepr<F>, IxDyn> {
+    pub fn get_raw_data(&self) -> &ArrayBase<OwnedRepr<T>, IxDyn> {
         return self.get_storage().get_data();
+    }
+
+    pub fn get_raw_data_as_ix2(&self) -> ArrayBase<OwnedRepr<T>, Ix2> {
+        return self.get_storage().get_data_as_ix2();
     }
 
     pub fn get_nbytes(&self) -> usize {

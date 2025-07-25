@@ -1,22 +1,22 @@
 use super::dtypes::{self, DTypes};
-use ndarray::{ArrayBase, IxDyn, OwnedRepr};
+use ndarray::{ArrayBase, Ix2, IxDyn, OwnedRepr};
 use num_traits::Zero;
 
 #[derive(Debug)]
-pub struct Storage<F>
+pub struct Storage<T>
 where
-    F: Zero + Clone,
+    T: Zero + Clone,
 {
-    data: ArrayBase<OwnedRepr<F>, IxDyn>,
+    data: ArrayBase<OwnedRepr<T>, IxDyn>,
     nbytes: usize,
     dtype: dtypes::DTypes,
 }
 
-impl<F> Storage<F>
+impl<T> Storage<T>
 where
-    F: Zero + Clone,
+    T: Zero + Clone,
 {
-    pub fn new(x: ArrayBase<OwnedRepr<F>, IxDyn>, nbytes: usize, dtype: dtypes::DTypes) -> Self {
+    pub fn new(x: ArrayBase<OwnedRepr<T>, IxDyn>, nbytes: usize, dtype: dtypes::DTypes) -> Self {
         let storage = Storage {
             data: x,
             nbytes: nbytes,
@@ -26,8 +26,13 @@ where
         return storage;
     }
 
-    pub fn get_data(&self) -> &ArrayBase<OwnedRepr<F>, IxDyn> {
+    pub fn get_data(&self) -> &ArrayBase<OwnedRepr<T>, IxDyn> {
         return &(self.data);
+    }
+
+    pub fn get_data_as_ix2(&self) -> ArrayBase<OwnedRepr<T>, Ix2> {
+        let fixed_shape = self.data.clone().into_dimensionality::<Ix2>().unwrap();
+        return fixed_shape;
     }
 
     pub fn get_nbytes(&self) -> usize {
