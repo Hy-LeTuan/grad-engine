@@ -4,8 +4,8 @@ use std::fmt::Debug;
 
 use super::super::config::CONFIG;
 use super::dtypes::DTypeMarker;
+use super::dtypes::DTypes;
 use super::storage::Storage;
-use crate::core::dtypes::DTypes;
 
 #[derive(Debug)]
 pub struct Tensor<F>

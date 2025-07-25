@@ -1,6 +1,4 @@
-use crate::core::dtypes::DTypes;
-
-use super::dtypes;
+use super::dtypes::{self, DTypes};
 use ndarray::{ArrayBase, IxDyn, OwnedRepr};
 use num_traits::Zero;
 
