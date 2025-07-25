@@ -2,6 +2,7 @@ use crate::core::tensor::ops::Add;
 use core::panic;
 use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr, ScalarOperand};
 use num_traits::Zero;
+use std::fmt::Debug;
 use std::ops::{self, AddAssign};
 
 use super::super::config::CONFIG;
@@ -9,6 +10,7 @@ use super::dtypes::DTypeMarker;
 use super::storage::Storage;
 use crate::core::dtypes::DTypes;
 
+#[derive(Debug)]
 pub struct Tensor<F>
 where
     F: Zero + Clone,
@@ -160,6 +162,7 @@ where
 }
 
 mod test {
+    #[allow(unused)]
     use super::*;
 
     #[test]

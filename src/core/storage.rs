@@ -4,6 +4,7 @@ use super::dtypes;
 use ndarray::{ArrayBase, IxDyn, OwnedRepr};
 use num_traits::Zero;
 
+#[derive(Debug)]
 pub struct Storage<F>
 where
     F: Zero + Clone,
