@@ -1,9 +1,6 @@
-use crate::core::tensor::ops::Add;
-use core::panic;
-use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr, ScalarOperand};
+use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{self, AddAssign};
 
 use super::super::config::CONFIG;
 use super::dtypes::DTypeMarker;
@@ -92,19 +89,23 @@ where
         return tensor;
     }
 
-    pub fn get_shape(self) -> Vec<usize> {
-        return self.shape;
+    fn get_storage(&self) -> &Storage<F> {
+        return &self.storage;
     }
 
-    pub fn get_strides(self) -> Vec<usize> {
-        return self.strides;
+    pub fn get_shape(&self) -> &[usize] {
+        return &self.shape;
     }
 
-    pub fn get_numel(self) -> usize {
+    pub fn get_strides(&self) -> &[usize] {
+        return &self.strides;
+    }
+
+    pub fn get_numel(&self) -> usize {
         return self.numel;
     }
 
-    pub fn get_version(self) -> u64 {
+    pub fn get_version(&self) -> u64 {
         return self.version;
     }
 
@@ -116,49 +117,11 @@ where
         return self.storage.get_nbytes();
     }
 
-    pub fn get_type(self) -> DTypes {
+    pub fn get_type(&self) -> DTypes {
         return self.storage.get_dtype();
     }
-}
 
-impl<TensorType, ScalarType> ops::Add<ScalarType> for Tensor<TensorType>
-where
-    TensorType: DTypeMarker + Zero + Clone + Add<ScalarType, Output = TensorType>,
-    ScalarType: AddAssign + ScalarOperand,
-{
-    type Output = Tensor<TensorType>;
-
-    fn add(self, _rhs: ScalarType) -> Tensor<TensorType> {
-        let data = self.get_raw_data();
-        let new_raw_data = data + _rhs;
-
-        let tensor = Tensor::from_raw_array(new_raw_data);
-
-        return tensor;
-    }
-}
-
-impl<'a, 'b, TensorType> Add<&'b Tensor<TensorType>> for &'a Tensor<TensorType>
-where
-    TensorType: DTypeMarker + Zero + Clone + Add<Output = TensorType>,
-{
-    type Output = Tensor<TensorType>;
-
-    fn add(self, rhs: &'b Tensor<TensorType>) -> Self::Output {
-        let new_raw_data = self.get_raw_data() + rhs.get_raw_data();
-        Tensor::from_raw_array(new_raw_data)
-    }
-}
-
-impl<TensorType> Add<Tensor<TensorType>> for Tensor<TensorType>
-where
-    TensorType: DTypeMarker + Zero + Clone + Add<Output = TensorType>,
-{
-    type Output = Tensor<TensorType>;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        &self + &rhs
-    }
+    pub fn as_float(&self) {}
 }
 
 mod test {
@@ -169,13 +132,5 @@ mod test {
     fn create_tensor() {
         let x = vec![1, 2, 3, 4];
         let _a = Tensor::new(x, vec![4, 1]);
-    }
-
-    #[test]
-    fn add_tensor() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1]);
-
-        let _c = a + b;
     }
 }

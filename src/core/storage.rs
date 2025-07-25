@@ -36,7 +36,7 @@ where
         return self.nbytes;
     }
 
-    pub fn get_dtype(self) -> DTypes {
+    pub fn get_dtype(&self) -> DTypes {
         return self.dtype;
     }
 
