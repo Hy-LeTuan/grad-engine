@@ -1,5 +1,5 @@
 use super::dtypes::{self, DTypes};
-use ndarray::{ArrayBase, Ix2, IxDyn, OwnedRepr};
+use ndarray::{ArrayBase, Dimension, Ix2, IxDyn, OwnedRepr};
 use num_traits::Zero;
 
 #[derive(Debug)]
