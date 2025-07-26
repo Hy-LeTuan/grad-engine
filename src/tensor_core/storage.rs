@@ -1,22 +1,24 @@
 use super::dtypes::{self, DTypes};
-use ndarray::{ArrayBase, Dimension, Ix2, IxDyn, OwnedRepr};
+use ndarray::{ArrayBase, Dimension, Ix2, OwnedRepr};
 use num_traits::Zero;
 
 #[derive(Debug)]
-pub struct Storage<T>
+pub struct Storage<T, D>
 where
     T: Zero + Clone,
+    D: Dimension,
 {
-    data: ArrayBase<OwnedRepr<T>, IxDyn>,
+    data: ArrayBase<OwnedRepr<T>, D>,
     nbytes: usize,
     dtype: dtypes::DTypes,
 }
 
-impl<T> Storage<T>
+impl<T, D> Storage<T, D>
 where
     T: Zero + Clone,
+    D: Dimension,
 {
-    pub fn new(x: ArrayBase<OwnedRepr<T>, IxDyn>, nbytes: usize, dtype: dtypes::DTypes) -> Self {
+    pub fn new(x: ArrayBase<OwnedRepr<T>, D>, nbytes: usize, dtype: dtypes::DTypes) -> Self {
         let storage = Storage {
             data: x,
             nbytes: nbytes,
@@ -26,7 +28,7 @@ where
         return storage;
     }
 
-    pub fn get_data(&self) -> &ArrayBase<OwnedRepr<T>, IxDyn> {
+    pub fn get_data(&self) -> &ArrayBase<OwnedRepr<T>, D> {
         return &(self.data);
     }
 
