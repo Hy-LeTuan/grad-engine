@@ -1,24 +1,23 @@
+use super::super::config::CONFIG;
+use super::autograd_meta::AutogradMeta;
+use super::dtypes::{DTypeMarker, DTypes};
+use super::storage::Storage;
 use ndarray::Ix2;
 use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
 use num_traits::{AsPrimitive, Zero};
 use std::fmt::Debug;
 
-use super::super::config::CONFIG;
-use super::dtypes::DTypeMarker;
-use super::dtypes::DTypes;
-use super::storage::Storage;
-
 #[derive(Debug)]
 pub struct Tensor<T>
 where
-    T: Zero + Clone,
+    T: Zero + Clone + DTypeMarker,
 {
     storage: Storage<T>,
     shape: Vec<usize>,
     strides: Vec<usize>,
     numel: usize,
     version: u64,
-    // autograd_meta: Option<AutogradMeta>,
+    pub autograd_meta: Option<AutogradMeta<T>>,
 }
 
 impl<T> Tensor<T>
@@ -46,6 +45,7 @@ where
             strides: vec![1, numel],
             numel: numel,
             version: CONFIG.version,
+            autograd_meta: None,
         };
 
         return tensor;
@@ -65,6 +65,7 @@ where
             strides: vec![1, numel],
             numel: numel,
             version: CONFIG.version,
+            autograd_meta: None,
         };
 
         return tensor;
@@ -85,6 +86,7 @@ where
             strides: vec![1, numel],
             numel: numel,
             version: CONFIG.version,
+            autograd_meta: None,
         };
 
         return tensor;
@@ -125,11 +127,15 @@ where
     pub fn get_type(&self) -> DTypes {
         return self.get_storage().get_dtype();
     }
+
+    pub fn get_autograd_ref(&self) -> &Option<AutogradMeta<T>> {
+        return &self.autograd_meta;
+    }
 }
 
-impl<F> Tensor<F>
+impl<T> Tensor<T>
 where
-    F: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f32>,
+    T: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f32>,
 {
     pub fn as_float_32(&self) -> Tensor<f32> {
         let tensor;
@@ -143,9 +149,9 @@ where
     }
 }
 
-impl<F> Tensor<F>
+impl<T> Tensor<T>
 where
-    F: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f64>,
+    T: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f64>,
 {
     pub fn as_float_64(&self) -> Tensor<f64> {
         let tensor;
