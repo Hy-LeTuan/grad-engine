@@ -5,12 +5,13 @@ use super::super::tensor_core::tensor::Tensor;
 use super::edge::Edge;
 
 use num_traits::Zero;
+use std::fmt::Debug;
 
 pub mod grad_accum;
 
-pub trait Backward<T>: std::fmt::Debug
+pub trait Backward<T>: Debug
 where
-    T: DTypeMarker + Zero + Clone,
+    T: DTypeMarker + Zero + Clone + Debug,
 {
     fn calculate_gradient(&self, others: Vec<Arc<Tensor<T>>>) -> Vec<Arc<Tensor<T>>>;
 

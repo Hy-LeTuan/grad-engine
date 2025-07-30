@@ -2,19 +2,20 @@ use super::super::edge::Edge;
 use super::super::node::Backward;
 use super::DTypeMarker;
 
+use super::super::super::tensor_core::autograd_meta::AutogradMeta;
 use super::Tensor;
 
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 
 #[derive(Debug)]
 pub struct GradAccum<T>
 where
-    T: Zero + Clone + DTypeMarker,
+    T: Zero + Clone + DTypeMarker + Debug,
 {
     edge_list: Vec<Edge<T>>,
-    origin: Option<Arc<Tensor<T>>>,
+    origin: Option<Weak<AutogradMeta<T>>>,
     inputs: Vec<Arc<Tensor<T>>>,
 }
 
@@ -37,34 +38,24 @@ where
     fn traverse(&self) {}
 
     /// save gradient to the origin tensor
-    fn save_grad_to_origin_tensor(&self, tensor: Arc<Tensor<T>>) {
-        match &self.origin {
-            Some(tensor_ptr) => match tensor_ptr.as_ref().get_autograd_ref() {
-                Some(autograd_meta_ref) => {
-                    autograd_meta_ref.set_grad(tensor);
-                }
-                None => {}
-            },
-            None => {}
-        }
-    }
+    fn save_grad_to_origin_tensor(&self, grad: Arc<Tensor<T>>) {}
 }
 
 impl<T> GradAccum<T>
 where
     T: Zero + Clone + DTypeMarker + Debug,
 {
-    pub fn new(
-        origin: Arc<Tensor<T>>,
-        edge_list: Vec<Edge<T>>,
-        inputs: Vec<Arc<Tensor<T>>>,
-    ) -> Self {
+    pub fn new(edge_list: Vec<Edge<T>>, inputs: Vec<Arc<Tensor<T>>>) -> Self {
         let grad_accum = GradAccum {
             edge_list: edge_list,
-            origin: Some(origin),
+            origin: None,
             inputs: inputs,
         };
 
         return grad_accum;
+    }
+
+    pub fn set_owned_meta(&mut self, origin: Arc<AutogradMeta<T>>) {
+        self.origin = Some(Arc::downgrade(&origin));
     }
 }

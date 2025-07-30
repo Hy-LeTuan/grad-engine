@@ -3,12 +3,13 @@ use super::super::tensor::Tensor;
 
 use ndarray::Ix2;
 use ndarray::LinalgScalar;
+use std::fmt::Debug;
 
 use num_traits::Zero;
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Clone + LinalgScalar,
+    T: DTypeMarker + Zero + Clone + LinalgScalar + Debug,
 {
     pub fn tensor_dot(&self, rhs: &Tensor<T>) -> Tensor<T> {
         let left_raw_array = self

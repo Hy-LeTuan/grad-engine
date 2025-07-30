@@ -3,11 +3,12 @@ use super::super::tensor::Tensor;
 
 use ndarray::ScalarOperand;
 use num_traits::Zero;
+use std::fmt::Debug;
 use std::ops::{Sub, SubAssign};
 
 impl<'a, TensorType, ScalarType> Sub<ScalarType> for &'a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType>,
     ScalarType: SubAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -24,7 +25,7 @@ where
 
 impl<TensorType, ScalarType> Sub<ScalarType> for Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType>,
     ScalarType: SubAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -36,7 +37,7 @@ where
 
 impl<'a, 'b, TensorType> Sub<&'b Tensor<TensorType>> for &'a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -54,7 +55,7 @@ where
 
 impl<TensorType> Sub for Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 

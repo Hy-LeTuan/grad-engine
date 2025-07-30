@@ -2,27 +2,29 @@ use super::super::config::CONFIG;
 use super::autograd_meta::AutogradMeta;
 use super::dtypes::{DTypeMarker, DTypes};
 use super::storage::Storage;
+
 use ndarray::Ix2;
 use ndarray::{Array, ArrayBase, ArrayD, IxDyn, OwnedRepr};
 use num_traits::{AsPrimitive, Zero};
 use std::fmt::Debug;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct Tensor<T>
 where
-    T: Zero + Clone + DTypeMarker,
+    T: Zero + Clone + DTypeMarker + Debug,
 {
     storage: Storage<T>,
     shape: Vec<usize>,
     strides: Vec<usize>,
     numel: usize,
     version: u64,
-    pub autograd_meta: Option<AutogradMeta<T>>,
+    pub autograd_meta: Option<Arc<AutogradMeta<T>>>,
 }
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Clone,
+    T: DTypeMarker + Zero + Clone + Debug,
 {
     pub fn new(x: Vec<T>, shape: Vec<usize>, requires_grad: bool) -> Self {
         let numel = x.len();
@@ -49,8 +51,10 @@ where
         };
 
         if requires_grad {
-            let new_autograd_meta = AutogradMeta::<T>::new(String::from("leaf_grad_meta"));
-            tensor.set_autograd_meta(new_autograd_meta);
+            let autograd_meta = AutogradMeta::<T>::new_for_leaf(String::from("leaf_grad_meta"));
+
+            tensor.set_autograd_meta(autograd_meta);
+
             return tensor;
         } else {
             return tensor;
@@ -134,18 +138,18 @@ where
         return self.get_storage().get_dtype();
     }
 
-    pub fn get_autograd_ref(&self) -> &Option<AutogradMeta<T>> {
+    pub fn get_autograd_ref(&self) -> &Option<Arc<AutogradMeta<T>>> {
         return &self.autograd_meta;
     }
 
-    pub fn set_autograd_meta(&mut self, autograd_meta: AutogradMeta<T>) {
+    pub fn set_autograd_meta(&mut self, autograd_meta: Arc<AutogradMeta<T>>) {
         self.autograd_meta = Some(autograd_meta);
     }
 }
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f32>,
+    T: DTypeMarker + Zero + Debug + Clone + Copy + 'static + AsPrimitive<f32>,
 {
     pub fn as_float_32(&self) -> Tensor<f32> {
         let tensor;
@@ -161,7 +165,7 @@ where
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f64>,
+    T: Debug + DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f64>,
 {
     pub fn as_float_64(&self) -> Tensor<f64> {
         let tensor;
