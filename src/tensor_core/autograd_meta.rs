@@ -22,7 +22,7 @@ where
 
 impl<T> AutogradMeta<T>
 where
-    T: Zero + Clone + DTypeMarker,
+    T: DTypeMarker + Zero + Clone,
 {
     pub fn new(name: String) -> Self {
         let autograd_meta = AutogradMeta {

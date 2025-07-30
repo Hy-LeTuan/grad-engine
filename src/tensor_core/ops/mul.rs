@@ -179,15 +179,15 @@ mod test {
 
     #[test]
     fn mul_tensor() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
-        let b = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
+        let b = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
 
         let _c = a * b;
     }
 
     #[test]
     fn mul_scalar() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
         let b = 3;
 
         let _c = a * b;

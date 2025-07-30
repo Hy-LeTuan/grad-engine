@@ -50,4 +50,17 @@ where
             None => None,
         }
     }
+
+    fn get_next_grad_fn(self) -> Arc<dyn Backward<T>> {
+        return self.grad_fn_linked;
+    }
+
+    fn set_edge_nr(&mut self, new_input_nr: usize) {
+        self.input_nr = new_input_nr;
+    }
+}
+
+mod test {
+    #[allow(unused)]
+    use super::*;
 }

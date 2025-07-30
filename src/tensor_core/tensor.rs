@@ -24,7 +24,7 @@ impl<T> Tensor<T>
 where
     T: DTypeMarker + Zero + Clone,
 {
-    pub fn new(x: Vec<T>, shape: Vec<usize>) -> Self {
+    pub fn new(x: Vec<T>, shape: Vec<usize>, requires_grad: bool) -> Self {
         let numel = x.len();
         let type_signature = T::dtype();
         let nbytes = std::mem::size_of::<T>() * (numel as usize);
@@ -39,7 +39,7 @@ where
 
         let storage = Storage::new(data, nbytes, type_signature);
 
-        let tensor = Tensor {
+        let mut tensor = Tensor {
             storage: storage,
             shape: shape,
             strides: vec![1, numel],
@@ -48,7 +48,13 @@ where
             autograd_meta: None,
         };
 
-        return tensor;
+        if requires_grad {
+            let new_autograd_meta = AutogradMeta::<T>::new(String::from("leaf_grad_meta"));
+            tensor.set_autograd_meta(new_autograd_meta);
+            return tensor;
+        } else {
+            return tensor;
+        }
     }
 
     pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>) -> Self {
@@ -131,6 +137,10 @@ where
     pub fn get_autograd_ref(&self) -> &Option<AutogradMeta<T>> {
         return &self.autograd_meta;
     }
+
+    pub fn set_autograd_meta(&mut self, autograd_meta: AutogradMeta<T>) {
+        self.autograd_meta = Some(autograd_meta);
+    }
 }
 
 impl<T> Tensor<T>
@@ -172,6 +182,12 @@ mod test {
     #[test]
     fn create_tensor() {
         let x = vec![1, 2, 3, 4];
-        let _a = Tensor::new(x, vec![4, 1]);
+        let _a = Tensor::new(x, vec![4, 1], false);
+    }
+
+    #[test]
+    fn create_tensor_with_grad() {
+        let x = vec![1, 2, 3, 4];
+        let _a = Tensor::new(x, vec![4, 1], true);
     }
 }

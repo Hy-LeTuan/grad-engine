@@ -12,7 +12,9 @@ pub trait Backward<T>: std::fmt::Debug
 where
     T: DTypeMarker + Zero + Clone,
 {
-    fn calculate_gradient(&self) -> Arc<Tensor<T>>;
+    fn calculate_gradient(&self, others: Vec<Arc<Tensor<T>>>) -> Vec<Arc<Tensor<T>>>;
+
+    fn traverse(&self);
 
     fn get_edge_list(&self) -> &[Edge<T>];
 

@@ -69,15 +69,15 @@ mod test {
 
     #[test]
     fn subtract_tensor() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
 
         let _c = a - b;
     }
 
     #[test]
     fn subtract_scalar() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]).as_float_32();
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false).as_float_32();
         let b = 4.0;
         let _c = a - b;
     }
