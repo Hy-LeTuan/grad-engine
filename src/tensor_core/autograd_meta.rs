@@ -76,4 +76,25 @@ where
             *tensor_grad = Some(grad);
         }
     }
+
+    pub fn get_grad_accum(&self) -> &Option<Arc<RefCell<GradAccum<T>>>> {
+        return &self.grad_accum;
+    }
+
+    pub fn get_grad_fn(&self) -> &Option<Arc<RefCell<dyn Backward<T>>>> {
+        return &self.grad_fn;
+    }
+
+    pub fn start_backprop_chain(&self, starting_gradient: Vec<Tensor<T>>) {
+        if let Some(node_arc_ref) = self.get_grad_accum() {
+            node_arc_ref.borrow().calculate_gradient(vec![]);
+            return;
+        }
+
+        if let Some(node_arc_ref) = self.get_grad_fn() {
+            node_arc_ref.borrow().calculate_gradient(vec![]);
+        } else {
+            panic!("Error, calling backwards on a non-leaf tensor with no preceeding operation");
+        }
+    }
 }

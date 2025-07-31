@@ -27,18 +27,18 @@ where
         return &self.edge_list;
     }
 
-    fn save_input_refs(&self, input_refs: &[&Tensor<T>]) {}
+    fn save_input_refs(&self, _input_refs: &[&Tensor<T>]) {}
 
     fn add_to_node_list(&self) {}
 
-    fn calculate_gradient(&self, others: Vec<Arc<Tensor<T>>>) -> Vec<Arc<Tensor<T>>> {
+    fn calculate_gradient(&self, _others: Vec<Arc<Tensor<T>>>) -> Vec<Arc<Tensor<T>>> {
         return vec![];
     }
 
     fn traverse(&self) {}
 
     /// save gradient to the origin tensor
-    fn save_grad_to_origin_tensor(&self, grad: Arc<Tensor<T>>) {}
+    fn save_grad_to_origin_tensor(&self, _grad: Arc<Tensor<T>>) {}
 }
 
 impl<T> GradAccum<T>
@@ -57,5 +57,15 @@ where
 
     pub fn set_owned_meta(&mut self, origin: Arc<AutogradMeta<T>>) {
         self.origin = Some(Arc::downgrade(&origin));
+    }
+}
+
+mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn grad_accum_create() {
+        let _grad_accum = GradAccum::<f32>::new(vec![], vec![]);
     }
 }

@@ -145,6 +145,17 @@ where
     pub fn set_autograd_meta(&mut self, autograd_meta: Arc<AutogradMeta<T>>) {
         self.autograd_meta = Some(autograd_meta);
     }
+
+    pub fn backwards(&mut self, starting_gradient: Vec<Tensor<T>>) {
+        match self.get_autograd_ref() {
+            Some(autograd_meta_arc_ref) => {
+                autograd_meta_arc_ref.start_backprop_chain(starting_gradient);
+            }
+            None => {
+                panic!("Error, calling backwards on a tensor without ")
+            }
+        }
+    }
 }
 
 impl<T> Tensor<T>
