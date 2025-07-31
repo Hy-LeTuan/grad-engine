@@ -1,11 +1,10 @@
-use std::sync::Arc;
-
 use super::super::tensor_core::dtypes::DTypeMarker;
 use super::super::tensor_core::tensor::Tensor;
 use super::edge::Edge;
 
 use num_traits::Zero;
 use std::fmt::Debug;
+use std::rc::Rc;
 
 pub mod grad_accum;
 
@@ -14,7 +13,7 @@ where
     T: DTypeMarker + Zero + Clone + Debug,
 {
     /// Save received gradient to origin tensor; calculate gradient and traverse through the graph
-    fn calculate_gradient(&self, others: Arc<Vec<Tensor<T>>>) -> Arc<Vec<Tensor<T>>>;
+    fn calculate_gradient(&self, others: Rc<Vec<Tensor<T>>>) -> Rc<Vec<Tensor<T>>>;
 
     /// Call `self.calculate_gradient` on connected Nodes through Edge(s)
     fn traverse(&self);
@@ -28,5 +27,5 @@ where
     /// Save references of input tensors used to compute the tensor this Node belongs to
     fn save_input_refs(&mut self, input_refs: &[&Tensor<T>]);
 
-    fn save_grad_to_origin_tensor(&self, tensor: Arc<Tensor<T>>);
+    fn save_grad_to_origin_tensor(&self, tensor: Rc<Tensor<T>>);
 }

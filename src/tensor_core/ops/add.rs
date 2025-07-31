@@ -4,7 +4,7 @@ use super::super::tensor::Tensor;
 use ndarray::ScalarOperand;
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Deref};
 
 // ADD FOR TENSOR AND SCALAR
 
@@ -17,7 +17,7 @@ where
 
     fn add(self, _rhs: ScalarType) -> Tensor<TensorType> {
         let data = self.get_raw_data();
-        let new_raw_data = data + _rhs;
+        let new_raw_data = data.deref() + _rhs;
 
         let tensor = Tensor::from_raw_array(new_raw_data, false);
 
@@ -45,7 +45,7 @@ where
 
     fn add(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data + self;
+        let new_data = raw_data.deref() + self;
 
         let tensor = Tensor::from_raw_array(new_data, false);
 
@@ -72,7 +72,7 @@ where
 
     fn add(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data + self;
+        let new_data = raw_data.deref() + self;
 
         let tensor = Tensor::from_raw_array(new_data, false);
 
@@ -99,7 +99,7 @@ where
 
     fn add(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data + self;
+        let new_data = raw_data.deref() + self;
 
         let tensor = Tensor::from_raw_array(new_data, false);
 
@@ -126,7 +126,7 @@ where
 
     fn add(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data + self;
+        let new_data = raw_data.deref() + self;
 
         let tensor = Tensor::from_raw_array(new_data, false);
 
@@ -153,7 +153,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: &'b Tensor<TensorType>) -> Self::Output {
-        let new_raw_data = self.get_raw_data() + rhs.get_raw_data();
+        let new_raw_data = self.get_raw_data().deref() + rhs.get_raw_data().deref();
         return Tensor::from_raw_array(new_raw_data, false);
     }
 }
