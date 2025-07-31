@@ -19,7 +19,7 @@ where
         let data = self.get_raw_data();
         let new_raw_data = data + _rhs;
 
-        let tensor = Tensor::from_raw_array(new_raw_data);
+        let tensor = Tensor::from_raw_array(new_raw_data, false);
 
         return tensor;
     }
@@ -47,7 +47,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data + self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -74,7 +74,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data + self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -101,7 +101,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data + self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -128,7 +128,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data + self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -154,7 +154,7 @@ where
 
     fn add(self, rhs: &'b Tensor<TensorType>) -> Self::Output {
         let new_raw_data = self.get_raw_data() + rhs.get_raw_data();
-        Tensor::from_raw_array(new_raw_data)
+        return Tensor::from_raw_array(new_raw_data, false);
     }
 }
 

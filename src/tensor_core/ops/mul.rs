@@ -17,7 +17,7 @@ where
         let raw_array = self.get_raw_data();
         let new_array = raw_array * rhs;
 
-        let tensor = Tensor::from_raw_array(new_array);
+        let tensor = Tensor::from_raw_array(new_array, false);
 
         return tensor;
     }
@@ -45,7 +45,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -72,7 +72,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -99,7 +99,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -126,7 +126,7 @@ where
         let raw_data = rhs.get_raw_data();
         let new_data = raw_data * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -157,7 +157,7 @@ where
 
         let raw_array = left_raw_array * right_raw_array;
 
-        let tensor = Tensor::from_raw_array(raw_array);
+        let tensor = Tensor::from_raw_array(raw_array, false);
 
         return tensor;
     }

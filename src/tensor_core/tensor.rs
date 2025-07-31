@@ -61,7 +61,15 @@ where
         }
     }
 
-    pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>) -> Self {
+    /// Turns on grad tracking for a leaf tensor. Any intermediate tensor will always be
+    /// created with gradient, so this method does not apply for them.
+    pub fn requires_grad(&mut self) {
+        let autograd_meta = AutogradMeta::<T>::new_for_leaf(String::from("leaf_grad_meta"));
+
+        self.set_autograd_meta(autograd_meta);
+    }
+
+    pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>, requires_grad: bool) -> Self {
         let shape = x.shape().to_vec();
         let numel = x.len();
         let type_signature = T::dtype();
@@ -69,7 +77,7 @@ where
 
         let storage = Storage::new(x, nbytes, type_signature);
 
-        let tensor = Tensor {
+        let mut tensor = Tensor {
             storage: storage,
             shape: shape,
             strides: vec![1, numel],
@@ -77,6 +85,10 @@ where
             version: CONFIG.version,
             autograd_meta: None,
         };
+
+        if requires_grad {
+            tensor.requires_grad();
+        }
 
         return tensor;
     }
@@ -146,7 +158,7 @@ where
         self.autograd_meta = Some(autograd_meta);
     }
 
-    pub fn backwards(&mut self, starting_gradient: Vec<Tensor<T>>) {
+    pub fn backward(&mut self, starting_gradient: Vec<Tensor<T>>) {
         match self.get_autograd_ref() {
             Some(autograd_meta_arc_ref) => {
                 autograd_meta_arc_ref.start_backprop_chain(starting_gradient);
@@ -168,7 +180,7 @@ where
         let old_raw_array = self.get_raw_data();
         let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
 
-        tensor = Tensor::from_raw_array(new_raw_array);
+        tensor = Tensor::from_raw_array(new_raw_array, false);
 
         return tensor;
     }
@@ -184,7 +196,7 @@ where
         let old_raw_array = self.get_raw_data();
         let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
 
-        tensor = Tensor::from_raw_array(new_raw_array);
+        tensor = Tensor::from_raw_array(new_raw_array, false);
 
         return tensor;
     }

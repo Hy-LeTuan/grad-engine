@@ -86,13 +86,19 @@ where
     }
 
     pub fn start_backprop_chain(&self, starting_gradient: Vec<Tensor<T>>) {
+        let starting_gradient_arc = Arc::new(starting_gradient);
+
         if let Some(node_arc_ref) = self.get_grad_accum() {
-            node_arc_ref.borrow().calculate_gradient(vec![]);
+            node_arc_ref
+                .borrow()
+                .calculate_gradient(starting_gradient_arc);
             return;
         }
 
         if let Some(node_arc_ref) = self.get_grad_fn() {
-            node_arc_ref.borrow().calculate_gradient(vec![]);
+            node_arc_ref
+                .borrow()
+                .calculate_gradient(starting_gradient_arc);
         } else {
             panic!("Error, calling backwards on a non-leaf tensor with no preceeding operation");
         }

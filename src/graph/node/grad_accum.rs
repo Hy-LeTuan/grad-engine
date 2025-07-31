@@ -23,22 +23,30 @@ impl<T> Backward<T> for GradAccum<T>
 where
     T: Zero + Clone + DTypeMarker + Debug,
 {
+    fn calculate_gradient(&self, _others: Arc<Vec<Tensor<T>>>) -> Arc<Vec<Tensor<T>>> {
+        return Arc::new(vec![]);
+    }
+
+    fn traverse(&self) {
+        todo!()
+    }
+
     fn get_edge_list(&self) -> &[Edge<T>] {
         return &self.edge_list;
     }
 
-    fn save_input_refs(&self, _input_refs: &[&Tensor<T>]) {}
-
-    fn add_to_node_list(&self) {}
-
-    fn calculate_gradient(&self, _others: Vec<Arc<Tensor<T>>>) -> Vec<Arc<Tensor<T>>> {
-        return vec![];
+    fn save_input_refs(&mut self, input_refs: &[&Tensor<T>]) {
+        for tensor_ref in 0..input_refs.len() {}
     }
 
-    fn traverse(&self) {}
-
     /// save gradient to the origin tensor
-    fn save_grad_to_origin_tensor(&self, _grad: Arc<Tensor<T>>) {}
+    fn save_grad_to_origin_tensor(&self, _grad: Arc<Tensor<T>>) {
+        todo!()
+    }
+
+    fn add_to_edge_list(&mut self, _edge: Edge<T>) {
+        todo!()
+    }
 }
 
 impl<T> GradAccum<T>

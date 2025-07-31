@@ -17,7 +17,7 @@ where
         let raw_data = self.get_raw_data();
         let new_raw_data = raw_data - rhs;
 
-        let tensor = Tensor::from_raw_array(new_raw_data);
+        let tensor = Tensor::from_raw_array(new_raw_data, false);
 
         return tensor;
     }
@@ -47,7 +47,7 @@ where
 
         let new_raw_data = raw_data_left - raw_data_right;
 
-        let tensor = Tensor::from_raw_array(new_raw_data);
+        let tensor = Tensor::from_raw_array(new_raw_data, false);
 
         return tensor;
     }
