@@ -3,13 +3,14 @@ use super::super::tensor::Tensor;
 
 use ndarray::ScalarOperand;
 use num_traits::Zero;
+use std::fmt::Debug;
 use std::ops::{Add, AddAssign};
 
 // ADD FOR TENSOR AND SCALAR
 
 impl<'a, TensorType, ScalarType> Add<ScalarType> for &'a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<ScalarType, Output = TensorType>,
     ScalarType: AddAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -26,7 +27,7 @@ where
 
 impl<TensorType, ScalarType> Add<ScalarType> for Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<ScalarType, Output = TensorType>,
     ScalarType: AddAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -38,7 +39,7 @@ where
 
 impl<'a, TensorType> Add<&'a Tensor<TensorType>> for f32
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<f32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<f32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -54,7 +55,7 @@ where
 
 impl<TensorType> Add<Tensor<TensorType>> for f32
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<f32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<f32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -65,7 +66,7 @@ where
 
 impl<'a, TensorType> Add<&'a Tensor<TensorType>> for f64
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<f64, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<f64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -81,7 +82,7 @@ where
 
 impl<TensorType> Add<Tensor<TensorType>> for f64
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<f64, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<f64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -92,7 +93,7 @@ where
 
 impl<'a, TensorType> Add<&'a Tensor<TensorType>> for i32
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<i32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<i32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -108,7 +109,7 @@ where
 
 impl<TensorType> Add<Tensor<TensorType>> for i32
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<i32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<i32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -119,7 +120,7 @@ where
 
 impl<'a, TensorType> Add<&'a Tensor<TensorType>> for i64
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<i64, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Debug + Clone + Add<i64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -135,7 +136,7 @@ where
 
 impl<TensorType> Add<Tensor<TensorType>> for i64
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<i64, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<i64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -147,7 +148,7 @@ where
 // OPERATIONS FOR ADDING TENSOR TO TENSOR
 impl<'a, 'b, TensorType> Add<&'b Tensor<TensorType>> for &'a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -159,7 +160,7 @@ where
 
 impl<TensorType> Add<Tensor<TensorType>> for Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Add<Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -174,15 +175,15 @@ mod test {
 
     #[test]
     fn add_tensor() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
 
         let _c = a + b;
     }
 
     #[test]
     fn add_scalar() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
         let b = 3;
 
         let _c = a + b;

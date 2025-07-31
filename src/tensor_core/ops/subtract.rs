@@ -3,11 +3,12 @@ use super::super::tensor::Tensor;
 
 use ndarray::ScalarOperand;
 use num_traits::Zero;
+use std::fmt::Debug;
 use std::ops::{Sub, SubAssign};
 
 impl<'a, TensorType, ScalarType> Sub<ScalarType> for &'a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType>,
     ScalarType: SubAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -24,7 +25,7 @@ where
 
 impl<TensorType, ScalarType> Sub<ScalarType> for Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType>,
     ScalarType: SubAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -36,7 +37,7 @@ where
 
 impl<'a, 'b, TensorType> Sub<&'b Tensor<TensorType>> for &'a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -54,7 +55,7 @@ where
 
 impl<TensorType> Sub for Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Sub<Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -69,15 +70,15 @@ mod test {
 
     #[test]
     fn subtract_tensor() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]);
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1]);
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
 
         let _c = a - b;
     }
 
     #[test]
     fn subtract_scalar() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1]).as_float_32();
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false).as_float_32();
         let b = 4.0;
         let _c = a - b;
     }
