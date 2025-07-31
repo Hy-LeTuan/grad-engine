@@ -4,7 +4,7 @@ use super::super::tensor::Tensor;
 use ndarray::ScalarOperand;
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{Mul, MulAssign};
+use std::ops::{Deref, Mul, MulAssign};
 
 impl<'a, TensorType, ScalarType> Mul<ScalarType> for &'a Tensor<TensorType>
 where
@@ -15,9 +15,9 @@ where
 
     fn mul(self, rhs: ScalarType) -> Self::Output {
         let raw_array = self.get_raw_data();
-        let new_array = raw_array * rhs;
+        let new_array = raw_array.deref() * rhs;
 
-        let tensor = Tensor::from_raw_array(new_array);
+        let tensor = Tensor::from_raw_array(new_array, false);
 
         return tensor;
     }
@@ -43,9 +43,9 @@ where
 
     fn mul(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data * self;
+        let new_data = raw_data.deref() * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -70,9 +70,9 @@ where
 
     fn mul(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data * self;
+        let new_data = raw_data.deref() * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -97,9 +97,9 @@ where
 
     fn mul(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data * self;
+        let new_data = raw_data.deref() * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -124,9 +124,9 @@ where
 
     fn mul(self, rhs: &'a Tensor<TensorType>) -> Self::Output {
         let raw_data = rhs.get_raw_data();
-        let new_data = raw_data * self;
+        let new_data = raw_data.deref() * self;
 
-        let tensor = Tensor::from_raw_array(new_data);
+        let tensor = Tensor::from_raw_array(new_data, false);
 
         return tensor;
     }
@@ -155,9 +155,9 @@ where
         let left_raw_array = self.get_raw_data();
         let right_raw_array = rhs.get_raw_data();
 
-        let raw_array = left_raw_array * right_raw_array;
+        let raw_array = left_raw_array.deref() * right_raw_array.deref();
 
-        let tensor = Tensor::from_raw_array(raw_array);
+        let tensor = Tensor::from_raw_array(raw_array, false);
 
         return tensor;
     }

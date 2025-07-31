@@ -4,7 +4,7 @@ use super::super::tensor::Tensor;
 use ndarray::ScalarOperand;
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{Sub, SubAssign};
+use std::ops::{Deref, Sub, SubAssign};
 
 impl<'a, TensorType, ScalarType> Sub<ScalarType> for &'a Tensor<TensorType>
 where
@@ -15,9 +15,9 @@ where
 
     fn sub(self, rhs: ScalarType) -> Self::Output {
         let raw_data = self.get_raw_data();
-        let new_raw_data = raw_data - rhs;
+        let new_raw_data = raw_data.deref() - rhs;
 
-        let tensor = Tensor::from_raw_array(new_raw_data);
+        let tensor = Tensor::from_raw_array(new_raw_data, false);
 
         return tensor;
     }
@@ -45,9 +45,9 @@ where
         let raw_data_left = self.get_raw_data();
         let raw_data_right = rhs.get_raw_data();
 
-        let new_raw_data = raw_data_left - raw_data_right;
+        let new_raw_data = raw_data_left.deref() - raw_data_right.deref();
 
-        let tensor = Tensor::from_raw_array(new_raw_data);
+        let tensor = Tensor::from_raw_array(new_raw_data, false);
 
         return tensor;
     }

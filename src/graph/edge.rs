@@ -6,14 +6,14 @@ use super::super::tensor_core::tensor::Tensor;
 use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Edge<T>
 where
     T: DTypeMarker + Zero + Clone + Debug,
 {
-    pub grad_fn_linked: Arc<RefCell<dyn Backward<T>>>,
+    pub grad_fn_linked: Rc<RefCell<dyn Backward<T>>>,
     pub input_nr: usize,
 }
 
@@ -24,12 +24,12 @@ where
     /// Connect edge to a grad_fn if the next node is an intermediate tensor. Else, connect to a
     /// GradAccum for leaf nodes and return that edge
     fn create_and_connect_to_node(tensor: &Tensor<T>, input_nr: usize) -> Option<Edge<T>> {
-        match tensor.get_autograd_ref() {
+        match tensor.get_autograd_ref().as_ref() {
             Some(meta) => match &meta.grad_fn {
                 Some(grad_fn_ref) => {
                     let edge = Edge {
                         input_nr: input_nr,
-                        grad_fn_linked: Arc::clone(grad_fn_ref),
+                        grad_fn_linked: Rc::clone(grad_fn_ref),
                     };
 
                     return Some(edge);
@@ -40,8 +40,8 @@ where
                     Some(grad_accum_ref) => {
                         let edge = Edge {
                             input_nr: input_nr,
-                            grad_fn_linked: Arc::clone(grad_accum_ref)
-                                as Arc<RefCell<dyn Backward<T>>>,
+                            grad_fn_linked: Rc::clone(grad_accum_ref)
+                                as Rc<RefCell<dyn Backward<T>>>,
                         };
 
                         return Some(edge);
@@ -53,8 +53,8 @@ where
         }
     }
 
-    fn get_next_grad_fn(&self) -> Arc<RefCell<dyn Backward<T>>> {
-        return Arc::clone(&self.grad_fn_linked);
+    fn get_next_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
+        return Rc::clone(&self.grad_fn_linked);
     }
 
     fn set_edge_nr(&mut self, new_input_nr: usize) {

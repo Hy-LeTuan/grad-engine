@@ -24,7 +24,7 @@ where
 
         let raw_array = left_raw_array.dot(&right_raw_array).into_dyn();
 
-        let tensor = Tensor::from_raw_array(raw_array);
+        let tensor = Tensor::from_raw_array(raw_array, false);
 
         return tensor;
     }
