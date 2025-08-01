@@ -15,7 +15,7 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct TensorImpl<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug,
+    T: Zero + Clone + DTypeMarker + Debug + 'static,
 {
     pub storage: Storage<T>,
     pub shape: Vec<usize>,
@@ -27,7 +27,7 @@ where
 
 impl<T> TensorImpl<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug,
+    T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
     pub fn new(x: Vec<T>, shape: Vec<usize>) -> Self {
         let numel = x.len();

@@ -13,14 +13,14 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct Tensor<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug,
+    T: Zero + Clone + DTypeMarker + Debug + 'static,
 {
     tensor_impl: Rc<RefCell<TensorImpl<T>>>,
 }
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug,
+    T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
     fn __get_tensor_impl(&self) -> &Rc<RefCell<TensorImpl<T>>> {
         return &self.tensor_impl;

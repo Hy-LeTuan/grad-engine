@@ -1,4 +1,4 @@
-use super::node::Backward;
+use super::backward::Backward;
 
 use super::super::tensor_core::dtypes::DTypeMarker;
 use super::super::tensor_core::tensor::Tensor;
@@ -23,7 +23,7 @@ where
 {
     /// Connect edge to a grad_fn if the next node is an intermediate tensor. Else, connect to a
     /// GradAccum for leaf nodes and return that edge
-    fn create_and_connect_to_node(tensor: &Tensor<T>, input_nr: usize) -> Option<Edge<T>> {
+    pub fn create_and_connect_to_node(tensor: &Tensor<T>, input_nr: usize) -> Option<Edge<T>> {
         match tensor.get_autograd_ref().as_ref() {
             Some(meta) => match &meta.grad_fn {
                 Some(grad_fn_ref) => {
@@ -53,11 +53,11 @@ where
         }
     }
 
-    fn get_next_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
+    pub fn get_next_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
         return Rc::clone(&self.grad_fn_linked);
     }
 
-    fn set_edge_nr(&mut self, new_input_nr: usize) {
+    pub fn set_edge_nr(&mut self, new_input_nr: usize) {
         self.input_nr = new_input_nr;
     }
 }

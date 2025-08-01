@@ -13,10 +13,10 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct AutogradMeta<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTypeMarker + Zero + Clone + Debug,
 {
     pub name: String,
-    pub grad: RefCell<Option<Rc<Tensor<T>>>>,
+    pub grad: Option<Rc<RefCell<Tensor<T>>>>,
     pub requires_grad: bool,
     pub grad_fn: Option<Rc<RefCell<dyn Backward<T>>>>,
     pub grad_accum: Option<Rc<RefCell<GradAccum<T>>>>,
@@ -24,7 +24,7 @@ where
 
 impl<T> AutogradMeta<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTypeMarker + Zero + Clone + Debug,
 {
     pub fn new_for_intermediate(
         name: String,
@@ -66,10 +66,6 @@ where
         self.grad_accum = Some(Rc::clone(&grad_accum_node));
     }
 
-    pub fn get_grad_as_ref(&self) -> &RefCell<Option<Rc<Tensor<T>>>> {
-        return &self.grad;
-    }
-
     pub fn set_grad(&self, grad: Rc<Tensor<T>>) {
         let mut tensor_grad = self.grad.borrow_mut();
         if let Some(_existing_grad) = tensor_grad.as_ref() {
@@ -88,18 +84,21 @@ where
     }
 
     pub fn start_backprop_chain(&self, starting_gradient: Vec<Tensor<T>>) {
-        todo!()
-        // let starting_gradient_arc = Rc::new(starting_gradient);
-        //
-        // if let Some(node_arc_ref) = self.get_grad_accum() {
-        //     node_arc_ref.borrow().apply(starting_gradient_arc);
-        //     return;
-        // }
-        //
-        // if let Some(node_arc_ref) = self.get_grad_fn() {
-        //     node_arc_ref.borrow().apply(starting_gradient_arc);
-        // } else {
-        //     panic!("Error, calling backwards on a non-leaf tensor with no preceeding operation");
-        // }
+        let starting_gradient_arc = Rc::new(starting_gradient);
+
+        if let Some(node_arc_ref) = self.get_grad_accum() {
+            node_arc_ref
+                .borrow()
+                .calculate_gradient(starting_gradient_arc);
+            return;
+        }
+
+        if let Some(node_arc_ref) = self.get_grad_fn() {
+            node_arc_ref
+                .borrow()
+                .calculate_gradient(starting_gradient_arc);
+        } else {
+            panic!("Error, calling backwards on a non-leaf tensor with no preceeding operation");
+        }
     }
 }
