@@ -16,6 +16,7 @@ pub struct GradAccum<T>
 where
     T: Zero + Clone + DTypeMarker + Debug + 'static,
 {
+    id: usize,
     edge_list: Vec<Edge<T>>,
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
@@ -43,7 +44,10 @@ where
                 }
             }
         } else {
-            panic!("Dangling graph node, no origin tensor found.");
+            panic!(
+                "Dangling graph node, no origin tensor found at node: {}",
+                self.get_id()
+            );
         }
     }
 
@@ -67,6 +71,10 @@ where
     fn save_input_refs(&mut self, _input_refs: &[&Tensor<T>]) {
         return;
     }
+
+    fn get_id(&self) -> usize {
+        return self.id;
+    }
 }
 
 impl<T> GradAccum<T>
@@ -75,6 +83,7 @@ where
 {
     pub fn new(edge_list: Vec<Edge<T>>) -> Self {
         let grad_accum = GradAccum {
+            id: 0,
             edge_list: edge_list,
             origin: None,
         };
@@ -84,6 +93,7 @@ where
 
     pub fn new_with_origin(edge_list: Vec<Edge<T>>, origin: Rc<RefCell<TensorImpl<T>>>) -> Self {
         let grad_accum = GradAccum {
+            id: 0,
             edge_list: edge_list,
             origin: Some(GradAccum::convert_origin_to_weak(origin)),
         };
