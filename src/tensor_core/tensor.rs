@@ -1,3 +1,6 @@
+use crate::graph::backward::Backward;
+use crate::graph::backward::grad_accum::GradAccum;
+
 use super::autograd_meta::AutogradMeta;
 use super::dtypes::{DTypeMarker, DTypes};
 use super::storage::Storage;
@@ -22,11 +25,11 @@ impl<T> Tensor<T>
 where
     T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
-    fn __get_tensor_impl(&self) -> &Rc<RefCell<TensorImpl<T>>> {
+    pub fn __get_tensor_impl(&self) -> &Rc<RefCell<TensorImpl<T>>> {
         return &self.tensor_impl;
     }
 
-    fn __clone_ptr_to_tensor_impl(&self) -> Rc<RefCell<TensorImpl<T>>> {
+    pub fn __clone_ptr_to_tensor_impl(&self) -> Rc<RefCell<TensorImpl<T>>> {
         return Rc::clone(self.__get_tensor_impl());
     }
 
@@ -141,8 +144,49 @@ where
         });
     }
 
-    fn set_autograd_meta(&self, autograd_meta: AutogradMeta<T>) {
+    pub fn set_autograd_meta(&self, autograd_meta: AutogradMeta<T>) {
         self.__get_tensor_impl().borrow_mut().autograd_meta = Some(autograd_meta);
+    }
+
+    pub fn does_require_grad(&self) -> bool {
+        return self.__get_tensor_impl().borrow().autograd_meta.is_some();
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        if self
+            .__get_tensor_impl()
+            .borrow()
+            .get_autograd_ref_()
+            .is_some()
+        {
+            return self
+                .__get_tensor_impl()
+                .borrow()
+                .get_autograd_ref_()
+                .as_ref()
+                .expect("Checking for leaf tensor failed")
+                .is_leaf();
+        } else {
+            return false;
+        }
+    }
+
+    pub fn set_grad_fn(&self, node: Rc<RefCell<dyn Backward<T>>>) {
+        self.__get_tensor_impl()
+            .borrow_mut()
+            .autograd_meta
+            .as_mut()
+            .expect("..")
+            .set_grad_fn_to_node(node);
+    }
+
+    pub fn set_grad_accum(&self, node: Rc<RefCell<GradAccum<T>>>) {
+        self.__get_tensor_impl()
+            .borrow_mut()
+            .autograd_meta
+            .as_mut()
+            .expect("..")
+            .set_grad_accum_to_accum(node);
     }
 
     pub fn backward(&mut self, starting_gradient: Vec<Tensor<T>>) {

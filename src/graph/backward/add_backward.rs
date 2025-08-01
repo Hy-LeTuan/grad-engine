@@ -74,3 +74,18 @@ where
         return self.id;
     }
 }
+
+impl<T> AddBackward<T>
+where
+    T: Zero + Clone + DTypeMarker + Debug + 'static,
+{
+    pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
+        let node = AddBackward {
+            id,
+            edge_list,
+            origin: Some(Rc::downgrade(origin)),
+        };
+
+        return node;
+    }
+}

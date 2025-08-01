@@ -107,6 +107,13 @@ where
         return &self.autograd_meta;
     }
 
+    pub fn get_autograd_and_expect_res(&self) -> &AutogradMeta<T> {
+        return &self
+            .autograd_meta
+            .as_ref()
+            .expect("Straight access to AutogradMeta failed, value does not exist");
+    }
+
     pub fn set_autograd_meta_(&mut self, autograd_meta: AutogradMeta<T>) {
         self.autograd_meta = Some(autograd_meta);
     }
