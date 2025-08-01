@@ -1,5 +1,5 @@
-use super::super::dtypes::DTypeMarker;
-use super::super::tensor::Tensor;
+use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::tensor::Tensor;
 
 use ndarray::Ix2;
 use ndarray::LinalgScalar;

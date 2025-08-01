@@ -3,15 +3,17 @@ use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::edge::Edge;
+use crate::ops::compute::mul_compute::compute_mul_tensor_scalar;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::{Deref, Mul};
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-pub struct AddBackward<T>
+pub struct SubtractBackward<T>
 where
     T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
@@ -20,9 +22,9 @@ where
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
-impl<T> Backward<T> for AddBackward<T>
+impl<T> Backward<T> for SubtractBackward<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: Zero + Clone + DTypeMarker + Debug + 'static + Mul<f32, Output = T>,
 {
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
@@ -46,12 +48,18 @@ where
     fn apply(&self, upstream_gradient: Rc<Tensor<T>>) {
         self.save_grad_to_origin_tensor(&upstream_gradient);
 
-        for (_i, edge) in self.get_edge_list().iter().enumerate() {
-            let next_grad = self.calculate_gradient_for_next_node(&upstream_gradient);
+        let minuend_grad = self.calculate_gradient_for_next_node(&upstream_gradient);
+        let subtrahend_grad = Rc::new(compute_mul_tensor_scalar(
+            self.calculate_gradient_for_next_node(&upstream_gradient)
+                .deref(),
+            -1.0,
+        ));
 
-            let next_node = edge.get_next_grad_fn();
-            next_node.borrow().apply(next_grad);
-        }
+        let minuend_node = &self.get_edge_list()[0].get_next_grad_fn();
+        let subtrahend_node = &self.get_edge_list()[1].get_next_grad_fn();
+
+        minuend_node.borrow().apply(minuend_grad);
+        subtrahend_node.borrow().apply(subtrahend_grad);
     }
 
     fn calculate_gradient_for_next_node(&self, upstream_gradient: &Rc<Tensor<T>>) -> Rc<Tensor<T>> {

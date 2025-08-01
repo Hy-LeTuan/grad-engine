@@ -9,6 +9,7 @@ use std::rc::Rc;
 // All backward node
 pub mod add_backward;
 pub mod grad_accum;
+pub mod subtract_backward;
 
 pub trait Backward<T>: Debug
 where
@@ -31,4 +32,7 @@ where
 
     /// Loop through input list and link inputs with each tensor's TensorImpl
     fn save_input_refs(&mut self, input_refs: &[&Tensor<T>]);
+
+    // MISC functions
+    fn get_id(&self) -> usize;
 }

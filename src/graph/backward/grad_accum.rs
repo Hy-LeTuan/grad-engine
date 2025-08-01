@@ -1,6 +1,7 @@
 use super::super::super::tensor_core::tensor_impl::TensorImpl;
 use super::super::backward::Backward;
 use super::super::edge::Edge;
+use crate::ops::compute::add_compute;
 
 use super::DTypeMarker;
 use super::Tensor;
@@ -16,6 +17,7 @@ pub struct GradAccum<T>
 where
     T: Zero + Clone + DTypeMarker + Debug + 'static,
 {
+    id: usize,
     edge_list: Vec<Edge<T>>,
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
@@ -34,7 +36,10 @@ where
                 {
                     match origin_ref.get_grad_as_ref().borrow().as_ref() {
                         Some(x) => {
-                            origin_ref.set_grad(Rc::new(x.deref() + grad.deref()));
+                            origin_ref.set_grad(Rc::new(add_compute::compute_add_tensor_tensor(
+                                x.deref(),
+                                grad.deref(),
+                            )));
                         }
                         None => {
                             origin_ref.set_grad(Rc::clone(grad));
@@ -43,7 +48,10 @@ where
                 }
             }
         } else {
-            panic!("Dangling graph node, no origin tensor found.");
+            panic!(
+                "Dangling graph node, no origin tensor found at node: {}",
+                self.get_id()
+            );
         }
     }
 
@@ -67,6 +75,10 @@ where
     fn save_input_refs(&mut self, _input_refs: &[&Tensor<T>]) {
         return;
     }
+
+    fn get_id(&self) -> usize {
+        return self.id;
+    }
 }
 
 impl<T> GradAccum<T>
@@ -75,6 +87,7 @@ where
 {
     pub fn new(edge_list: Vec<Edge<T>>) -> Self {
         let grad_accum = GradAccum {
+            id: 0,
             edge_list: edge_list,
             origin: None,
         };
@@ -84,6 +97,7 @@ where
 
     pub fn new_with_origin(edge_list: Vec<Edge<T>>, origin: Rc<RefCell<TensorImpl<T>>>) -> Self {
         let grad_accum = GradAccum {
+            id: 0,
             edge_list: edge_list,
             origin: Some(GradAccum::convert_origin_to_weak(origin)),
         };
