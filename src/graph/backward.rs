@@ -6,17 +6,22 @@ use num_traits::Zero;
 use std::fmt::Debug;
 use std::rc::Rc;
 
+// All backward node
+pub mod add_backward;
 pub mod grad_accum;
 
 pub trait Backward<T>: Debug
 where
     T: DTypeMarker + Zero + Clone + Debug,
 {
-    /// Save received gradient to origin tensor; calculate gradient and traverse through the graph
-    fn calculate_gradient(&self, others: Rc<Vec<Tensor<T>>>) -> Rc<Vec<Tensor<T>>>;
+    /// Save the gradient received to the origin tensor
+    fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>);
 
-    /// Call `self.calculate_gradient` on connected Nodes through Edge(s)
-    fn traverse(&self);
+    /// Save received gradient to origin tensor; calculate gradient and traverse through the graph
+    fn apply(&self, upstream_gradient: Rc<Tensor<T>>);
+
+    /// Function for actual mathemtical calculation of next node's gradients
+    fn calculate_gradient_for_next_node(&self, upstream_gradient: &Rc<Tensor<T>>) -> Rc<Tensor<T>>;
 
     /// Get edge list
     fn get_edge_list(&self) -> &[Edge<T>];
@@ -24,8 +29,6 @@ where
     /// Add edge to list, this Node will also own the edge
     fn add_to_edge_list(&mut self, edge: Edge<T>);
 
-    /// Save references of input tensors used to compute the tensor this Node belongs to
+    /// Loop through input list and link inputs with each tensor's TensorImpl
     fn save_input_refs(&mut self, input_refs: &[&Tensor<T>]);
-
-    fn save_grad_to_origin_tensor(&self, tensor: Rc<Tensor<T>>);
 }
