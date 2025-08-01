@@ -1,4 +1,4 @@
-use crate::ops::compute::sub_compute::{compute_sub_tensor_scalar, compute_sub_tensor_tensor};
+use crate::ops::public_ops::public_sub::{sub_tensor_scalar, sub_tensor_tensor};
 use crate::tensor_core::dtypes::DTypeMarker;
 use crate::tensor_core::tensor::Tensor;
 
@@ -15,7 +15,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn sub(self, rhs: ScalarType) -> Self::Output {
-        return compute_sub_tensor_scalar(&self, rhs);
+        return sub_tensor_scalar(&self, rhs);
     }
 }
 
@@ -26,7 +26,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        return compute_sub_tensor_tensor(&self, &rhs);
+        return sub_tensor_tensor(&self, &rhs);
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::ops::compute::add_compute::{compute_add_tensor_scalar, compute_add_tensor_tensor};
+use crate::ops::public_ops::public_add::{add_tensor_scalar, add_tensor_tensor};
 use crate::tensor_core::dtypes::DTypeMarker;
 use crate::tensor_core::tensor::Tensor;
 
@@ -17,7 +17,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: ScalarType) -> Tensor<TensorType> {
-        return compute_add_tensor_scalar(&self, rhs);
+        return add_tensor_scalar(&self, rhs);
     }
 }
 
@@ -28,7 +28,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_add_tensor_scalar(&rhs, self);
+        return add_tensor_scalar(&rhs, self);
     }
 }
 
@@ -39,7 +39,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_add_tensor_scalar(&rhs, self);
+        return add_tensor_scalar(&rhs, self);
     }
 }
 
@@ -50,7 +50,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_add_tensor_scalar(&rhs, self);
+        return add_tensor_scalar(&rhs, self);
     }
 }
 
@@ -61,7 +61,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_add_tensor_scalar(&rhs, self);
+        return add_tensor_scalar(&rhs, self);
     }
 }
 
@@ -72,7 +72,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        return compute_add_tensor_tensor(&self, &rhs);
+        return add_tensor_tensor(&self, &rhs);
     }
 }
 

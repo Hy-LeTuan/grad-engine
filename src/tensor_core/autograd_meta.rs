@@ -58,6 +58,16 @@ where
         return autograd_meta;
     }
 
+    pub fn is_leaf(&self) -> bool {
+        if self.grad_fn.is_some() {
+            return false;
+        } else if self.grad_accum.is_some() {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     pub fn set_grad_fn_to_node(&mut self, node: Rc<RefCell<dyn Backward<T>>>) {
         self.grad_fn = Some(Rc::clone(&node));
     }

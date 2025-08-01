@@ -53,6 +53,13 @@ where
         }
     }
 
+    pub fn maybe_create_connect(tensor: &Tensor<T>, input_nr: usize) -> Edge<T> {
+        let edge = Edge::create_and_connect_to_node(tensor, input_nr)
+            .expect(format!("Edge creation error on edge input nr: {}", input_nr).as_str());
+
+        return edge;
+    }
+
     pub fn get_next_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
         return Rc::clone(&self.grad_fn_linked);
     }
