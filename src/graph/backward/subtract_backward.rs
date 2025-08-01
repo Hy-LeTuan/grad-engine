@@ -3,6 +3,7 @@ use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::edge::Edge;
+use crate::ops::compute::mul_compute::compute_mul_tensor_scalar;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use num_traits::Zero;
@@ -48,11 +49,11 @@ where
         self.save_grad_to_origin_tensor(&upstream_gradient);
 
         let minuend_grad = self.calculate_gradient_for_next_node(&upstream_gradient);
-        let subtrahend_grad = Rc::new(
-            -1.0 * self
-                .calculate_gradient_for_next_node(&upstream_gradient)
+        let subtrahend_grad = Rc::new(compute_mul_tensor_scalar(
+            self.calculate_gradient_for_next_node(&upstream_gradient)
                 .deref(),
-        );
+            -1.0,
+        ));
 
         let minuend_node = &self.get_edge_list()[0].get_next_grad_fn();
         let subtrahend_node = &self.get_edge_list()[1].get_next_grad_fn();

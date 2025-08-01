@@ -5,7 +5,7 @@ use crate::tensor_core::tensor::Tensor;
 use ndarray::ScalarOperand;
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{Add, AddAssign, Deref};
+use std::ops::{Add, AddAssign};
 
 // ADD FOR TENSOR AND SCALAR
 
