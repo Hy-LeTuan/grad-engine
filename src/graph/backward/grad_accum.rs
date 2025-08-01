@@ -1,6 +1,7 @@
 use super::super::super::tensor_core::tensor_impl::TensorImpl;
 use super::super::backward::Backward;
 use super::super::edge::Edge;
+use crate::ops::compute::add_compute;
 
 use super::DTypeMarker;
 use super::Tensor;
@@ -35,7 +36,10 @@ where
                 {
                     match origin_ref.get_grad_as_ref().borrow().as_ref() {
                         Some(x) => {
-                            origin_ref.set_grad(Rc::new(x.deref() + grad.deref()));
+                            origin_ref.set_grad(Rc::new(add_compute::compute_add_tensor_tensor(
+                                x.deref(),
+                                grad.deref(),
+                            )));
                         }
                         None => {
                             origin_ref.set_grad(Rc::clone(grad));

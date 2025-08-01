@@ -1,5 +1,5 @@
-use super::super::dtypes::DTypeMarker;
-use super::super::tensor::Tensor;
+use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::tensor::Tensor;
 
 use ndarray::ScalarOperand;
 use num_traits::Zero;
