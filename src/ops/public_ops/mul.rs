@@ -1,4 +1,4 @@
-use crate::ops::compute::mul_compute::{compute_mul_tensor_scalar, compute_mul_tensor_tensor};
+use crate::ops::public_ops::public_mul::{mul_tensor_scalar, mul_tensor_tensor};
 use crate::tensor_core::dtypes::DTypeMarker;
 use crate::tensor_core::tensor::Tensor;
 
@@ -15,7 +15,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: ScalarType) -> Self::Output {
-        return compute_mul_tensor_scalar(&self, rhs);
+        return mul_tensor_scalar(&self, rhs);
     }
 }
 
@@ -26,7 +26,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_mul_tensor_scalar(&rhs, self);
+        return mul_tensor_scalar(&rhs, self);
     }
 }
 
@@ -37,7 +37,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_mul_tensor_scalar(&rhs, self);
+        return mul_tensor_scalar(&rhs, self);
     }
 }
 
@@ -48,7 +48,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_mul_tensor_scalar(&rhs, self);
+        return mul_tensor_scalar(&rhs, self);
     }
 }
 
@@ -59,7 +59,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return compute_mul_tensor_scalar(&rhs, self);
+        return mul_tensor_scalar(&rhs, self);
     }
 }
 
@@ -70,7 +70,7 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        return compute_mul_tensor_tensor(&self, &rhs);
+        return mul_tensor_tensor(&self, &rhs);
     }
 }
 
