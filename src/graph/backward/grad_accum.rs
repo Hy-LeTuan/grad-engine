@@ -2,7 +2,7 @@ use super::super::super::tensor_core::tensor_impl::TensorImpl;
 use super::super::backward::Backward;
 use super::super::edge::Edge;
 use crate::graph::backward::backward_types::BackwardType;
-use crate::ops::compute::add_compute;
+use crate::ops::compute::add_compute::compute_add_tensor_tensor;
 
 use super::DTypeMarker;
 use super::Tensor;
@@ -31,22 +31,18 @@ where
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
             if let Some(origin_as_strong_rc) = origin_as_option_ref.upgrade() {
-                if let Some(origin_ref) = origin_as_strong_rc
-                    .borrow_mut()
-                    .get_autograd_ref_()
-                    .as_ref()
+                println!("Tensor being saved to is: {:?}", origin_as_strong_rc);
+
+                if let Some(origin_ref) = origin_as_strong_rc.borrow().get_autograd_ref_().as_ref()
                 {
-                    match origin_ref.get_grad_as_ref().borrow().as_ref() {
-                        Some(x) => {
-                            origin_ref.set_grad(Rc::new(add_compute::compute_add_tensor_tensor(
-                                x.deref(),
-                                grad.deref(),
-                            )));
-                        }
-                        None => {
-                            origin_ref.set_grad(Rc::clone(grad));
-                        }
-                    };
+                    if origin_ref.grad_is_set() {
+                        let old_grad = origin_ref.get_grad_as_tensor();
+                        let new_grad = compute_add_tensor_tensor(old_grad.deref(), grad.deref());
+
+                        origin_ref.set_grad(Rc::new(new_grad));
+                    } else {
+                        origin_ref.set_grad(Rc::clone(grad));
+                    }
                 }
             }
         } else {

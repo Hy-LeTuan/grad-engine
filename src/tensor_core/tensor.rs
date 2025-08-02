@@ -182,9 +182,9 @@ where
 
     // BACKWARD FUNCTIONS
 
-    pub fn backward(&mut self, starting_gradient: Vec<Tensor<T>>) {
+    pub fn backward(&self, starting_gradient: Tensor<T>) {
         self.__get_tensor_impl()
-            .borrow_mut()
+            .borrow()
             .backward_(starting_gradient);
     }
 

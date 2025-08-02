@@ -176,13 +176,15 @@ where
 
     // BACKWARD FUNCTION
 
-    pub fn backward_(&mut self, starting_gradient: Vec<Tensor<T>>) {
+    pub fn backward_(&self, starting_gradient: Tensor<T>) {
         match self.get_autograd_ref_() {
             Some(autograd_meta_arc_ref) => {
-                autograd_meta_arc_ref.start_backprop_chain(starting_gradient);
+                autograd_meta_arc_ref.start_backprop_chain(Rc::new(starting_gradient));
             }
             None => {
-                panic!("Error, calling backwards on a tensor without ")
+                println!(
+                    "Warning! Calling backward on a tensor that does not have gradient tracking enabled. Please call `requires_grad()` on the tensor and try again."
+                );
             }
         }
     }
