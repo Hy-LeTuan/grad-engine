@@ -81,4 +81,8 @@ where
     fn get_id(&self) -> usize {
         return self.id;
     }
+
+    fn get_name(&self) -> String {
+        todo!()
+    }
 }

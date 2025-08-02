@@ -2,6 +2,7 @@ use super::DTypeMarker;
 use super::Tensor;
 
 use crate::graph::backward::Backward;
+use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
@@ -15,6 +16,7 @@ pub struct AddBackward<T>
 where
     T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
+    name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
@@ -73,6 +75,10 @@ where
     fn get_id(&self) -> usize {
         return self.id;
     }
+
+    fn get_name(&self) -> String {
+        return self.name.to_string();
+    }
 }
 
 impl<T> AddBackward<T>
@@ -81,6 +87,7 @@ where
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
         let node = AddBackward {
+            name: BackwardType::AddBackward,
             id,
             edge_list,
             origin: Some(Rc::downgrade(origin)),
@@ -102,5 +109,13 @@ pub mod test {
         let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
 
         let d = &a + &b + &c;
+
+        if d.does_require_grad() {
+            assert_eq!(
+                d.get_grad_fn().borrow().get_name(),
+                String::from("AddBackward"),
+                "AddBackward does not exist on tensor from add operation"
+            );
+        }
     }
 }
