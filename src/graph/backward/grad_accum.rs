@@ -31,8 +31,6 @@ where
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
             if let Some(origin_as_strong_rc) = origin_as_option_ref.upgrade() {
-                println!("Tensor being saved to is: {:?}", origin_as_strong_rc);
-
                 if let Some(origin_ref) = origin_as_strong_rc.borrow().get_autograd_ref_().as_ref()
                 {
                     if origin_ref.grad_is_set() {

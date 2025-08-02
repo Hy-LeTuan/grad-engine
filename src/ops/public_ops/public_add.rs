@@ -15,15 +15,15 @@ pub fn add_tensor_tensor<TensorType>(
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<TensorType>,
 {
-    let res = add_compute::compute_add_tensor_tensor(lhs_tensor, rhs_tensor);
+    let result_tensor = add_compute::compute_add_tensor_tensor(lhs_tensor, rhs_tensor);
 
     if lhs_tensor.does_require_grad() || rhs_tensor.does_require_grad() {
-        res.requires_grad_intermediate("Intermediate tensor from add");
+        result_tensor.requires_grad_intermediate("Intermediate tensor from add");
     }
 
-    add_impl(Some(lhs_tensor), Some(rhs_tensor), &res);
+    add_impl(Some(lhs_tensor), Some(rhs_tensor), &result_tensor);
 
-    return res;
+    return result_tensor;
 }
 
 pub fn add_tensor_scalar<TensorType, ScalarType>(
@@ -34,13 +34,13 @@ where
     ScalarType: DTypeMarker + ScalarOperand + 'static,
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<ScalarType, Output = TensorType>,
 {
-    let res = add_compute::compute_add_tensor_scalar(tensor, scalar);
+    let result_tensor = add_compute::compute_add_tensor_scalar(tensor, scalar);
 
     if tensor.does_require_grad() {
-        res.requires_grad_intermediate("Intermediate tensor from add");
+        result_tensor.requires_grad_intermediate("Intermediate tensor from add");
     }
 
-    add_impl(Some(tensor), None, &res);
+    add_impl(Some(tensor), None, &result_tensor);
 
-    return res;
+    return result_tensor;
 }

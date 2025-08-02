@@ -13,7 +13,7 @@ pub mod backward_types;
 // All backward node
 pub mod add_backward;
 pub mod grad_accum;
-pub mod subtract_backward;
+pub mod sub_backward;
 
 pub trait Backward<T>: Debug
 where

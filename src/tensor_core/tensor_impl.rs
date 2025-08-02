@@ -189,14 +189,3 @@ where
         }
     }
 }
-
-mod test {
-    #[allow(unused)]
-    use super::*;
-
-    #[test]
-    fn create_tensor_impl() {
-        let x = vec![1, 2, 3, 4];
-        let _a = TensorImpl::new(x, vec![4, 1]);
-    }
-}

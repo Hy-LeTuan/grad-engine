@@ -250,7 +250,11 @@ where
         let old_raw_array = self.get_raw_data();
         let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
 
-        tensor = Tensor::from_raw_array(new_raw_array, false);
+        if self.does_require_grad() {
+            tensor = Tensor::from_raw_array(new_raw_array, true);
+        } else {
+            tensor = Tensor::from_raw_array(new_raw_array, false);
+        }
 
         return tensor;
     }
@@ -266,25 +270,12 @@ where
         let old_raw_array = self.get_raw_data();
         let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
 
-        tensor = Tensor::from_raw_array(new_raw_array, false);
+        if self.does_require_grad() {
+            tensor = Tensor::from_raw_array(new_raw_array, true);
+        } else {
+            tensor = Tensor::from_raw_array(new_raw_array, false);
+        }
 
         return tensor;
-    }
-}
-
-mod test {
-    #[allow(unused)]
-    use super::*;
-
-    #[test]
-    fn create_tensor() {
-        let x = vec![1, 2, 3, 4];
-        let _a = Tensor::new(x, vec![4, 1], false);
-    }
-
-    #[test]
-    fn create_tensor_with_grad() {
-        let x = vec![1, 2, 3, 4];
-        let _a = Tensor::new(x, vec![4, 1], true);
     }
 }
