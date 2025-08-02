@@ -109,10 +109,11 @@ pub mod test {
         let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
 
         let d = &a + &b + &c;
+        let e = &d + 3;
 
         if d.does_require_grad() {
             assert_eq!(
-                d.get_grad_fn().borrow().get_name(),
+                e.get_grad_fn().borrow().get_name(),
                 String::from("AddBackward"),
                 "AddBackward does not exist on tensor from add operation"
             );

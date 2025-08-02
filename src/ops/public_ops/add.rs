@@ -87,25 +87,3 @@ where
         return add_tensor_tensor(&self, rhs);
     }
 }
-
-mod test {
-    #[allow(unused)]
-    use super::*;
-
-    #[test]
-    fn add_tensor() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
-        let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
-
-        let _c = &a + &b + &c;
-    }
-
-    #[test]
-    fn add_scalar() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
-        let b = 3;
-
-        let _c = &a + b;
-    }
-}
