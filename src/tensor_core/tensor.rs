@@ -151,7 +151,9 @@ where
     }
 
     pub fn set_autograd_meta(&self, autograd_meta: AutogradMeta<T>) {
-        self.__get_tensor_impl().borrow_mut().autograd_meta = Some(autograd_meta);
+        self.__get_tensor_impl()
+            .borrow_mut()
+            .set_autograd_meta_(autograd_meta);
     }
 
     pub fn does_require_grad(&self) -> bool {
