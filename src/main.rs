@@ -16,9 +16,5 @@ fn main() {
     let z = &x1 + &x2 - &x3;
     z.backward(Tensor::new(vec![1, 1, 1, 1], vec![4, 1], false).as_float_32());
 
-    if z.does_require_grad() {
-        println!("z does require grad");
-    }
-
     // Visualizer::visualize_graph(&z);
 }

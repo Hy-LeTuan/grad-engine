@@ -3,18 +3,13 @@ use crate::tensor_core::dtypes::DTypeMarker;
 use crate::tensor_core::tensor::Tensor;
 
 use ndarray::ScalarOperand;
-use num_traits::Zero;
+use num_traits::{Signed, Zero};
 use std::fmt::Debug;
-use std::ops::{Mul, Sub, SubAssign};
+use std::ops::{Sub, SubAssign};
 
 impl<'tl, TensorType, ScalarType> Sub<ScalarType> for &'tl Tensor<TensorType>
 where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Sub<ScalarType, Output = TensorType>
-        + Mul<f32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType> + Signed,
     ScalarType: SubAssign + ScalarOperand + DTypeMarker,
 {
     type Output = Tensor<TensorType>;
@@ -26,12 +21,7 @@ where
 
 impl<'tl_a, 'tl_b, TensorType> Sub<&'tl_b Tensor<TensorType>> for &'tl_a Tensor<TensorType>
 where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Sub<Output = TensorType>
-        + Mul<f32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType> + Signed,
 {
     type Output = Tensor<TensorType>;
 
@@ -42,12 +32,7 @@ where
 
 impl<'tl_a, TensorType> Sub<&'tl_a Tensor<TensorType>> for Tensor<TensorType>
 where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Sub<Output = TensorType>
-        + Mul<f32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType> + Signed,
 {
     type Output = Tensor<TensorType>;
 

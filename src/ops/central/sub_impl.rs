@@ -1,7 +1,6 @@
-use num_traits::Zero;
+use num_traits::{Signed, Zero};
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::ops::Mul;
 use std::rc::Rc;
 
 use crate::graph::backward::Backward;
@@ -15,7 +14,7 @@ pub fn sub_impl<TensorType>(
     rhs_tensor: Option<&Tensor<TensorType>>,
     result_tensor: &Tensor<TensorType>,
 ) where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<f32, Output = TensorType>,
+    TensorType: DTypeMarker + Zero + Clone + Debug + Signed,
 {
     if !result_tensor.does_require_grad() {
         return;
