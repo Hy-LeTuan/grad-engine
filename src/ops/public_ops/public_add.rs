@@ -18,7 +18,7 @@ where
     let res = add_compute::compute_add_tensor_tensor(lhs_tensor, rhs_tensor);
 
     if lhs_tensor.does_require_grad() || rhs_tensor.does_require_grad() {
-        res.requires_grad();
+        res.requires_grad_intermediate("Intermediate tensor from add");
     }
 
     add_impl(Some(lhs_tensor), Some(rhs_tensor), &res);
@@ -37,7 +37,7 @@ where
     let res = add_compute::compute_add_tensor_scalar(tensor, scalar);
 
     if tensor.does_require_grad() {
-        res.requires_grad()
+        res.requires_grad_intermediate("Intermediate tensor from add");
     }
 
     add_impl(Some(tensor), None, &res);

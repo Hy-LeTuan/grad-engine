@@ -9,7 +9,7 @@ use std::ops::{Add, AddAssign};
 
 // ADD FOR TENSOR AND SCALAR
 
-impl<TensorType, ScalarType> Add<ScalarType> for Tensor<TensorType>
+impl<'tl, TensorType, ScalarType> Add<ScalarType> for &'tl Tensor<TensorType>
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<ScalarType, Output = TensorType>,
     ScalarType: AddAssign + ScalarOperand + DTypeMarker,
@@ -17,62 +17,74 @@ where
     type Output = Tensor<TensorType>;
 
     fn add(self, rhs: ScalarType) -> Tensor<TensorType> {
-        return add_tensor_scalar(&self, rhs);
+        return add_tensor_scalar(self, rhs);
     }
 }
 
-impl<TensorType> Add<Tensor<TensorType>> for f32
+impl<'tl, TensorType> Add<&'tl Tensor<TensorType>> for f32
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<f32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return add_tensor_scalar(&rhs, self);
+    fn add(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return add_tensor_scalar(rhs, self);
     }
 }
 
-impl<TensorType> Add<Tensor<TensorType>> for f64
+impl<'tl, TensorType> Add<&'tl Tensor<TensorType>> for f64
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<f64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return add_tensor_scalar(&rhs, self);
+    fn add(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return add_tensor_scalar(rhs, self);
     }
 }
 
-impl<TensorType> Add<Tensor<TensorType>> for i32
+impl<'tl, TensorType> Add<&'tl Tensor<TensorType>> for i32
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<i32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return add_tensor_scalar(&rhs, self);
+    fn add(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return add_tensor_scalar(rhs, self);
     }
 }
 
-impl<TensorType> Add<Tensor<TensorType>> for i64
+impl<'tl, TensorType> Add<&'tl Tensor<TensorType>> for i64
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<i64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn add(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return add_tensor_scalar(&rhs, self);
+    fn add(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return add_tensor_scalar(rhs, self);
     }
 }
 
-impl<TensorType> Add<Tensor<TensorType>> for Tensor<TensorType>
+impl<'tl_a, 'tl_b, TensorType> Add<&'tl_b Tensor<TensorType>> for &'tl_a Tensor<TensorType>
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Add<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn add(self, rhs: Self) -> Self::Output {
-        return add_tensor_tensor(&self, &rhs);
+    fn add(self, rhs: &'tl_b Tensor<TensorType>) -> Self::Output {
+        return add_tensor_tensor(self, rhs);
+    }
+}
+
+// allow the chaining of Add operation
+impl<'tl, TensorType> Add<&'tl Tensor<TensorType>> for Tensor<TensorType>
+where
+    TensorType: DTypeMarker + Zero + Clone + Debug + Add<Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn add(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return add_tensor_tensor(&self, rhs);
     }
 }
 
@@ -84,8 +96,9 @@ mod test {
     fn add_tensor() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
         let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
+        let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], false);
 
-        let _c = a + b;
+        let _c = &a + &b + &c;
     }
 
     #[test]
@@ -93,6 +106,6 @@ mod test {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
         let b = 3;
 
-        let _c = a + b;
+        let _c = &a + b;
     }
 }

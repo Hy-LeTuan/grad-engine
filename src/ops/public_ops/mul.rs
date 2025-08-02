@@ -7,7 +7,7 @@ use num_traits::Zero;
 use std::fmt::Debug;
 use std::ops::{Mul, MulAssign};
 
-impl<TensorType, ScalarType> Mul<ScalarType> for Tensor<TensorType>
+impl<'tl, TensorType, ScalarType> Mul<ScalarType> for &'tl Tensor<TensorType>
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Mul<ScalarType, Output = TensorType>,
     ScalarType: DTypeMarker + MulAssign + ScalarOperand,
@@ -15,62 +15,73 @@ where
     type Output = Tensor<TensorType>;
 
     fn mul(self, rhs: ScalarType) -> Self::Output {
-        return mul_tensor_scalar(&self, rhs);
+        return mul_tensor_scalar(self, rhs);
     }
 }
 
-impl<TensorType> Mul<Tensor<TensorType>> for f32
+impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for f32
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Mul<f32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return mul_tensor_scalar(&rhs, self);
+    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return mul_tensor_scalar(rhs, self);
     }
 }
 
-impl<TensorType> Mul<Tensor<TensorType>> for f64
+impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for f64
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Mul<f64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
-        return mul_tensor_scalar(&rhs, self);
+    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return mul_tensor_scalar(rhs, self);
     }
 }
 
-impl<TensorType> Mul<Tensor<TensorType>> for i32
+impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for i32
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Mul<i32, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
+    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
         return mul_tensor_scalar(&rhs, self);
     }
 }
 
-impl<TensorType> Mul<Tensor<TensorType>> for i64
+impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for i64
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Mul<i64, Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn mul(self, rhs: Tensor<TensorType>) -> Self::Output {
+    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
         return mul_tensor_scalar(&rhs, self);
     }
 }
 
-impl<TensorType> Mul for Tensor<TensorType>
+impl<'tl_a, 'tl_b, TensorType> Mul<&'tl_b Tensor<TensorType>> for &'tl_a Tensor<TensorType>
 where
     TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
-    fn mul(self, rhs: Self) -> Self::Output {
-        return mul_tensor_tensor(&self, &rhs);
+    fn mul(self, rhs: &'tl_b Tensor<TensorType>) -> Self::Output {
+        return mul_tensor_tensor(self, rhs);
+    }
+}
+
+impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for Tensor<TensorType>
+where
+    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
+{
+    type Output = Tensor<TensorType>;
+
+    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+        return mul_tensor_tensor(&self, rhs);
     }
 }
 
@@ -83,7 +94,7 @@ mod test {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
         let b = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
 
-        let _c = a * b;
+        let _c = &a * &b;
     }
 
     #[test]
@@ -91,6 +102,6 @@ mod test {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], false);
         let b = 3;
 
-        let _c = a * b;
+        let _c = &a * b;
     }
 }
