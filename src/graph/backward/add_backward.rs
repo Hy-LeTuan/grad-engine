@@ -2,6 +2,7 @@ use super::DTypeMarker;
 use super::Tensor;
 
 use crate::graph::backward::Backward;
+use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
@@ -15,6 +16,7 @@ pub struct AddBackward<T>
 where
     T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
+    name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
@@ -27,10 +29,7 @@ where
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
             if let Some(origin_as_strong_rc) = origin_as_option_ref.upgrade() {
-                if let Some(origin_ref) = origin_as_strong_rc
-                    .borrow_mut()
-                    .get_autograd_ref_()
-                    .as_ref()
+                if let Some(origin_ref) = origin_as_strong_rc.borrow().get_autograd_ref_().as_ref()
                 {
                     origin_ref.set_grad(Rc::clone(grad));
                 }
@@ -73,6 +72,10 @@ where
     fn get_id(&self) -> usize {
         return self.id;
     }
+
+    fn get_name(&self) -> String {
+        return self.name.to_string();
+    }
 }
 
 impl<T> AddBackward<T>
@@ -81,11 +84,36 @@ where
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
         let node = AddBackward {
+            name: BackwardType::AddBackward,
             id,
             edge_list,
             origin: Some(Rc::downgrade(origin)),
         };
 
         return node;
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn add_backward_creation() {
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
+        let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
+
+        let d = &a + &b + &c;
+        let e = &d + 3;
+
+        if d.does_require_grad() {
+            assert_eq!(
+                e.get_grad_fn().borrow().get_name(),
+                String::from("AddBackward"),
+                "AddBackward does not exist on tensor from add operation"
+            );
+        }
     }
 }

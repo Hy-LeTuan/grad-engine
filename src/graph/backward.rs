@@ -1,10 +1,14 @@
-use super::super::tensor_core::dtypes::DTypeMarker;
-use super::super::tensor_core::tensor::Tensor;
 use super::edge::Edge;
+
+use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::tensor::Tensor;
 
 use num_traits::Zero;
 use std::fmt::Debug;
 use std::rc::Rc;
+
+// Backward node types
+pub mod backward_types;
 
 // All backward node
 pub mod add_backward;
@@ -35,4 +39,6 @@ where
 
     // MISC functions
     fn get_id(&self) -> usize;
+
+    fn get_name(&self) -> String;
 }

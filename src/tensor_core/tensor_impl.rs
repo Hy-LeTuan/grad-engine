@@ -1,3 +1,6 @@
+use crate::graph::backward::Backward;
+use crate::graph::backward::grad_accum::GradAccum;
+
 use super::super::config::CONFIG;
 use super::autograd_meta::AutogradMeta;
 use super::dtypes::{DTypeMarker, DTypes};
@@ -83,6 +86,8 @@ where
         return tensor_impl;
     }
 
+    // GETTERS AND SETTERS
+
     pub fn get_storage_(&self) -> &Storage<T> {
         return &self.storage;
     }
@@ -107,6 +112,12 @@ where
         return &self.autograd_meta;
     }
 
+    pub fn get_autograd_ref_as_mut_(&mut self) -> &mut AutogradMeta<T> {
+        return self.autograd_meta.as_mut().expect(
+            "Attmepting to get AutogradMeta on a tensor that does not require gradient tracking.",
+        );
+    }
+
     pub fn get_autograd_and_expect_res(&self) -> &AutogradMeta<T> {
         return &self
             .autograd_meta
@@ -114,17 +125,66 @@ where
             .expect("Straight access to AutogradMeta failed, value does not exist");
     }
 
+    pub fn get_grad_fn_(&self) -> Rc<RefCell<dyn Backward<T>>> {
+        let grad_fn_option = self
+            .get_autograd_ref_()
+            .as_ref()
+            .expect("Attempting to get grad_fn on a tensor that does not require gradient tracking")
+            .get_grad_fn()
+            .as_ref();
+
+        return Rc::clone(grad_fn_option.expect("Attempting to get grad_fn on a fucntion that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
+    }
+
+    pub fn get_grad_accum_(&self) -> Rc<RefCell<GradAccum<T>>> {
+        let grad_accum_option = self
+            .get_autograd_ref_()
+            .as_ref()
+            .expect("Attempting to get grad_fn on a tensor that does not require gradient tracking")
+            .get_grad_accum()
+            .as_ref();
+
+        return Rc::clone(grad_accum_option.expect("Attempting to get grad_fn on a tensor that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
+    }
+
     pub fn set_autograd_meta_(&mut self, autograd_meta: AutogradMeta<T>) {
         self.autograd_meta = Some(autograd_meta);
     }
 
-    pub fn backward_(&mut self, starting_gradient: Vec<Tensor<T>>) {
+    /// Dangerously set grad_fn, will panic if grad_fn does not exist
+    pub fn set_grad_fn_(&mut self, node: Rc<RefCell<dyn Backward<T>>>) {
+        self.get_autograd_ref_as_mut_().set_grad_fn_to_node(node);
+    }
+
+    pub fn set_grad_accum_(&mut self, node: Rc<RefCell<GradAccum<T>>>) {
+        self.get_autograd_ref_as_mut_()
+            .set_grad_accum_to_accum(node);
+    }
+
+    /// UTILITIES
+
+    pub fn is_leaf_(&self) -> bool {
+        if let Some(autograd_ref) = self.get_autograd_ref_().as_ref() {
+            return autograd_ref.is_leaf();
+        } else {
+            println!(
+                "Attempting to check for leaf tensor on a tensor that does not require gradient tracking. Returning false now."
+            );
+            return false;
+        }
+    }
+
+    // BACKWARD FUNCTION
+
+    pub fn backward_(&self, starting_gradient: Tensor<T>) {
         match self.get_autograd_ref_() {
             Some(autograd_meta_arc_ref) => {
-                autograd_meta_arc_ref.start_backprop_chain(starting_gradient);
+                autograd_meta_arc_ref.start_backprop_chain(Rc::new(starting_gradient));
             }
             None => {
-                panic!("Error, calling backwards on a tensor without ")
+                println!(
+                    "Warning! Calling backward on a tensor that does not have gradient tracking enabled. Please call `requires_grad()` on the tensor and try again."
+                );
             }
         }
     }
