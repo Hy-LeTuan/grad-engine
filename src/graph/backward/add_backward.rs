@@ -108,7 +108,7 @@ pub mod test {
         let d = &a + &b + &c;
         let e = &d + 3;
 
-        if d.does_require_grad() {
+        if e.does_require_grad() {
             assert_eq!(
                 e.get_grad_fn().borrow().get_name(),
                 String::from("AddBackward"),
