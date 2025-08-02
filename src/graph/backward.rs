@@ -2,8 +2,10 @@ use super::edge::Edge;
 
 use crate::tensor_core::dtypes::DTypeMarker;
 use crate::tensor_core::tensor::Tensor;
+use crate::tensor_core::tensor_impl::TensorImpl;
 
 use num_traits::Zero;
+use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
 
@@ -13,11 +15,12 @@ pub mod backward_types;
 // All backward node
 pub mod add_backward;
 pub mod grad_accum;
+pub mod mul_backward;
 pub mod sub_backward;
 
 pub trait Backward<T>: Debug
 where
-    T: DTypeMarker + Zero + Clone + Debug,
+    T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
     /// Save the gradient received to the origin tensor
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>);
@@ -26,7 +29,11 @@ where
     fn apply(&self, upstream_gradient: Rc<Tensor<T>>);
 
     /// Function for actual mathemtical calculation of next node's gradients
-    fn calculate_gradient_for_next_node(&self, upstream_gradient: &Rc<Tensor<T>>) -> Rc<Tensor<T>>;
+    fn calculate_gradient_for_next_node(
+        &self,
+        upstream_gradient: &Rc<Tensor<T>>,
+        edge: Option<&Edge<T>>,
+    ) -> Rc<Tensor<T>>;
 
     /// Get edge list
     fn get_edge_list(&self) -> &[Edge<T>];
@@ -35,7 +42,11 @@ where
     fn add_to_edge_list(&mut self, edge: Edge<T>);
 
     /// Loop through input list and link inputs with each tensor's TensorImpl
-    fn save_input_refs(&mut self, input_refs: &[&Tensor<T>]);
+    fn save_input_refs(&mut self, input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>);
+
+    fn clear_input_refs(&mut self) {
+        self.save_input_refs(vec![]);
+    }
 
     // MISC functions
     fn get_id(&self) -> usize;

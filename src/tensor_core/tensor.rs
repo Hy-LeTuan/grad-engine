@@ -258,6 +258,18 @@ where
 
         return tensor;
     }
+
+    pub fn ones_as_f32(shape: Vec<usize>) -> Tensor<f32> {
+        let dyn_shape = IxDyn(&shape);
+        let data = ArrayD::<f32>::ones(dyn_shape);
+
+        let tensor_impl =
+            TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
+
+        let tensor = Tensor { tensor_impl };
+
+        return tensor;
+    }
 }
 
 impl<T> Tensor<T>
@@ -275,6 +287,18 @@ where
         } else {
             tensor = Tensor::from_raw_array(new_raw_array, false);
         }
+
+        return tensor;
+    }
+
+    pub fn ones_as_f64(shape: Vec<usize>) -> Tensor<f64> {
+        let dyn_shape = IxDyn(&shape);
+        let data = ArrayD::<f64>::ones(dyn_shape);
+
+        let tensor_impl =
+            TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
+
+        let tensor = Tensor { tensor_impl };
 
         return tensor;
     }

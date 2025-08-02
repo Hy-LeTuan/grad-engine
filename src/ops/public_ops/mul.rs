@@ -9,7 +9,12 @@ use std::ops::{Mul, MulAssign};
 
 impl<'tl, TensorType, ScalarType> Mul<ScalarType> for &'tl Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<ScalarType, Output = TensorType>,
+    TensorType: DTypeMarker
+        + Zero
+        + Clone
+        + Debug
+        + Mul<ScalarType, Output = TensorType>
+        + Mul<Output = TensorType>,
     ScalarType: DTypeMarker + MulAssign + ScalarOperand,
 {
     type Output = Tensor<TensorType>;
@@ -21,7 +26,12 @@ where
 
 impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for f32
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<f32, Output = TensorType>,
+    TensorType: DTypeMarker
+        + Zero
+        + Clone
+        + Debug
+        + Mul<f32, Output = TensorType>
+        + Mul<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -32,7 +42,12 @@ where
 
 impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for f64
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<f64, Output = TensorType>,
+    TensorType: DTypeMarker
+        + Zero
+        + Clone
+        + Debug
+        + Mul<f64, Output = TensorType>
+        + Mul<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -43,7 +58,12 @@ where
 
 impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for i32
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<i32, Output = TensorType>,
+    TensorType: DTypeMarker
+        + Zero
+        + Clone
+        + Debug
+        + Mul<i32, Output = TensorType>
+        + Mul<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -54,7 +74,12 @@ where
 
 impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for i64
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<i64, Output = TensorType>,
+    TensorType: DTypeMarker
+        + Zero
+        + Clone
+        + Debug
+        + Mul<i64, Output = TensorType>
+        + Mul<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
@@ -65,7 +90,8 @@ where
 
 impl<'tl_a, 'tl_b, TensorType> Mul<&'tl_b Tensor<TensorType>> for &'tl_a Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
+    TensorType:
+        DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType> + Mul<Output = TensorType>,
 {
     type Output = Tensor<TensorType>;
 
