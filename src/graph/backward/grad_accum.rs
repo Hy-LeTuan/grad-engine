@@ -52,11 +52,15 @@ where
     }
 
     fn apply(&self, upstream_gradient: Rc<Tensor<T>>) {
-        let next_grad = self.calculate_gradient_for_next_node(&upstream_gradient);
+        let next_grad = self.calculate_gradient_for_next_node(&upstream_gradient, None);
         self.save_grad_to_origin_tensor(&next_grad);
     }
 
-    fn calculate_gradient_for_next_node(&self, upstream_gradient: &Rc<Tensor<T>>) -> Rc<Tensor<T>> {
+    fn calculate_gradient_for_next_node(
+        &self,
+        upstream_gradient: &Rc<Tensor<T>>,
+        _edge: Option<&Edge<T>>,
+    ) -> Rc<Tensor<T>> {
         return Rc::clone(upstream_gradient);
     }
 
@@ -68,7 +72,7 @@ where
         return;
     }
 
-    fn save_input_refs(&mut self, _input_refs: &[&Tensor<T>]) {
+    fn save_input_refs(&mut self, _input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>) {
         return;
     }
 
