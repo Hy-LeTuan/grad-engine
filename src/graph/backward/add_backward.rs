@@ -89,3 +89,18 @@ where
         return node;
     }
 }
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn add_backward_creation() {
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
+        let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
+
+        let d = &a + &b + &c;
+    }
+}

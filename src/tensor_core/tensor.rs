@@ -161,41 +161,26 @@ where
     }
 
     pub fn is_leaf(&self) -> bool {
-        if self
-            .__get_tensor_impl()
-            .borrow()
-            .get_autograd_ref_()
-            .is_some()
-        {
-            return self
-                .__get_tensor_impl()
-                .borrow()
-                .get_autograd_ref_()
-                .as_ref()
-                .expect("Checking for leaf tensor failed")
-                .is_leaf();
-        } else {
-            return false;
-        }
+        return self.__get_tensor_impl().borrow().is_leaf_();
+    }
+
+    pub fn get_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
+        return self.__get_tensor_impl().borrow().get_grad_fn_();
+    }
+
+    pub fn get_grad_accum(&self) -> Rc<RefCell<GradAccum<T>>> {
+        return self.__get_tensor_impl().borrow().get_grad_accum_();
     }
 
     pub fn set_grad_fn(&self, node: Rc<RefCell<dyn Backward<T>>>) {
-        self.__get_tensor_impl()
-            .borrow_mut()
-            .autograd_meta
-            .as_mut()
-            .expect("..")
-            .set_grad_fn_to_node(node);
+        self.__get_tensor_impl().borrow_mut().set_grad_fn_(node);
     }
 
     pub fn set_grad_accum(&self, node: Rc<RefCell<GradAccum<T>>>) {
-        self.__get_tensor_impl()
-            .borrow_mut()
-            .autograd_meta
-            .as_mut()
-            .expect("..")
-            .set_grad_accum_to_accum(node);
+        self.__get_tensor_impl().borrow_mut().set_grad_accum_(node);
     }
+
+    // BACKWARD FUNCTIONS
 
     pub fn backward(&mut self, starting_gradient: Vec<Tensor<T>>) {
         self.__get_tensor_impl()
@@ -203,7 +188,7 @@ where
             .backward_(starting_gradient);
     }
 
-    // Display functions
+    // DISPLAY FUNCTIONS
 
     pub fn display_grad(&self) {
         let borrowed_impl = self.tensor_impl.borrow();
