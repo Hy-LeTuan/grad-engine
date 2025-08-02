@@ -26,15 +26,12 @@ impl<T> AutogradMeta<T>
 where
     T: DTypeMarker + Zero + Clone + Debug + 'static,
 {
-    pub fn new_for_intermediate(
-        name: String,
-        grad_fn: Option<Rc<RefCell<dyn Backward<T>>>>,
-    ) -> Self {
+    pub fn new_for_intermediate(name: &str) -> Self {
         let autograd_meta = AutogradMeta {
-            name: name,
+            name: String::from(name),
             grad: RefCell::new(None),
             requires_grad: true,
-            grad_fn: grad_fn,
+            grad_fn: None,
             grad_accum: None,
         };
 
@@ -97,7 +94,7 @@ where
         return &self.grad_fn;
     }
 
-    pub fn start_backprop_chain(&self, starting_gradient: Vec<Tensor<T>>) {
+    pub fn start_backprop_chain(&self, _starting_gradient: Vec<Tensor<T>>) {
         todo!()
         // let starting_gradient_arc = Rc::new(starting_gradient);
         //

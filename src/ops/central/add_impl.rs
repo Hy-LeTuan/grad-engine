@@ -51,3 +51,17 @@ pub fn add_impl<TensorType>(
     let node = Rc::new(RefCell::new(node));
     result_tensor.set_grad_fn(node);
 }
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn add_and_create_graph() {
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true);
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true);
+
+        let _c = &a + &b;
+    }
+}

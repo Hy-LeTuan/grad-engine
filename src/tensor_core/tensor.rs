@@ -63,6 +63,12 @@ where
         self.set_autograd_meta(autograd_meta);
     }
 
+    pub fn requires_grad_intermediate(&self, name: &str) {
+        let autograd_meta = AutogradMeta::<T>::new_for_intermediate(name);
+
+        self.set_autograd_meta(autograd_meta);
+    }
+
     pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>, requires_grad: bool) -> Self {
         let tensor_impl = TensorImpl::from_raw_array_(x);
 
@@ -145,7 +151,9 @@ where
     }
 
     pub fn set_autograd_meta(&self, autograd_meta: AutogradMeta<T>) {
-        self.__get_tensor_impl().borrow_mut().autograd_meta = Some(autograd_meta);
+        self.__get_tensor_impl()
+            .borrow_mut()
+            .set_autograd_meta_(autograd_meta);
     }
 
     pub fn does_require_grad(&self) -> bool {
@@ -193,6 +201,57 @@ where
         self.__get_tensor_impl()
             .borrow_mut()
             .backward_(starting_gradient);
+    }
+
+    // Display functions
+
+    pub fn display_grad(&self) {
+        let borrowed_impl = self.tensor_impl.borrow();
+        match &borrowed_impl.autograd_meta {
+            Some(meta) => match &meta.grad.borrow().as_ref() {
+                Some(grad) => {
+                    println!("Grad: {:?}", grad);
+                }
+                None => {
+                    println!("Grad has not been computed or is None.");
+                }
+            },
+            None => {
+                println!("Tensor has no autograd metadata.");
+            }
+        }
+    }
+
+    pub fn display_autograd_meta(&self) {
+        let borrowed_impl = self.tensor_impl.borrow();
+        match &borrowed_impl.autograd_meta {
+            Some(meta) => {
+                println!("AutogradMeta:");
+                println!("  Name: {}", meta.name);
+                println!("  Requires Grad: {}", meta.requires_grad);
+
+                // Grad
+                match &*meta.grad.borrow() {
+                    Some(grad) => println!("  Grad: {:?}", grad),
+                    None => println!("  Grad: None"),
+                }
+
+                // GradFn
+                match &meta.grad_fn {
+                    Some(grad_fn) => println!("  GradFn: {:?}", grad_fn),
+                    None => println!("  GradFn: None"),
+                }
+
+                // GradAccum
+                match &meta.grad_accum {
+                    Some(grad_accum) => println!("  GradAccum: {:?}", grad_accum),
+                    None => println!("  GradAccum: None"),
+                }
+            }
+            None => {
+                println!("Tensor has no autograd metadata.");
+            }
+        }
     }
 }
 
