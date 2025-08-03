@@ -2,21 +2,21 @@ use super::super::super::tensor_core::tensor_impl::TensorImpl;
 use super::super::backward::Backward;
 use super::super::edge::Edge;
 use crate::graph::backward::backward_types::BackwardType;
-use crate::ops::compute::add_compute::compute_add_tensor_tensor;
+use crate::ops::compute::add_compute::add_compute_tensor_tensor;
 
-use super::DTypeMarker;
+use super::DTComp;
 use super::Tensor;
 
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::Add;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
 pub struct GradAccum<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: DTComp + Debug,
 {
     name: BackwardType,
     id: usize,
@@ -26,7 +26,7 @@ where
 
 impl<T> Backward<T> for GradAccum<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: Clone + DTComp + Debug + Add<Output = T>,
 {
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
@@ -35,7 +35,7 @@ where
                 {
                     if origin_ref.grad_is_set() {
                         let old_grad = origin_ref.get_grad_as_tensor();
-                        let new_grad = compute_add_tensor_tensor(old_grad.deref(), grad.deref());
+                        let new_grad = add_compute_tensor_tensor(old_grad.deref(), grad.deref());
 
                         origin_ref.set_grad(Rc::new(new_grad));
                     } else {
@@ -87,7 +87,7 @@ where
 
 impl<T> GradAccum<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug,
+    T: Clone + DTComp + Debug,
 {
     pub fn new(edge_list: Vec<Edge<T>>) -> Self {
         let grad_accum = GradAccum {

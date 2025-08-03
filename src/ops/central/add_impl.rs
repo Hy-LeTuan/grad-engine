@@ -1,4 +1,3 @@
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::Add;
@@ -7,15 +6,15 @@ use std::rc::Rc;
 use crate::graph::backward::Backward;
 use crate::graph::backward::add_backward::AddBackward;
 use crate::graph::edge::Edge;
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn add_impl<TensorType>(
-    lhs_tensor: Option<&Tensor<TensorType>>,
-    rhs_tensor: Option<&Tensor<TensorType>>,
-    result_tensor: &Tensor<TensorType>,
+pub fn add_impl<T>(
+    lhs_tensor: Option<&Tensor<T>>,
+    rhs_tensor: Option<&Tensor<T>>,
+    result_tensor: &Tensor<T>,
 ) where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Add<TensorType>,
+    T: DTComp + Clone + Debug + 'static + Add<Output = T>,
 {
     if !result_tensor.does_require_grad() {
         return;

@@ -1,20 +1,19 @@
-use super::dtypes::DTypeMarker;
+use super::dtypes::DTComp;
 use super::tensor::Tensor;
 use super::tensor_impl::TensorImpl;
 
 use super::super::graph::backward::Backward;
 use super::super::graph::backward::grad_accum::GradAccum;
 
-use num_traits::Zero;
 use std::cell::{Ref, RefCell};
 use std::fmt::Debug;
-use std::ops::Deref;
+use std::ops::{Add, Deref};
 use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct AutogradMeta<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTComp + Debug,
 {
     pub name: String,
     pub grad: RefCell<Option<Rc<Tensor<T>>>>,
@@ -25,7 +24,7 @@ where
 
 impl<T> AutogradMeta<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTComp + Clone + Debug,
 {
     pub fn new_for_intermediate(name: &str) -> Self {
         let autograd_meta = AutogradMeta {
@@ -110,7 +109,12 @@ where
     pub fn get_grad_fn(&self) -> &Option<Rc<RefCell<dyn Backward<T>>>> {
         return &self.grad_fn;
     }
+}
 
+impl<T> AutogradMeta<T>
+where
+    T: DTComp + Clone + Debug + Add<Output = T>,
+{
     pub fn start_backprop_chain(&self, starting_gradient: Rc<Tensor<T>>) {
         if let Some(node_arc_ref) = self.get_grad_accum() {
             node_arc_ref.borrow().apply(starting_gradient);

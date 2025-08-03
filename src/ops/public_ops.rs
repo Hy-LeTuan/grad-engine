@@ -1,11 +1,11 @@
 pub mod add;
-pub mod public_add;
+pub mod add_public;
 
 pub mod dot;
 pub mod public_dot;
 
 pub mod mul;
-pub mod public_mul;
+pub mod mul_public;
 
-pub mod public_sub;
 pub mod sub;
+pub mod sub_public;

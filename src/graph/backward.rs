@@ -1,10 +1,9 @@
 use super::edge::Edge;
 
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -20,7 +19,7 @@ pub mod sub_backward;
 
 pub trait Backward<T>: Debug
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTComp + Clone + Debug,
 {
     /// Save the gradient received to the origin tensor
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>);

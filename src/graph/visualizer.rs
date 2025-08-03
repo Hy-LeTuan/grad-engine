@@ -1,6 +1,6 @@
 use crate::{
     graph::backward::Backward,
-    tensor_core::{dtypes::DTypeMarker, tensor::Tensor},
+    tensor_core::{dtypes::DTComp, tensor::Tensor},
 };
 use std::collections::VecDeque;
 use std::ops::Deref;
@@ -12,7 +12,7 @@ pub struct Visualizer {}
 
 pub trait VisualizerTrait<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: Zero + Clone + DTComp + Debug + 'static,
 {
     fn visualize_graph(tensor: &Tensor<T>);
 
@@ -21,7 +21,7 @@ where
 
 impl<T> VisualizerTrait<T> for Visualizer
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: Zero + Clone + DTComp + Debug + 'static,
 {
     fn visualize_graph(tensor: &Tensor<T>) {
         if !tensor.does_require_grad() {

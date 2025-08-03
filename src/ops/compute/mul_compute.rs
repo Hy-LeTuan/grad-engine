@@ -1,19 +1,16 @@
 use ndarray::ScalarOperand;
-use num_traits::{Signed, Zero};
+use num_traits::Signed;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::{Deref, Mul};
 
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
-pub fn compute_mul_tensor_tensor<TensorType>(
-    lhs_scalar: &Tensor<TensorType>,
-    rhs_tensor: &Tensor<TensorType>,
-) -> Tensor<TensorType>
+pub fn mul_compute_tensor_tensor<T>(lhs_scalar: &Tensor<T>, rhs_tensor: &Tensor<T>) -> Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
+    T: DTComp + Clone + Debug + Mul<Output = T>,
 {
     let x_raw = lhs_scalar.get_raw_data();
     let y_raw = rhs_tensor.get_raw_data();
@@ -24,12 +21,12 @@ where
     return tensor;
 }
 
-pub fn compute_mul_tensor_tensorimpl<TensorType>(
-    lhs_scalar: &RefCell<TensorImpl<TensorType>>,
-    rhs_tensor: &Tensor<TensorType>,
-) -> Tensor<TensorType>
+pub fn mul_compute_tensor_tensorimpl<T>(
+    lhs_scalar: &RefCell<TensorImpl<T>>,
+    rhs_tensor: &Tensor<T>,
+) -> Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
+    T: DTComp + Clone + Debug + Mul<Output = T>,
 {
     let binding = lhs_scalar.borrow();
     let x_raw = binding.get_raw_data_();
@@ -41,13 +38,10 @@ where
     return tensor;
 }
 
-pub fn compute_mul_tensor_scalar<TensorType, ScalarType>(
-    tensor: &Tensor<TensorType>,
-    scalar: ScalarType,
-) -> Tensor<TensorType>
+pub fn mul_compute_tensor_scalar<T, S>(tensor: &Tensor<T>, scalar: S) -> Tensor<T>
 where
-    ScalarType: DTypeMarker + ScalarOperand + 'static,
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<ScalarType, Output = TensorType>,
+    S: ScalarOperand,
+    T: DTComp + Clone + Debug + Mul<S, Output = T>,
 {
     let x_raw = tensor.get_raw_data();
 
@@ -57,9 +51,9 @@ where
     return tensor;
 }
 
-pub fn compute_mul_reverse_tensor<TensorType>(tensor: &Tensor<TensorType>) -> Tensor<TensorType>
+pub fn mul_compute_reverse_tensor<TensorType>(tensor: &Tensor<TensorType>) -> Tensor<TensorType>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Signed,
+    TensorType: DTComp + Clone + Debug + Signed,
 {
     let raw_array = tensor.get_raw_data();
     let new_array = raw_array.map(|x| -x.clone());

@@ -1,17 +1,17 @@
 use super::backward::Backward;
 
-use super::super::tensor_core::dtypes::DTypeMarker;
+use super::super::tensor_core::dtypes::DTComp;
 use super::super::tensor_core::tensor::Tensor;
 
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::Add;
 use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Edge<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug,
+    T: DTComp + Debug,
 {
     pub grad_fn_linked: Rc<RefCell<dyn Backward<T>>>,
     pub input_nr: usize,
@@ -19,7 +19,7 @@ where
 
 impl<T> Edge<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTComp + Debug + Clone + 'static + Add<Output = T>,
 {
     /// Connect edge to a grad_fn if the next node is an intermediate tensor. Else, connect to a
     /// GradAccum for leaf nodes and return that edge
