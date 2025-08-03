@@ -1,42 +1,42 @@
-use crate::ops::public_ops::public_sub::{sub_tensor_scalar, sub_tensor_tensor};
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::ops::public_ops::sub_public::{sub_tensor_scalar, sub_tensor_tensor};
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
 use ndarray::ScalarOperand;
-use num_traits::{Signed, Zero};
+use num_traits::Signed;
 use std::fmt::Debug;
-use std::ops::{Sub, SubAssign};
+use std::ops::Sub;
 
-impl<'tl, TensorType, ScalarType> Sub<ScalarType> for &'tl Tensor<TensorType>
+impl<'tl, T, S> Sub<S> for &'tl Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType> + Signed,
-    ScalarType: SubAssign + ScalarOperand + DTypeMarker,
+    T: DTComp + Sub<S, Output = T> + ScalarOperand + Signed + 'static + Debug + Clone,
+    S: ScalarOperand,
 {
-    type Output = Tensor<TensorType>;
+    type Output = Tensor<T>;
 
-    fn sub(self, rhs: ScalarType) -> Self::Output {
+    fn sub(self, rhs: S) -> Self::Output {
         return sub_tensor_scalar(self, rhs);
     }
 }
 
-impl<'tl_a, 'tl_b, TensorType> Sub<&'tl_b Tensor<TensorType>> for &'tl_a Tensor<TensorType>
+impl<'tl_a, 'tl_b, T> Sub<&'tl_b Tensor<T>> for &'tl_a Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType> + Signed,
+    T: DTComp + Sub<T> + Signed + 'static + Debug + Clone,
 {
-    type Output = Tensor<TensorType>;
+    type Output = Tensor<T>;
 
-    fn sub(self, rhs: &'tl_b Tensor<TensorType>) -> Self::Output {
+    fn sub(self, rhs: &'tl_b Tensor<T>) -> Self::Output {
         return sub_tensor_tensor(self, rhs);
     }
 }
 
-impl<'tl_a, TensorType> Sub<&'tl_a Tensor<TensorType>> for Tensor<TensorType>
+impl<'tl_a, T> Sub<&'tl_a Tensor<T>> for Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType> + Signed,
+    T: DTComp + Sub<T> + Signed + 'static + Debug + Clone,
 {
-    type Output = Tensor<TensorType>;
+    type Output = Tensor<T>;
 
-    fn sub(self, rhs: &'tl_a Tensor<TensorType>) -> Self::Output {
+    fn sub(self, rhs: &'tl_a Tensor<T>) -> Self::Output {
         return sub_tensor_tensor(&self, rhs);
     }
 }

@@ -2,28 +2,28 @@ use crate::graph::backward::Backward;
 use crate::graph::backward::grad_accum::GradAccum;
 
 use super::autograd_meta::AutogradMeta;
-use super::dtypes::{DTypeMarker, DTypes};
+use super::dtypes::{DTComp, DTypes};
 use super::storage::Storage;
 use super::tensor_impl::TensorImpl;
 
 use ndarray::Ix2;
-use ndarray::{ArrayBase, ArrayD, IxDyn, OwnedRepr};
-use num_traits::{AsPrimitive, Zero};
+use ndarray::{ArrayBase, IxDyn, OwnedRepr};
 use std::cell::{Ref, RefCell};
 use std::fmt::Debug;
+use std::ops::Add;
 use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Tensor<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: DTComp + Debug,
 {
-    tensor_impl: Rc<RefCell<TensorImpl<T>>>,
+    pub(crate) tensor_impl: Rc<RefCell<TensorImpl<T>>>,
 }
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTComp + Debug + Clone,
 {
     pub fn __get_tensor_impl(&self) -> &Rc<RefCell<TensorImpl<T>>> {
         return &self.tensor_impl;
@@ -84,18 +84,6 @@ where
 
             tensor.set_autograd_meta(autograd_meta);
         }
-
-        return tensor;
-    }
-
-    pub fn zeros(shape: Vec<usize>) -> Self {
-        let dyn_shape = IxDyn(&shape);
-        let data = ArrayD::<T>::zeros(dyn_shape);
-
-        let tensor_impl =
-            TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
-
-        let tensor = Tensor { tensor_impl };
 
         return tensor;
     }
@@ -180,14 +168,6 @@ where
         self.__get_tensor_impl().borrow_mut().set_grad_accum_(node);
     }
 
-    // BACKWARD FUNCTIONS
-
-    pub fn backward(&self, starting_gradient: Tensor<T>) {
-        self.__get_tensor_impl()
-            .borrow()
-            .backward_(starting_gradient);
-    }
-
     // DISPLAY FUNCTIONS
 
     pub fn display_grad(&self) {
@@ -242,64 +222,11 @@ where
 
 impl<T> Tensor<T>
 where
-    T: DTypeMarker + Zero + Debug + Clone + Copy + 'static + AsPrimitive<f32>,
+    T: DTComp + Debug + Clone + Add<Output = T>,
 {
-    pub fn as_float_32(&self) -> Tensor<f32> {
-        let tensor;
-
-        let old_raw_array = self.get_raw_data();
-        let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
-
-        if self.does_require_grad() {
-            tensor = Tensor::from_raw_array(new_raw_array, true);
-        } else {
-            tensor = Tensor::from_raw_array(new_raw_array, false);
-        }
-
-        return tensor;
-    }
-
-    pub fn ones_as_f32(shape: Vec<usize>) -> Tensor<f32> {
-        let dyn_shape = IxDyn(&shape);
-        let data = ArrayD::<f32>::ones(dyn_shape);
-
-        let tensor_impl =
-            TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
-
-        let tensor = Tensor { tensor_impl };
-
-        return tensor;
-    }
-}
-
-impl<T> Tensor<T>
-where
-    T: Debug + DTypeMarker + Zero + Clone + Copy + 'static + AsPrimitive<f64>,
-{
-    pub fn as_float_64(&self) -> Tensor<f64> {
-        let tensor;
-
-        let old_raw_array = self.get_raw_data();
-        let new_raw_array = old_raw_array.mapv(|elem| elem.as_());
-
-        if self.does_require_grad() {
-            tensor = Tensor::from_raw_array(new_raw_array, true);
-        } else {
-            tensor = Tensor::from_raw_array(new_raw_array, false);
-        }
-
-        return tensor;
-    }
-
-    pub fn ones_as_f64(shape: Vec<usize>) -> Tensor<f64> {
-        let dyn_shape = IxDyn(&shape);
-        let data = ArrayD::<f64>::ones(dyn_shape);
-
-        let tensor_impl =
-            TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
-
-        let tensor = Tensor { tensor_impl };
-
-        return tensor;
+    pub fn backward(&self, starting_gradient: Tensor<T>) {
+        self.__get_tensor_impl()
+            .borrow()
+            .backward_(starting_gradient);
     }
 }

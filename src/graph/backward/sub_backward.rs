@@ -1,14 +1,13 @@
-use super::DTypeMarker;
+use super::DTComp;
 use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::mul_compute::compute_mul_reverse_tensor;
+use crate::ops::compute::mul_compute::mul_compute_reverse_tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use num_traits::Signed;
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::Deref;
@@ -17,7 +16,7 @@ use std::rc::{Rc, Weak};
 #[derive(Debug)]
 pub struct SubBackward<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static + Signed,
+    T: DTComp + Clone + Debug + 'static,
 {
     name: BackwardType,
     id: usize,
@@ -27,7 +26,7 @@ where
 
 impl<T> Backward<T> for SubBackward<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static + Signed,
+    T: Clone + DTComp + Debug + 'static + Signed,
 {
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
@@ -49,7 +48,7 @@ where
         self.save_grad_to_origin_tensor(&upstream_gradient);
 
         let minuend_grad = self.calculate_gradient_for_next_node(&upstream_gradient, None);
-        let subtrahend_grad = Rc::new(compute_mul_reverse_tensor(
+        let subtrahend_grad = Rc::new(mul_compute_reverse_tensor(
             self.calculate_gradient_for_next_node(&upstream_gradient, None)
                 .deref(),
         ));
@@ -92,7 +91,7 @@ where
 
 impl<T> SubBackward<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static + Signed,
+    T: Clone + DTComp + Debug + 'static,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
         let node = SubBackward {

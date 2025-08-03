@@ -3,4 +3,5 @@ pub mod dtypes;
 pub mod storage;
 
 pub mod tensor;
+pub mod tensor_builder;
 pub mod tensor_impl;

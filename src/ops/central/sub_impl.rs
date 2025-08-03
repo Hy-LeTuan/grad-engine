@@ -1,4 +1,4 @@
-use num_traits::{Signed, Zero};
+use num_traits::Signed;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -6,20 +6,16 @@ use std::rc::Rc;
 use crate::graph::backward::Backward;
 use crate::graph::backward::sub_backward::SubBackward;
 use crate::graph::edge::Edge;
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn sub_impl<TensorType>(
-    lhs_tensor: Option<&Tensor<TensorType>>,
-    rhs_tensor: Option<&Tensor<TensorType>>,
-    result_tensor: &Tensor<TensorType>,
+pub fn sub_impl<T>(
+    lhs_tensor: Option<&Tensor<T>>,
+    rhs_tensor: Option<&Tensor<T>>,
+    result_tensor: &Tensor<T>,
 ) where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Signed,
+    T: DTComp + Clone + Debug + 'static + Signed,
 {
-    if !result_tensor.does_require_grad() {
-        return;
-    }
-
     let mut node = SubBackward::new(0, vec![], result_tensor.__get_tensor_impl());
 
     match (lhs_tensor, rhs_tensor) {

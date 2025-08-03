@@ -1,21 +1,20 @@
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 use std::rc::Rc;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::mul_backward::MulBackward;
 use crate::graph::edge::Edge;
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn mul_impl<TensorType>(
-    lhs_tensor: Option<&Tensor<TensorType>>,
-    rhs_tensor: Option<&Tensor<TensorType>>,
-    result_tensor: &Tensor<TensorType>,
+pub fn mul_impl<T>(
+    lhs_tensor: Option<&Tensor<T>>,
+    rhs_tensor: Option<&Tensor<T>>,
+    result_tensor: &Tensor<T>,
 ) where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
+    T: DTComp + Clone + Debug + Mul<Output = T> + 'static + Add<Output = T>,
 {
     if !result_tensor.does_require_grad() {
         return;

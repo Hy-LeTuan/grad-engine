@@ -1,112 +1,41 @@
-use crate::ops::public_ops::public_mul::{mul_tensor_scalar, mul_tensor_tensor};
-use crate::tensor_core::dtypes::DTypeMarker;
+use crate::ops::public_ops::mul_public::{mul_tensor_scalar, mul_tensor_tensor};
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
 use ndarray::ScalarOperand;
-use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{Mul, MulAssign};
+use std::ops::{Add, Mul};
 
-impl<'tl, TensorType, ScalarType> Mul<ScalarType> for &'tl Tensor<TensorType>
+impl<'tl, T, S> Mul<S> for &'tl Tensor<T>
 where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Mul<ScalarType, Output = TensorType>
-        + Mul<Output = TensorType>,
-    ScalarType: DTypeMarker + MulAssign + ScalarOperand,
+    T: DTComp + Clone + Debug + Mul<Output = T> + Mul<S, Output = T> + Add<Output = T> + 'static,
+    S: ScalarOperand,
 {
-    type Output = Tensor<TensorType>;
+    type Output = Tensor<T>;
 
-    fn mul(self, rhs: ScalarType) -> Self::Output {
+    fn mul(self, rhs: S) -> Self::Output {
         return mul_tensor_scalar(self, rhs);
     }
 }
 
-impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for f32
+impl<'tl_in, 'tl_out, T> Mul<&'tl_out Tensor<T>> for &'tl_in Tensor<T>
 where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Mul<f32, Output = TensorType>
-        + Mul<Output = TensorType>,
+    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static,
 {
-    type Output = Tensor<TensorType>;
+    type Output = Tensor<T>;
 
-    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
-        return mul_tensor_scalar(rhs, self);
-    }
-}
-
-impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for f64
-where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Mul<f64, Output = TensorType>
-        + Mul<Output = TensorType>,
-{
-    type Output = Tensor<TensorType>;
-
-    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
-        return mul_tensor_scalar(rhs, self);
-    }
-}
-
-impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for i32
-where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Mul<i32, Output = TensorType>
-        + Mul<Output = TensorType>,
-{
-    type Output = Tensor<TensorType>;
-
-    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
-        return mul_tensor_scalar(&rhs, self);
-    }
-}
-
-impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for i64
-where
-    TensorType: DTypeMarker
-        + Zero
-        + Clone
-        + Debug
-        + Mul<i64, Output = TensorType>
-        + Mul<Output = TensorType>,
-{
-    type Output = Tensor<TensorType>;
-
-    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
-        return mul_tensor_scalar(&rhs, self);
-    }
-}
-
-impl<'tl_a, 'tl_b, TensorType> Mul<&'tl_b Tensor<TensorType>> for &'tl_a Tensor<TensorType>
-where
-    TensorType:
-        DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType> + Mul<Output = TensorType>,
-{
-    type Output = Tensor<TensorType>;
-
-    fn mul(self, rhs: &'tl_b Tensor<TensorType>) -> Self::Output {
+    fn mul(self, rhs: &'tl_out Tensor<T>) -> Self::Output {
         return mul_tensor_tensor(self, rhs);
     }
 }
 
-impl<'tl, TensorType> Mul<&'tl Tensor<TensorType>> for Tensor<TensorType>
+impl<'tl, T> Mul<&'tl Tensor<T>> for Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Mul<Output = TensorType>,
+    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static,
 {
-    type Output = Tensor<TensorType>;
+    type Output = Tensor<T>;
 
-    fn mul(self, rhs: &'tl Tensor<TensorType>) -> Self::Output {
+    fn mul(self, rhs: &'tl Tensor<T>) -> Self::Output {
         return mul_tensor_tensor(&self, rhs);
     }
 }

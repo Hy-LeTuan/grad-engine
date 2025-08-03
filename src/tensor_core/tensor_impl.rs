@@ -3,22 +3,22 @@ use crate::graph::backward::grad_accum::GradAccum;
 
 use super::super::config::CONFIG;
 use super::autograd_meta::AutogradMeta;
-use super::dtypes::{DTypeMarker, DTypes};
+use super::dtypes::{DTComp, DTypes};
 use super::storage::Storage;
 use super::tensor::Tensor;
 
 use ndarray::Ix2;
 use ndarray::{Array, ArrayBase, IxDyn, OwnedRepr};
-use num_traits::Zero;
 use std::fmt::Debug;
 
 use std::cell::RefCell;
+use std::ops::Add;
 use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct TensorImpl<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static,
+    T: DTComp + Debug,
 {
     pub storage: Storage<T>,
     pub shape: Vec<usize>,
@@ -30,7 +30,7 @@ where
 
 impl<T> TensorImpl<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static,
+    T: DTComp + Debug + Clone,
 {
     pub fn new(x: Vec<T>, shape: Vec<usize>) -> Self {
         let numel = x.len();
@@ -175,7 +175,12 @@ where
     }
 
     // BACKWARD FUNCTION
+}
 
+impl<T> TensorImpl<T>
+where
+    T: DTComp + Debug + Clone + Add<Output = T>,
+{
     pub fn backward_(&self, starting_gradient: Tensor<T>) {
         match self.get_autograd_ref_() {
             Some(autograd_meta_arc_ref) => {

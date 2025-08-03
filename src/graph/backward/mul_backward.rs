@@ -1,15 +1,15 @@
-use super::DTypeMarker;
+use super::DTComp;
 use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::mul_compute::compute_mul_tensor_tensorimpl;
+use crate::ops::compute::mul_compute::mul_compute_tensor_tensorimpl;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
-use num_traits::Zero;
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::Add;
 use std::ops::Deref;
 use std::ops::Mul;
 use std::rc::{Rc, Weak};
@@ -17,7 +17,7 @@ use std::rc::{Rc, Weak};
 #[derive(Debug)]
 pub struct MulBackward<T>
 where
-    T: DTypeMarker + Zero + Clone + Debug + 'static + Mul<Output = T>,
+    T: DTComp + Clone + Debug,
 {
     input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>,
     name: BackwardType,
@@ -28,7 +28,7 @@ where
 
 impl<T> Backward<T> for MulBackward<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static + Mul<Output = T>,
+    T: Clone + DTComp + Debug + 'static + Mul<Output = T> + Add<Output = T>,
 {
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
         if let Some(origin_as_option_ref) = self.origin.as_ref() {
@@ -72,7 +72,7 @@ where
 
             println!("input tensor: {:?}", input_tensor);
 
-            let tensor = compute_mul_tensor_tensorimpl(input_tensor.deref(), upstream_gradient);
+            let tensor = mul_compute_tensor_tensorimpl(input_tensor.deref(), upstream_gradient);
 
             return Rc::new(tensor);
         } else {
@@ -103,7 +103,7 @@ where
 
 impl<T> MulBackward<T>
 where
-    T: Zero + Clone + DTypeMarker + Debug + 'static + Mul<Output = T>,
+    T: Clone + DTComp + Debug + 'static,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
         let node = MulBackward {

@@ -1,17 +1,14 @@
 use ndarray::ScalarOperand;
-use num_traits::Zero;
-use std::fmt::Debug;
 use std::ops::{Deref, Sub};
 
-use crate::tensor_core::dtypes::DTypeMarker;
+use std::fmt::Debug;
+
+use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn compute_sub_tensor_tensor<TensorType>(
-    tensor_lhs: &Tensor<TensorType>,
-    tensor_rhs: &Tensor<TensorType>,
-) -> Tensor<TensorType>
+pub fn sub_compute_tensor_tensor<T>(tensor_lhs: &Tensor<T>, tensor_rhs: &Tensor<T>) -> Tensor<T>
 where
-    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<Output = TensorType>,
+    T: DTComp + Clone + Sub<Output = T> + Debug,
 {
     let lhs_raw = tensor_lhs.get_raw_data();
     let rhs_raw = tensor_rhs.get_raw_data();
@@ -22,13 +19,10 @@ where
     return tensor;
 }
 
-pub fn compute_sub_tensor_scalar<TensorType, ScalarType>(
-    tensor: &Tensor<TensorType>,
-    scalar: ScalarType,
-) -> Tensor<TensorType>
+pub fn sub_compute_tensor_scalar<T, S>(tensor: &Tensor<T>, scalar: S) -> Tensor<T>
 where
-    ScalarType: DTypeMarker + ScalarOperand + 'static,
-    TensorType: DTypeMarker + Zero + Clone + Debug + Sub<ScalarType, Output = TensorType>,
+    T: DTComp + Clone + Sub<S, Output = T> + ScalarOperand + Debug,
+    S: ScalarOperand,
 {
     let x_raw = tensor.get_raw_data();
 
