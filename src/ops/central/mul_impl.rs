@@ -1,3 +1,4 @@
+use ndarray::ScalarOperand;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::{Add, Mul};
@@ -9,12 +10,14 @@ use crate::graph::edge::Edge;
 use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn mul_impl<T>(
+pub fn mul_impl<T, S>(
     lhs_tensor: Option<&Tensor<T>>,
     rhs_tensor: Option<&Tensor<T>>,
     result_tensor: &Tensor<T>,
+    scalar: Option<S>,
 ) where
-    T: DTComp + Clone + Debug + Mul<Output = T> + 'static + Add<Output = T>,
+    T: DTComp + Clone + Debug + Mul<Output = T> + 'static + Add<Output = T> + Mul<S, Output = T>,
+    S: ScalarOperand + Clone + Debug,
 {
     if !result_tensor.does_require_grad() {
         return;
@@ -25,12 +28,12 @@ pub fn mul_impl<T>(
     match (lhs_tensor, rhs_tensor) {
         (Some(l), Some(r)) => {
             if l.does_require_grad() {
-                node.add_to_edge_list(Edge::maybe_create_connect(l, 0));
+                node.add_to_edge_list(Edge::maybe_create_connect(l, 1));
                 node.save_input_refs(vec![l.__clone_ptr_to_tensor_impl()]);
             }
 
             if r.does_require_grad() {
-                node.add_to_edge_list(Edge::maybe_create_connect(r, 1));
+                node.add_to_edge_list(Edge::maybe_create_connect(r, 0));
                 node.save_input_refs(vec![r.__clone_ptr_to_tensor_impl()]);
             }
         }
@@ -38,12 +41,16 @@ pub fn mul_impl<T>(
             if l.does_require_grad() {
                 node.add_to_edge_list(Edge::maybe_create_connect(l, 0));
                 node.save_input_refs(vec![l.__clone_ptr_to_tensor_impl()]);
+
+                node.save_scalar(scalar.expect("Error, trying to set a MulBackward node on multiplication of tensor and scalar, but scalar is not found."));
             }
         }
         (None, Some(r)) => {
             if r.does_require_grad() {
                 node.add_to_edge_list(Edge::maybe_create_connect(r, 0));
                 node.save_input_refs(vec![r.__clone_ptr_to_tensor_impl()]);
+
+                node.save_scalar(scalar.expect("Error, trying to set a MulBackward node on multiplication of tensor and scalar, but scalar is not found."));
             }
         }
         (None, None) => {

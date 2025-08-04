@@ -18,14 +18,14 @@ fn main() {
 
     z.backward(Tensor::new(vec![1, 1, 1, 1], vec![4, 1], false).as_float_32());
 
-    // x1.display_grad();
-    // println!("------");
-    //
-    // x2.display_grad();
-    // println!("------");
-    //
-    // x3.display_grad();
-    // println!("------");
+    x1.display_grad();
+    println!("------");
+
+    x2.display_grad();
+    println!("------");
+
+    x3.display_grad();
+    println!("------");
 
     // Visualizer::visualize_graph(&z);
 }

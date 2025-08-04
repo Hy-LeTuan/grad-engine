@@ -9,7 +9,7 @@ use std::ops::{Add, Mul};
 impl<'tl, T, S> Mul<S> for &'tl Tensor<T>
 where
     T: DTComp + Clone + Debug + Mul<Output = T> + Mul<S, Output = T> + Add<Output = T> + 'static,
-    S: ScalarOperand,
+    S: ScalarOperand + Debug + Clone,
 {
     type Output = Tensor<T>;
 
@@ -20,7 +20,7 @@ where
 
 impl<'tl_in, 'tl_out, T> Mul<&'tl_out Tensor<T>> for &'tl_in Tensor<T>
 where
-    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static,
+    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static + ScalarOperand,
 {
     type Output = Tensor<T>;
 
@@ -31,7 +31,7 @@ where
 
 impl<'tl, T> Mul<&'tl Tensor<T>> for Tensor<T>
 where
-    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static,
+    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static + ScalarOperand,
 {
     type Output = Tensor<T>;
 
