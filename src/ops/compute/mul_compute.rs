@@ -1,5 +1,4 @@
 use ndarray::ScalarOperand;
-use num_traits::Signed;
 use std::cell::{Ref, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, Mul};
@@ -63,18 +62,6 @@ where
 
     let new_raw = x_raw.deref() * scalar;
     let tensor = Tensor::from_raw_array(new_raw, false);
-
-    return tensor;
-}
-
-pub fn mul_compute_reverse_tensor<TensorType>(tensor: &Tensor<TensorType>) -> Tensor<TensorType>
-where
-    TensorType: DTComp + Clone + Debug + Signed,
-{
-    let raw_array = tensor.get_raw_data();
-    let new_array = raw_array.map(|x| -x.clone());
-
-    let tensor = Tensor::from_raw_array(new_array, tensor.does_require_grad());
 
     return tensor;
 }

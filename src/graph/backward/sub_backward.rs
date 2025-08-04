@@ -4,7 +4,7 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::mul_compute::mul_compute_reverse_tensor;
+use crate::ops::compute::neg_compute::neg_compute_tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use num_traits::Signed;
@@ -53,7 +53,7 @@ where
             if input_nr == 0 {
                 return Rc::clone(upstream_gradient);
             } else {
-                let subtrahend_grad = mul_compute_reverse_tensor(upstream_gradient.deref());
+                let subtrahend_grad = neg_compute_tensor(upstream_gradient.deref());
                 return Rc::new(subtrahend_grad);
             }
         } else {
