@@ -6,8 +6,8 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::mul_compute::mul_compute_tensor_tensorimpl;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_scalar;
+use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
@@ -62,10 +62,16 @@ where
 
                 if edge_nr == 0 {
                     let input_tensor = Rc::clone(&self.input_refs[1]);
-                    tensor = mul_compute_tensor_tensorimpl(input_tensor.deref(), upstream_gradient);
+                    tensor = mul_compute_tensorimpl_tensorimpl(
+                        input_tensor.deref(),
+                        upstream_gradient.__get_tensor_impl(),
+                    );
                 } else {
                     let input_tensor = Rc::clone(&self.input_refs[0]);
-                    tensor = mul_compute_tensor_tensorimpl(input_tensor.deref(), upstream_gradient);
+                    tensor = mul_compute_tensorimpl_tensorimpl(
+                        input_tensor.deref(),
+                        upstream_gradient.__get_tensor_impl(),
+                    );
                 }
 
                 return Rc::new(tensor);

@@ -12,7 +12,6 @@ use crate::ops::compute::div_compute::{
     div_compute_tensor_tensorimpl, div_compute_tensorimpl_scalar,
 };
 use crate::ops::compute::mul_compute::mul_compute_reverse_tensor;
-use crate::ops::compute::mul_compute::mul_compute_tensor_tensorimpl;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
@@ -91,9 +90,9 @@ where
                     let reverse_upstream_gradient =
                         mul_compute_reverse_tensor(upstream_gradient.deref());
 
-                    let product_tensor = mul_compute_tensor_tensorimpl(
+                    let product_tensor = mul_compute_tensorimpl_tensorimpl(
                         other_tensor.deref(),
-                        &reverse_upstream_gradient,
+                        reverse_upstream_gradient.__get_tensor_impl(),
                     );
 
                     tensor = div_compute_tensor_tensor(&product_tensor, &self_tensor);
