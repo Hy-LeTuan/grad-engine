@@ -21,6 +21,7 @@ where
     name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
+    #[allow(unused)]
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
@@ -28,44 +29,36 @@ impl<T> Backward<T> for SubBackward<T>
 where
     T: Clone + DTComp + Debug + 'static + Signed,
 {
-    fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
-        if let Some(origin_as_option_ref) = self.origin.as_ref() {
-            if let Some(origin_as_strong_rc) = origin_as_option_ref.upgrade() {
-                if let Some(origin_ref) = origin_as_strong_rc.borrow().get_autograd_ref_().as_ref()
-                {
-                    origin_ref.set_grad(Rc::clone(grad));
-                }
-            }
-        } else {
-            panic!(
-                "Dangling graph node, no origin tensor found at node: {}",
-                self.get_id()
-            );
-        }
+    fn save_grad_to_origin_tensor(&self, _grad: &Rc<Tensor<T>>) {
+        return;
     }
 
     fn apply(&self, upstream_gradient: Rc<Tensor<T>>) {
-        self.save_grad_to_origin_tensor(&upstream_gradient);
+        for edge in self.get_edge_list().iter() {
+            let grad = self.calculate_gradient_for_next_node(&upstream_gradient, Some(edge));
 
-        let minuend_grad = self.calculate_gradient_for_next_node(&upstream_gradient, None);
-        let subtrahend_grad = Rc::new(mul_compute_reverse_tensor(
-            self.calculate_gradient_for_next_node(&upstream_gradient, None)
-                .deref(),
-        ));
-
-        let minuend_node = &self.get_edge_list()[0].get_next_grad_fn();
-        let subtrahend_node = &self.get_edge_list()[1].get_next_grad_fn();
-
-        minuend_node.borrow().apply(minuend_grad);
-        subtrahend_node.borrow().apply(subtrahend_grad);
+            let node = edge.get_next_grad_fn();
+            node.borrow().apply(grad);
+        }
     }
 
     fn calculate_gradient_for_next_node(
         &self,
         upstream_gradient: &Rc<Tensor<T>>,
-        _edge: Option<&Edge<T>>,
+        edge: Option<&Edge<T>>,
     ) -> Rc<Tensor<T>> {
-        return Rc::clone(upstream_gradient);
+        if let Some(edge) = edge {
+            let input_nr = edge.input_nr;
+
+            if input_nr == 0 {
+                return Rc::clone(upstream_gradient);
+            } else {
+                let subtrahend_grad = mul_compute_reverse_tensor(upstream_gradient.deref());
+                return Rc::new(subtrahend_grad);
+            }
+        } else {
+            panic!("No edge positinal data found to calculate gradient")
+        }
     }
 
     fn get_edge_list(&self) -> &[Edge<T>] {
@@ -91,7 +84,7 @@ where
 
 impl<T> SubBackward<T>
 where
-    T: Clone + DTComp + Debug + 'static,
+    T: Clone + DTComp + Debug,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
         let node = SubBackward {

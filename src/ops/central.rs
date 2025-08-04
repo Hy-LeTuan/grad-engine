@@ -1,3 +1,4 @@
 pub mod add_impl;
+pub mod div_impl;
 pub mod mul_impl;
 pub mod sub_impl;

@@ -22,16 +22,16 @@ where
     return result_tensor;
 }
 
-pub fn sub_tensor_scalar<T, S>(tensor: &Tensor<T>, scalar: S) -> Tensor<T>
+pub fn sub_tensor_scalar<T, S>(lhs_tensor: &Tensor<T>, scalar: S) -> Tensor<T>
 where
     T: DTComp + Sub<S, Output = T> + ScalarOperand + Signed + 'static + Debug + Clone,
     S: ScalarOperand,
 {
-    let result_tensor = sub_compute_tensor_scalar(tensor, scalar);
+    let result_tensor = sub_compute_tensor_scalar(lhs_tensor, scalar);
 
-    if tensor.does_require_grad() {
+    if lhs_tensor.does_require_grad() {
         result_tensor.requires_grad_intermediate("Intermediate tensor from sub");
-        sub_impl(Some(tensor), None, &result_tensor);
+        sub_impl(Some(lhs_tensor), None, &result_tensor);
     }
 
     return result_tensor;

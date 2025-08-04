@@ -22,17 +22,53 @@ where
 }
 
 pub fn mul_compute_tensor_tensorimpl<T>(
-    lhs_scalar: &RefCell<TensorImpl<T>>,
-    rhs_tensor: &Tensor<T>,
+    tensor_impl: &RefCell<TensorImpl<T>>,
+    tensor: &Tensor<T>,
 ) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + Mul<Output = T>,
 {
-    let binding = lhs_scalar.borrow();
+    let binding = tensor_impl.borrow();
     let x_raw = binding.get_raw_data_();
-    let y_raw = rhs_tensor.get_raw_data();
+    let y_raw = tensor.get_raw_data();
 
     let new_raw = x_raw * y_raw.deref();
+    let tensor = Tensor::from_raw_array(new_raw, false);
+
+    return tensor;
+}
+
+pub fn mul_compute_tensorimpl_tensorimpl<T>(
+    lhs_tensor_impl: &RefCell<TensorImpl<T>>,
+    rhs_tensor_impl: &RefCell<TensorImpl<T>>,
+) -> Tensor<T>
+where
+    T: DTComp + Clone + Debug + Mul<Output = T>,
+{
+    let lhs_binding = lhs_tensor_impl.borrow();
+    let lhs_raw = lhs_binding.get_raw_data_();
+
+    let rhs_binding = rhs_tensor_impl.borrow();
+    let rhs_raw = rhs_binding.get_raw_data_();
+
+    let new_raw = rhs_raw * lhs_raw;
+    let tensor = Tensor::from_raw_array(new_raw, false);
+
+    return tensor;
+}
+
+pub fn mul_compute_tensorimpl_scalar<T, S>(
+    tensor_impl: &RefCell<TensorImpl<T>>,
+    scalar: S,
+) -> Tensor<T>
+where
+    T: DTComp + Clone + Debug + Mul<S, Output = T>,
+    S: ScalarOperand,
+{
+    let binding = tensor_impl.borrow();
+    let x_raw = binding.get_raw_data_();
+
+    let new_raw = x_raw * scalar;
     let tensor = Tensor::from_raw_array(new_raw, false);
 
     return tensor;

@@ -13,6 +13,7 @@ pub mod backward_types;
 
 // All backward node
 pub mod add_backward;
+pub mod div_backward;
 pub mod grad_accum;
 pub mod mul_backward;
 pub mod sub_backward;
