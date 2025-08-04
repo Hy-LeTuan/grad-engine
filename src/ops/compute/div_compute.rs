@@ -1,5 +1,5 @@
 use ndarray::ScalarOperand;
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, Div};
 
@@ -20,27 +20,18 @@ where
     return tensor;
 }
 
-pub fn div_compute_tensor_tensorimpl<T>(
+pub fn div_compute_tensorimpl_tensorimpl<T>(
     lhs_tensorimpl: &RefCell<TensorImpl<T>>,
-    rhs_tensor: &Tensor<T>,
-    reverse: bool,
+    rhs_tensorimpl: &RefCell<TensorImpl<T>>,
 ) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + Div<Output = T>,
 {
-    let binding = lhs_tensorimpl.borrow();
-    let lhs_raw = binding.get_raw_data_();
-    let rhs_raw = rhs_tensor.get_raw_data();
+    let lhs_raw = Ref::map(lhs_tensorimpl.borrow(), |x| x.get_raw_data_());
+    let rhs_raw = Ref::map(rhs_tensorimpl.borrow(), |x| x.get_raw_data_());
 
-    let tensor;
-
-    if reverse {
-        let new_raw = lhs_raw / rhs_raw.deref();
-        tensor = Tensor::from_raw_array(new_raw, false);
-    } else {
-        let new_raw = rhs_raw.deref() / lhs_raw;
-        tensor = Tensor::from_raw_array(new_raw, false);
-    }
+    let new_raw = lhs_raw.deref() / rhs_raw.deref();
+    let tensor = Tensor::from_raw_array(new_raw, false);
 
     return tensor;
 }

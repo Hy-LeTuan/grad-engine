@@ -22,14 +22,14 @@ where
 }
 
 pub fn mul_compute_tensorimpl_tensorimpl<T>(
-    lhs_tensor_impl: &RefCell<TensorImpl<T>>,
-    rhs_tensor_impl: &RefCell<TensorImpl<T>>,
+    lhs_tensorimpl: &RefCell<TensorImpl<T>>,
+    rhs_tensorimpl: &RefCell<TensorImpl<T>>,
 ) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + Mul<Output = T>,
 {
-    let lhs_raw = Ref::map(lhs_tensor_impl.borrow(), |x| x.get_raw_data_());
-    let rhs_raw = Ref::map(rhs_tensor_impl.borrow(), |x| x.get_raw_data_());
+    let lhs_raw = Ref::map(lhs_tensorimpl.borrow(), |x| x.get_raw_data_());
+    let rhs_raw = Ref::map(rhs_tensorimpl.borrow(), |x| x.get_raw_data_());
 
     let new_raw = rhs_raw.deref() * lhs_raw.deref();
     let tensor = Tensor::from_raw_array(new_raw, false);

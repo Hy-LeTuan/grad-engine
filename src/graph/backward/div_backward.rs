@@ -9,7 +9,7 @@ use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
 use crate::ops::compute::div_compute::div_compute_tensor_tensor;
 use crate::ops::compute::div_compute::{
-    div_compute_tensor_tensorimpl, div_compute_tensorimpl_scalar,
+    div_compute_tensorimpl_scalar, div_compute_tensorimpl_tensorimpl,
 };
 use crate::ops::compute::mul_compute::mul_compute_reverse_tensor;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
@@ -76,10 +76,9 @@ where
 
                 if edge_nr == 0 {
                     let other_tensor = Rc::clone(&self.input_refs[1]);
-                    tensor = div_compute_tensor_tensorimpl(
+                    tensor = div_compute_tensorimpl_tensorimpl(
+                        upstream_gradient.__get_tensor_impl(),
                         other_tensor.deref(),
-                        upstream_gradient,
-                        false,
                     );
                 } else {
                     let other_tensor = Rc::clone(&self.input_refs[0]);
