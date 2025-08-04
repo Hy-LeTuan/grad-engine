@@ -19,7 +19,7 @@ pub mod sub_backward;
 
 pub trait Backward<T>: Debug
 where
-    T: DTComp + Clone + Debug,
+    T: DTComp + Debug,
 {
     /// Save the gradient received to the origin tensor
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>);

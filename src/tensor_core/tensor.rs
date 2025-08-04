@@ -23,7 +23,7 @@ where
 
 impl<T> Tensor<T>
 where
-    T: DTComp + Debug + Clone,
+    T: DTComp + Debug,
 {
     pub fn __get_tensor_impl(&self) -> &Rc<RefCell<TensorImpl<T>>> {
         return &self.tensor_impl;
@@ -33,6 +33,17 @@ where
         return Rc::clone(self.__get_tensor_impl());
     }
 
+    pub fn get_raw_data(&self) -> Ref<ArrayBase<OwnedRepr<T>, IxDyn>> {
+        return Ref::map(self.__get_tensor_impl().borrow(), |tensor_impl| {
+            tensor_impl.get_storage_().get_data()
+        });
+    }
+}
+
+impl<T> Tensor<T>
+where
+    T: DTComp + Debug + Clone,
+{
     pub fn new(x: Vec<T>, shape: Vec<usize>, requires_grad: bool) -> Self {
         let tensor_impl = TensorImpl::new(x, shape);
 
@@ -112,12 +123,6 @@ where
 
     pub fn get_version(&self) -> u64 {
         return self.__get_tensor_impl().borrow().version;
-    }
-
-    pub fn get_raw_data(&self) -> Ref<ArrayBase<OwnedRepr<T>, IxDyn>> {
-        return Ref::map(self.__get_tensor_impl().borrow(), |tensor_impl| {
-            tensor_impl.get_storage_().get_data()
-        });
     }
 
     pub fn get_raw_data_as_ix2(&self) -> ArrayBase<OwnedRepr<T>, Ix2> {

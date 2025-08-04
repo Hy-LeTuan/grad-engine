@@ -20,11 +20,11 @@ pub struct TensorImpl<T>
 where
     T: DTComp + Debug,
 {
-    pub storage: Storage<T>,
     pub shape: Vec<usize>,
     pub strides: Vec<usize>,
     pub numel: usize,
     pub version: u64,
+    pub storage: Storage<T>,
     pub autograd_meta: Option<AutogradMeta<T>>,
 }
 
@@ -87,10 +87,6 @@ where
     }
 
     // GETTERS AND SETTERS
-
-    pub fn get_storage_(&self) -> &Storage<T> {
-        return &self.storage;
-    }
 
     pub fn get_raw_data_(&self) -> &ArrayBase<OwnedRepr<T>, IxDyn> {
         return self.get_storage_().get_data();
@@ -175,6 +171,15 @@ where
     }
 
     // BACKWARD FUNCTION
+}
+
+impl<T> TensorImpl<T>
+where
+    T: DTComp + Debug,
+{
+    pub fn get_storage_(&self) -> &Storage<T> {
+        return &self.storage;
+    }
 }
 
 impl<T> TensorImpl<T>
