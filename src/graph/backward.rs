@@ -15,6 +15,7 @@ pub mod backward_types;
 pub mod add_backward;
 pub mod div_backward;
 pub mod grad_accum;
+pub mod ln_backward;
 pub mod mul_backward;
 pub mod sub_backward;
 
