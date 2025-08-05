@@ -1,6 +1,5 @@
 use ndarray::ScalarOperand;
-use num_traits::Signed;
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, Mul};
 
@@ -21,37 +20,17 @@ where
     return tensor;
 }
 
-pub fn mul_compute_tensor_tensorimpl<T>(
-    tensor_impl: &RefCell<TensorImpl<T>>,
-    tensor: &Tensor<T>,
-) -> Tensor<T>
-where
-    T: DTComp + Clone + Debug + Mul<Output = T>,
-{
-    let binding = tensor_impl.borrow();
-    let x_raw = binding.get_raw_data_();
-    let y_raw = tensor.get_raw_data();
-
-    let new_raw = x_raw * y_raw.deref();
-    let tensor = Tensor::from_raw_array(new_raw, false);
-
-    return tensor;
-}
-
 pub fn mul_compute_tensorimpl_tensorimpl<T>(
-    lhs_tensor_impl: &RefCell<TensorImpl<T>>,
-    rhs_tensor_impl: &RefCell<TensorImpl<T>>,
+    lhs_tensorimpl: &RefCell<TensorImpl<T>>,
+    rhs_tensorimpl: &RefCell<TensorImpl<T>>,
 ) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + Mul<Output = T>,
 {
-    let lhs_binding = lhs_tensor_impl.borrow();
-    let lhs_raw = lhs_binding.get_raw_data_();
+    let lhs_raw = Ref::map(lhs_tensorimpl.borrow(), |x| x.get_raw_data_());
+    let rhs_raw = Ref::map(rhs_tensorimpl.borrow(), |x| x.get_raw_data_());
 
-    let rhs_binding = rhs_tensor_impl.borrow();
-    let rhs_raw = rhs_binding.get_raw_data_();
-
-    let new_raw = rhs_raw * lhs_raw;
+    let new_raw = rhs_raw.deref() * lhs_raw.deref();
     let tensor = Tensor::from_raw_array(new_raw, false);
 
     return tensor;
@@ -83,18 +62,6 @@ where
 
     let new_raw = x_raw.deref() * scalar;
     let tensor = Tensor::from_raw_array(new_raw, false);
-
-    return tensor;
-}
-
-pub fn mul_compute_reverse_tensor<TensorType>(tensor: &Tensor<TensorType>) -> Tensor<TensorType>
-where
-    TensorType: DTComp + Clone + Debug + Signed,
-{
-    let raw_array = tensor.get_raw_data();
-    let new_array = raw_array.map(|x| -x.clone());
-
-    let tensor = Tensor::from_raw_array(new_array, tensor.does_require_grad());
 
     return tensor;
 }

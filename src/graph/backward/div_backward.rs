@@ -9,11 +9,10 @@ use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
 use crate::ops::compute::div_compute::div_compute_tensor_tensor;
 use crate::ops::compute::div_compute::{
-    div_compute_tensor_tensorimpl, div_compute_tensorimpl_scalar,
+    div_compute_tensorimpl_scalar, div_compute_tensorimpl_tensorimpl,
 };
-use crate::ops::compute::mul_compute::mul_compute_reverse_tensor;
-use crate::ops::compute::mul_compute::mul_compute_tensor_tensorimpl;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
+use crate::ops::compute::neg_compute::neg_compute_tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
@@ -77,10 +76,9 @@ where
 
                 if edge_nr == 0 {
                     let other_tensor = Rc::clone(&self.input_refs[1]);
-                    tensor = div_compute_tensor_tensorimpl(
+                    tensor = div_compute_tensorimpl_tensorimpl(
+                        upstream_gradient.__get_tensor_impl(),
                         other_tensor.deref(),
-                        upstream_gradient,
-                        false,
                     );
                 } else {
                     let other_tensor = Rc::clone(&self.input_refs[0]);
@@ -88,12 +86,11 @@ where
 
                     let self_tensor =
                         mul_compute_tensorimpl_tensorimpl(self_tensor.deref(), self_tensor.deref());
-                    let reverse_upstream_gradient =
-                        mul_compute_reverse_tensor(upstream_gradient.deref());
+                    let reverse_upstream_gradient = neg_compute_tensor(upstream_gradient.deref());
 
-                    let product_tensor = mul_compute_tensor_tensorimpl(
+                    let product_tensor = mul_compute_tensorimpl_tensorimpl(
                         other_tensor.deref(),
-                        &reverse_upstream_gradient,
+                        reverse_upstream_gradient.__get_tensor_impl(),
                     );
 
                     tensor = div_compute_tensor_tensor(&product_tensor, &self_tensor);
@@ -170,7 +167,7 @@ pub mod test {
     use super::*;
 
     #[test]
-    fn div_backward_operation() {
+    fn div_backward_creation() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
         let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
         let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();

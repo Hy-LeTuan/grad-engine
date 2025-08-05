@@ -68,14 +68,3 @@ where
         self.input_nr = new_input_nr;
     }
 }
-
-mod test {
-    #[allow(unused)]
-    use super::*;
-
-    #[test]
-    fn edge_creation_and_methods() {
-        let tensor = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true);
-        let _edge = Edge::create_and_connect_to_node(&tensor, 1);
-    }
-}

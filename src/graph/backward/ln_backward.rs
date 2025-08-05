@@ -4,20 +4,22 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::neg_compute::neg_compute_tensor;
+use crate::ops::compute::div_compute::div_compute_tensorimpl_tensorimpl;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
-use num_traits::Signed;
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::Add;
 use std::ops::Deref;
+use std::ops::Div;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-pub struct SubBackward<T>
+pub struct LnBackward<T>
 where
-    T: DTComp + Clone + Debug + 'static,
+    T: DTComp + Clone + Debug,
 {
+    input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>,
     name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
@@ -25,9 +27,9 @@ where
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
-impl<T> Backward<T> for SubBackward<T>
+impl<T> Backward<T> for LnBackward<T>
 where
-    T: Clone + DTComp + Debug + 'static + Signed,
+    T: Clone + DTComp + Debug + 'static + Div<Output = T> + Add<Output = T>,
 {
     fn save_grad_to_origin_tensor(&self, _grad: &Rc<Tensor<T>>) {
         return;
@@ -35,10 +37,10 @@ where
 
     fn apply(&self, upstream_gradient: Rc<Tensor<T>>) {
         for edge in self.get_edge_list().iter() {
-            let grad = self.calculate_gradient_for_next_node(&upstream_gradient, Some(edge));
+            let next_grad = self.calculate_gradient_for_next_node(&upstream_gradient, Some(&edge));
 
-            let node = edge.get_next_grad_fn();
-            node.borrow().apply(grad);
+            let next_node = edge.get_next_grad_fn();
+            next_node.borrow().apply(next_grad);
         }
     }
 
@@ -47,17 +49,18 @@ where
         upstream_gradient: &Rc<Tensor<T>>,
         edge: Option<&Edge<T>>,
     ) -> Rc<Tensor<T>> {
-        if let Some(edge) = edge {
-            let input_nr = edge.input_nr;
+        if let Some(_) = edge {
+            let self_tensor = Rc::clone(&self.input_refs[0]);
+            let tensor = div_compute_tensorimpl_tensorimpl(
+                upstream_gradient.__get_tensor_impl(),
+                self_tensor.deref(),
+            );
 
-            if input_nr == 0 {
-                return Rc::clone(upstream_gradient);
-            } else {
-                let subtrahend_grad = neg_compute_tensor(upstream_gradient.deref());
-                return Rc::new(subtrahend_grad);
-            }
+            return Rc::new(tensor);
         } else {
-            panic!("No edge positinal data found to calculate gradient")
+            panic!(
+                "No edge found to connect to and calculate gradient because ln is a self operation"
+            );
         }
     }
 
@@ -69,8 +72,8 @@ where
         self.edge_list.push(edge);
     }
 
-    fn save_input_refs(&mut self, _input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>) {
-        return;
+    fn save_input_refs(&mut self, input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>) {
+        self.input_refs.extend(input_refs);
     }
 
     fn get_id(&self) -> usize {
@@ -82,13 +85,14 @@ where
     }
 }
 
-impl<T> SubBackward<T>
+impl<T> LnBackward<T>
 where
     T: Clone + DTComp + Debug,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
-        let node = SubBackward {
-            name: BackwardType::SubBackward,
+        let node = LnBackward {
+            name: BackwardType::LnBackward,
+            input_refs: vec![],
             id,
             edge_list,
             origin: Some(Rc::downgrade(origin)),
@@ -104,22 +108,16 @@ pub mod test {
     use super::*;
 
     #[test]
-    fn sub_backward_creation() {
+    fn ln_backward_operation() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        // let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
-        // let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
+        let z = a.ln();
 
-        // let d = &a - &b - &c;
-        let e = &a - 3.0;
-
-        if e.does_require_grad() {
+        if z.does_require_grad() {
             assert_eq!(
-                e.get_grad_fn().borrow().get_name(),
-                String::from("SubBackward"),
-                "SubBackward does not exist on tensor from sub operation"
+                z.get_grad_fn().borrow().get_name(),
+                String::from("LnBackward"),
+                "LnBackward does not exist on tensor from ln operation"
             );
-
-            // e.backward(Tensor::new(vec![1, 1, 1, 1], vec![4, 1], false).as_float_32());
         }
     }
 }

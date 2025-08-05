@@ -18,6 +18,10 @@ pub mod grad_accum;
 pub mod mul_backward;
 pub mod sub_backward;
 
+// Element wise
+pub mod ln_backward;
+pub mod log_backward;
+
 pub trait Backward<T>: Debug
 where
     T: DTComp + Debug,

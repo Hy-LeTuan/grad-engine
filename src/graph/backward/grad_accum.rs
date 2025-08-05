@@ -127,7 +127,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn grad_accum_create() {
+    fn grad_accum_creation() {
         let _grad_accum = GradAccum::<f32>::new(vec![]);
     }
 }

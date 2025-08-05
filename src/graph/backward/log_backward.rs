@@ -1,4 +1,5 @@
 use ndarray::ScalarOperand;
+use num_traits::Float;
 
 use super::DTComp;
 use super::Tensor;
@@ -6,19 +7,20 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
+use crate::ops::compute::div_compute::div_compute_tensor_tensor;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_scalar;
-use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::Add;
 use std::ops::Deref;
+use std::ops::Div;
 use std::ops::Mul;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-pub struct MulBackward<T, S>
+pub struct LogBackward<T, S>
 where
     T: DTComp + Clone + Debug,
 {
@@ -31,10 +33,10 @@ where
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
-impl<T, S> Backward<T> for MulBackward<T, S>
+impl<T, S> Backward<T> for LogBackward<T, S>
 where
-    T: Clone + DTComp + Debug + 'static + Mul<Output = T> + Mul<S, Output = T> + Add<Output = T>,
-    S: ScalarOperand + Clone + Debug,
+    T: Clone + DTComp + Debug + 'static + Div<Output = T> + Add<Output = T> + Mul<S, Output = T>,
+    S: ScalarOperand + Clone + Debug + Float,
 {
     fn save_grad_to_origin_tensor(&self, _grad: &Rc<Tensor<T>>) {
         return;
@@ -54,42 +56,21 @@ where
         upstream_gradient: &Rc<Tensor<T>>,
         edge: Option<&Edge<T>>,
     ) -> Rc<Tensor<T>> {
-        if self.input_refs.len() >= 2 {
-            if let Some(edge) = edge {
-                let edge_nr = edge.input_nr;
+        if let Some(_) = edge {
+            if let Some(scalar) = self.scalar.clone() {
+                let self_tensor = Rc::clone(&self.input_refs[0]);
+                let self_tensor = mul_compute_tensorimpl_scalar(self_tensor.deref(), scalar.ln());
 
-                let tensor;
-
-                if edge_nr == 0 {
-                    let input_tensor = Rc::clone(&self.input_refs[1]);
-                    tensor = mul_compute_tensorimpl_tensorimpl(
-                        input_tensor.deref(),
-                        upstream_gradient.__get_tensor_impl(),
-                    );
-                } else {
-                    let input_tensor = Rc::clone(&self.input_refs[0]);
-                    tensor = mul_compute_tensorimpl_tensorimpl(
-                        input_tensor.deref(),
-                        upstream_gradient.__get_tensor_impl(),
-                    );
-                }
+                let tensor = div_compute_tensor_tensor(upstream_gradient, &self_tensor);
 
                 return Rc::new(tensor);
             } else {
-                panic!("Cannot calculate gradient because of missing inputs");
+                panic!("Error, no scalar found on a log operation of base different than base e");
             }
         } else {
-            let input_tensor = Rc::clone(&self.input_refs[0]);
-
-            let tensor = mul_compute_tensorimpl_scalar(
-                input_tensor.deref(),
-                self.scalar
-                    .as_ref()
-                    .expect("Cannot calculate gradient, missing scalar")
-                    .clone(),
+            panic!(
+                "Error, no edge found to connect to and calculate gradient because ln is a self operation"
             );
-
-            return Rc::new(tensor);
         }
     }
 
@@ -114,14 +95,14 @@ where
     }
 }
 
-impl<T, S> MulBackward<T, S>
+impl<T, S> LogBackward<T, S>
 where
     T: Clone + DTComp + Debug,
     S: ScalarOperand + Clone + Debug,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
-        let node = MulBackward {
-            name: BackwardType::MulBackward,
+        let node = LogBackward {
+            name: BackwardType::LogBackward,
             input_refs: vec![],
             id,
             edge_list,
@@ -143,19 +124,15 @@ pub mod test {
     use super::*;
 
     #[test]
-    fn mul_backward_creation() {
+    fn log_backward_operation() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
-        let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
+        let z = a.log(2.0);
 
-        let d = &a * &b * &c;
-        let e = &d * 3.0;
-
-        if e.does_require_grad() {
+        if z.does_require_grad() {
             assert_eq!(
-                e.get_grad_fn().borrow().get_name(),
-                String::from("MulBackward"),
-                "MulBackward does not exist on tensor from mul operation"
+                z.get_grad_fn().borrow().get_name(),
+                String::from("LogBackward"),
+                "LogBackward does not exist on tensor from log operation"
             );
         }
     }
