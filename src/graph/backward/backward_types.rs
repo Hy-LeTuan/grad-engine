@@ -10,6 +10,8 @@ pub enum BackwardType {
     DotBackward,
     LnBackward,
     LogBackward,
+    ExpBackward,
+    TanhBackward,
 }
 
 impl fmt::Display for BackwardType {
@@ -23,6 +25,8 @@ impl fmt::Display for BackwardType {
             BackwardType::DotBackward => write!(f, "DotBackward"),
             BackwardType::LnBackward => write!(f, "LnBackward"),
             BackwardType::LogBackward => write!(f, "LogBackward"),
+            BackwardType::ExpBackward => write!(f, "ExpBackward"),
+            BackwardType::TanhBackward => write!(f, "TanhBackward"),
         }
     }
 }

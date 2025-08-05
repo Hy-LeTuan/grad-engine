@@ -13,7 +13,7 @@ fn main() {
     // let x2 = Tensor::new(vec![4, 5, 6, 7], vec![4, 1], true).as_float_32();
     let x3 = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
 
-    let z = x3.log(2.0);
+    let z = x3.tanh();
 
     z.backward(Tensor::new(vec![1, 1, 1, 1], vec![4, 1], false).as_float_32());
 
