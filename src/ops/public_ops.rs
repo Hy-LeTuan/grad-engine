@@ -12,3 +12,9 @@ pub mod sub_public;
 
 pub mod div;
 pub mod div_public;
+
+pub mod ln;
+pub mod ln_public;
+
+pub mod log;
+pub mod log_public;

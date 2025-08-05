@@ -15,9 +15,12 @@ pub mod backward_types;
 pub mod add_backward;
 pub mod div_backward;
 pub mod grad_accum;
-pub mod ln_backward;
 pub mod mul_backward;
 pub mod sub_backward;
+
+// Element wise
+pub mod ln_backward;
+pub mod log_backward;
 
 pub trait Backward<T>: Debug
 where

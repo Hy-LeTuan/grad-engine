@@ -1,10 +1,14 @@
+use ndarray::ScalarOperand;
+use num_traits::Float;
+
 use super::DTComp;
 use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::div_compute::div_compute_tensorimpl_tensorimpl;
+use crate::ops::compute::div_compute::div_compute_tensor_tensor;
+use crate::ops::compute::mul_compute::mul_compute_tensorimpl_scalar;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
@@ -12,10 +16,11 @@ use std::fmt::Debug;
 use std::ops::Add;
 use std::ops::Deref;
 use std::ops::Div;
+use std::ops::Mul;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-pub struct LnBackward<T>
+pub struct LogBackward<T, S>
 where
     T: DTComp + Clone + Debug,
 {
@@ -23,13 +28,15 @@ where
     name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
+    scalar: Option<S>,
     #[allow(unused)]
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
-impl<T> Backward<T> for LnBackward<T>
+impl<T, S> Backward<T> for LogBackward<T, S>
 where
-    T: Clone + DTComp + Debug + 'static + Div<Output = T> + Add<Output = T>,
+    T: Clone + DTComp + Debug + 'static + Div<Output = T> + Add<Output = T> + Mul<S, Output = T>,
+    S: ScalarOperand + Clone + Debug + Float,
 {
     fn save_grad_to_origin_tensor(&self, _grad: &Rc<Tensor<T>>) {
         return;
@@ -50,16 +57,19 @@ where
         edge: Option<&Edge<T>>,
     ) -> Rc<Tensor<T>> {
         if let Some(_) = edge {
-            let self_tensor = Rc::clone(&self.input_refs[0]);
-            let tensor = div_compute_tensorimpl_tensorimpl(
-                upstream_gradient.__get_tensor_impl(),
-                self_tensor.deref(),
-            );
+            if let Some(scalar) = self.scalar.clone() {
+                let self_tensor = Rc::clone(&self.input_refs[0]);
+                let self_tensor = mul_compute_tensorimpl_scalar(self_tensor.deref(), scalar.ln());
 
-            return Rc::new(tensor);
+                let tensor = div_compute_tensor_tensor(upstream_gradient, &self_tensor);
+
+                return Rc::new(tensor);
+            } else {
+                panic!("Error, no scalar found on a log operation of base different than base e");
+            }
         } else {
             panic!(
-                "No edge found to connect to and calculate gradient because ln is a self operation"
+                "Error, no edge found to connect to and calculate gradient because ln is a self operation"
             );
         }
     }
@@ -85,20 +95,26 @@ where
     }
 }
 
-impl<T> LnBackward<T>
+impl<T, S> LogBackward<T, S>
 where
     T: Clone + DTComp + Debug,
+    S: ScalarOperand + Clone + Debug,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
-        let node = LnBackward {
-            name: BackwardType::LnBackward,
+        let node = LogBackward {
+            name: BackwardType::LogBackward,
             input_refs: vec![],
             id,
             edge_list,
+            scalar: None,
             origin: Some(Rc::downgrade(origin)),
         };
 
         return node;
+    }
+
+    pub fn save_scalar(&mut self, scalar: S) {
+        self.scalar = Some(scalar);
     }
 }
 
@@ -108,15 +124,15 @@ pub mod test {
     use super::*;
 
     #[test]
-    fn ln_backward_operation() {
+    fn log_backward_operation() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        let z = a.ln();
+        let z = a.log(2.0);
 
         if z.does_require_grad() {
             assert_eq!(
                 z.get_grad_fn().borrow().get_name(),
-                String::from("LnBackward"),
-                "LnBackward does not exist on tensor from ln operation"
+                String::from("LogBackward"),
+                "LogBackward does not exist on tensor from log operation"
             );
         }
     }

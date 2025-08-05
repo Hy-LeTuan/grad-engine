@@ -143,7 +143,7 @@ pub mod test {
     use super::*;
 
     #[test]
-    fn mul_backward_operation() {
+    fn mul_backward_creation() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
         let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
         let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
