@@ -1,8 +1,8 @@
 use crate::tensor_core::{dtypes::DTComp, tensor::Tensor, tensor_impl::TensorImpl};
 use ndarray::{ArrayD, IxDyn};
-use num_traits::{AsPrimitive, Zero};
+use num_traits::{AsPrimitive, One, Zero};
 
-use std::fmt::Debug;
+use std::{fmt::Debug, ops::Deref};
 
 impl<T> Tensor<T>
 where
@@ -74,9 +74,37 @@ impl<T> Tensor<T>
 where
     T: DTComp + Debug + Zero + Clone,
 {
-    pub fn zeros(shape: Vec<usize>) -> Self {
-        let dyn_shape = IxDyn(&shape);
+    pub fn zeros(shape: &Vec<usize>) -> Self {
+        let dyn_shape = IxDyn(shape);
         let data = ArrayD::<T>::zeros(dyn_shape);
+
+        let tensor_impl =
+            TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
+
+        let tensor = Tensor { tensor_impl };
+
+        return tensor;
+    }
+
+    pub fn zeros_like(tensor: &Tensor<T>) -> Self {
+        let shape = tensor.get_shape();
+        return Tensor::zeros(shape.deref());
+    }
+}
+
+impl<T> Tensor<T>
+where
+    T: DTComp + Debug + Clone + One,
+{
+    pub fn ones_like(tensor: &Tensor<T>) -> Self {
+        let shape = tensor.get_shape();
+
+        return Tensor::ones(shape.deref());
+    }
+
+    pub fn ones(shape: &Vec<usize>) -> Self {
+        let dyn_shape = IxDyn(shape);
+        let data = ArrayD::<T>::ones(dyn_shape);
 
         let tensor_impl =
             TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
