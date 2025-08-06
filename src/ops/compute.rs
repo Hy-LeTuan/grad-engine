@@ -4,6 +4,7 @@ pub mod dot_compute;
 pub mod exp_compute;
 pub mod hyperbolic_compute;
 pub mod log_compute;
+pub mod max_min_compute;
 pub mod mul_compute;
 pub mod neg_compute;
 pub mod sub_compute;
