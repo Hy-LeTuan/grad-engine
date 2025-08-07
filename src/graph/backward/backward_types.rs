@@ -12,6 +12,10 @@ pub enum BackwardType {
     LogBackward,
     ExpBackward,
     TanhBackward,
+    MinBackward,
+    MaxBackward,
+    MeanBackward,
+    SumBackward,
 }
 
 impl fmt::Display for BackwardType {
@@ -27,6 +31,10 @@ impl fmt::Display for BackwardType {
             BackwardType::LogBackward => write!(f, "LogBackward"),
             BackwardType::ExpBackward => write!(f, "ExpBackward"),
             BackwardType::TanhBackward => write!(f, "TanhBackward"),
+            BackwardType::MinBackward => write!(f, "MinBackward"),
+            BackwardType::MaxBackward => write!(f, "MaxBackward"),
+            BackwardType::MeanBackward => write!(f, "MeanBackward"),
+            BackwardType::SumBackward => write!(f, "SumBackward"),
         }
     }
 }

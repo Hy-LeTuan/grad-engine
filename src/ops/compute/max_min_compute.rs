@@ -1,31 +1,30 @@
-use ndarray::{ArrayD, Axis, IxDyn};
-use num_traits::{Bounded, Signed};
+use ndarray::Axis;
+use num_traits::{Bounded, Float};
 use std::fmt::Debug;
 
 use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn min_compute<T>(tensor: &Tensor<T>, dim: Axis) -> Tensor<T>
+pub fn min_compute_tensor<T>(tensor: &Tensor<T>, dim: Axis) -> Tensor<T>
 where
-    T: DTComp + Clone + Debug + Signed + Ord + Bounded,
+    T: DTComp + Clone + Debug + PartialOrd + Bounded + Float,
 {
     let raw_array = tensor.get_raw_data();
     let raw_array = raw_array.map_axis(dim, |view| {
-        view.iter()
-            .fold(T::max_value(), |acc, x| T::min(acc, x.clone()))
+        view.iter().fold(view[0], |acc, x| T::min(acc, x.clone()))
     });
 
     let tensor = Tensor::from_raw_array(raw_array, false);
     return tensor;
 }
 
-pub fn argmin_compute<T>(
+pub fn argmin_compute_tensor<T>(
     tensor: &Tensor<T>,
     dim: Axis,
     return_min: bool,
 ) -> (Tensor<usize>, Option<Tensor<T>>)
 where
-    T: DTComp + Clone + Debug + Signed + Ord + Bounded,
+    T: DTComp + Clone + Debug + PartialOrd + Bounded + Float,
 {
     let raw_array = tensor.get_raw_data();
     let mut output_shape = tensor.get_shape().to_vec();
@@ -58,26 +57,26 @@ where
     }
 }
 
-pub fn max_compute<T>(tensor: &Tensor<T>) -> Tensor<T>
+pub fn max_compute_tensor<T>(tensor: &Tensor<T>, dim: Axis) -> Tensor<T>
 where
-    T: DTComp + Clone + Debug + Signed + Ord + Bounded,
+    T: DTComp + Clone + Debug + PartialOrd + Bounded + Float,
 {
     let raw_array = tensor.get_raw_data();
-    raw_array.map_axis(Axis(0), |view| {
-        view.iter()
-            .fold(T::min_value(), |acc, x| T::max(acc, x.clone()))
+    let raw_array = raw_array.map_axis(dim, |view| {
+        view.iter().fold(view[0], |acc, x| T::max(acc, x.clone()))
     });
 
-    todo!()
+    let tensor = Tensor::from_raw_array(raw_array, false);
+    return tensor;
 }
 
-pub fn argmax_compute<T>(
+pub fn argmax_compute_tensor<T>(
     tensor: &Tensor<T>,
     dim: Axis,
     return_max: bool,
 ) -> (Tensor<usize>, Option<Tensor<T>>)
 where
-    T: DTComp + Clone + Debug + Signed + Ord + Bounded,
+    T: DTComp + Clone + Debug + PartialOrd + Bounded + Float,
 {
     let raw_array = tensor.get_raw_data();
     let mut output_shape = tensor.get_shape().to_vec();
@@ -107,5 +106,23 @@ where
         return (index_tensor, Some(max_tensor));
     } else {
         return (index_tensor, None);
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn min_on_1d_array() {
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
+        let _b = min_compute_tensor(&a, Axis(0));
+    }
+
+    #[test]
+    fn argmin_on_2d_array() {
+        let a = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 4], true).as_float_32();
+        let _b = argmin_compute_tensor(&a, Axis(0), false);
     }
 }

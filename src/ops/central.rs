@@ -3,6 +3,8 @@ pub mod div_impl;
 pub mod exp_impl;
 pub mod ln_impl;
 pub mod log_impl;
+pub mod max_impl;
+pub mod min_impl;
 pub mod mul_impl;
 pub mod sub_impl;
 pub mod tanh_impl;
