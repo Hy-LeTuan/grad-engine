@@ -1,4 +1,4 @@
-use ndarray::{ArrayD, Axis, IxDyn};
+use ndarray::Axis;
 use num_traits::{Bounded, Signed};
 use std::fmt::Debug;
 
@@ -107,5 +107,23 @@ where
         return (index_tensor, Some(max_tensor));
     } else {
         return (index_tensor, None);
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn min_on_1d_array() {
+        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true);
+        let _b = min_compute(&a, Axis(0));
+    }
+
+    #[test]
+    fn argmin_on_2d_array() {
+        let a = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 4], true);
+        let _b = argmin_compute(&a, Axis(0), false);
     }
 }
