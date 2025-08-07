@@ -26,7 +26,9 @@ pub mod tanh_backward;
 
 // Reduction
 pub mod max_backward;
+pub mod mean_backward;
 pub mod min_backward;
+pub mod sum_backward;
 
 pub trait Backward<T>: Debug
 where

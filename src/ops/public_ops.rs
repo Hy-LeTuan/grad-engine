@@ -30,3 +30,9 @@ pub mod min_public;
 
 pub mod max;
 pub mod max_public;
+
+pub mod sum;
+pub mod sum_public;
+
+pub mod mean;
+pub mod mean_public;
