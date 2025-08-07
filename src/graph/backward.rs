@@ -24,6 +24,9 @@ pub mod ln_backward;
 pub mod log_backward;
 pub mod tanh_backward;
 
+// Reduction
+pub mod min_backward;
+
 pub trait Backward<T>: Debug
 where
     T: DTComp + Debug,

@@ -24,3 +24,6 @@ pub mod exp_public;
 
 pub mod tanh;
 pub mod tanh_public;
+
+pub mod min;
+pub mod min_public;
