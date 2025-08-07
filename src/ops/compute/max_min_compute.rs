@@ -57,16 +57,17 @@ where
     }
 }
 
-pub fn max_compute_tensor<T>(tensor: &Tensor<T>) -> Tensor<T>
+pub fn max_compute_tensor<T>(tensor: &Tensor<T>, dim: Axis) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + PartialOrd + Bounded + Float,
 {
     let raw_array = tensor.get_raw_data();
-    raw_array.map_axis(Axis(0), |view| {
+    let raw_array = raw_array.map_axis(dim, |view| {
         view.iter().fold(view[0], |acc, x| T::max(acc, x.clone()))
     });
 
-    todo!()
+    let tensor = Tensor::from_raw_array(raw_array, false);
+    return tensor;
 }
 
 pub fn argmax_compute_tensor<T>(

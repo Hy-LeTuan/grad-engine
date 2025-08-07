@@ -27,3 +27,6 @@ pub mod tanh_public;
 
 pub mod min;
 pub mod min_public;
+
+pub mod max;
+pub mod max_public;
