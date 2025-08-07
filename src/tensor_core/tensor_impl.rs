@@ -87,6 +87,9 @@ where
     }
 
     // GETTERS AND SETTERS
+    pub fn get_raw_shape(&self) -> Vec<usize> {
+        return self.get_storage_().get_raw_shape();
+    }
 
     pub fn get_raw_data_(&self) -> &ArrayBase<OwnedRepr<T>, IxDyn> {
         return self.get_storage_().get_data();
