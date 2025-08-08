@@ -235,3 +235,26 @@ where
             .backward_(starting_gradient);
     }
 }
+
+impl<T> Tensor<T>
+where
+    T: DTComp + Debug + Clone,
+{
+    /// Returns a new tensor and set grad if the input tensor does require grad
+    pub fn broadcast(&self, shape: Vec<usize>) -> Tensor<T> {
+        let raw_array = self.get_raw_data().clone();
+        let new_array_option = raw_array.broadcast(shape);
+
+        match new_array_option {
+            Some(new_array) => {
+                let new_tensor =
+                    Tensor::from_raw_array(new_array.to_owned(), self.does_require_grad());
+
+                return new_tensor;
+            }
+            None => {
+                panic!("Error: Cannot broadcast the tensor to the intended shape.");
+            }
+        }
+    }
+}
