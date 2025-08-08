@@ -53,7 +53,7 @@ where
             let upstream_gradient_raw_data = upstream_gradient.get_raw_data().clone();
             let expanded_data = upstream_gradient_raw_data.insert_axis(self.reduced_dim);
 
-            let shape = self.input_refs[0].borrow().get_storage_().get_raw_shape();
+            let shape = self.input_refs[0].borrow().get_raw_shape();
             let broadcasted_data = expanded_data
                 .broadcast(shape)
                 .expect("Error, cannot cast gradient to the correct input shape")
