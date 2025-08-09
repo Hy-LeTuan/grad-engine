@@ -64,6 +64,10 @@ where
         return Rc::clone(&self.grad_fn_linked);
     }
 
+    pub fn get_edge_nr(&self) -> usize {
+        return self.input_nr;
+    }
+
     pub fn set_edge_nr(&mut self, new_input_nr: usize) {
         self.input_nr = new_input_nr;
     }
