@@ -1,5 +1,5 @@
 use super::dtypes::{self, DTComp, DTypes};
-use ndarray::{ArrayBase, Ix2, IxDyn, OwnedRepr};
+use ndarray::{ArrayBase, Ix1, Ix2, IxDyn, OwnedRepr};
 
 #[derive(Debug)]
 pub struct Storage<T>
@@ -51,7 +51,17 @@ where
             .data
             .clone()
             .into_dimensionality::<Ix2>()
-            .expect("Attempting to get data as Array2 without the dimensionality matching");
+            .expect("Error: Attempting to cast tensor as as 2D tensor failed");
+        return fixed_shape;
+    }
+
+    pub fn get_data_as_ix1(&self) -> ArrayBase<OwnedRepr<T>, Ix1> {
+        let fixed_shape = self
+            .data
+            .clone()
+            .into_dimensionality::<Ix1>()
+            .expect("Error: Attempting to cast tensor as as 1D tensor failed");
+
         return fixed_shape;
     }
 }
