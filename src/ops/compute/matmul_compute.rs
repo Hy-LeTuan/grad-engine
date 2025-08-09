@@ -1,5 +1,4 @@
-use itertools::Itertools;
-use ndarray::{ArrayD, Ix2, IxDyn, LinalgScalar, SliceInfo, SliceInfoElem};
+use ndarray::{ArrayD, Ix2, LinalgScalar, s};
 
 use crate::tensor_core::{dtypes::DTComp, tensor::Tensor};
 use std::fmt::Debug;
@@ -46,93 +45,52 @@ where
     let rhs_raw_array = rhs_tensor.get_raw_data();
 
     let batch_dim = lhs_shape[..lhs_shape.len() - 2].to_vec();
+    let flattened_batch_dim: usize = batch_dim.iter().product();
 
-    let mut output_shape = batch_dim.clone();
-    output_shape.extend(vec![lhs_last_2_dim.0, rhs_last_2_dim.1]);
+    let lhs_raw_array_batched = lhs_raw_array
+        .broadcast(vec![
+            flattened_batch_dim,
+            lhs_last_2_dim.0,
+            lhs_last_2_dim.1,
+        ])
+        .unwrap();
 
-    println!("output shape: {:?}", output_shape);
+    let rhs_raw_array_batched = rhs_raw_array
+        .broadcast(vec![
+            flattened_batch_dim,
+            rhs_last_2_dim.0,
+            rhs_last_2_dim.1,
+        ])
+        .unwrap();
 
-    let mut output = ArrayD::<T>::zeros(output_shape.clone());
+    // the final shape of the output array that needs to be reshaped to
+    let mut final_output_shape = batch_dim.clone();
+    final_output_shape.extend(vec![lhs_last_2_dim.0, rhs_last_2_dim.1]);
+
+    let batched_output_shape = vec![flattened_batch_dim, lhs_last_2_dim.0, rhs_last_2_dim.1];
+    let mut batched_output = ArrayD::<T>::zeros(batched_output_shape);
 
     // main computation loop
-    let batches = batch_dim
-        .iter()
-        .map(|dim| 0..*dim)
-        .multi_cartesian_product();
+    for batch in 0..flattened_batch_dim {
+        let lhs_slice = lhs_raw_array_batched
+            .slice(s![batch, .., ..])
+            .into_dimensionality::<Ix2>()
+            .expect("Error: Internal error, cannot retrieve data from higher dimensional tensor");
 
-    for batch in batches {
-        let elems: Vec<SliceInfoElem> = batch
-            .clone()
-            .iter()
-            .map(|&i| SliceInfoElem::Index(i as isize))
-            .collect();
+        let rhs_slice = rhs_raw_array_batched
+            .slice(s![batch, .., ..])
+            .into_dimensionality::<Ix2>()
+            .expect("Error: Internal error, cannot retrieve data from higher dimensional tensor");
 
-        let mut lhs_elems = elems.clone();
-
-        lhs_elems.push(SliceInfoElem::Slice {
-            start: 0,
-            end: Some(lhs_last_2_dim.0 as isize),
-            step: 1,
-        });
-
-        lhs_elems.push(SliceInfoElem::Slice {
-            start: 0,
-            end: Some(lhs_last_2_dim.1 as isize),
-            step: 1,
-        });
-
-        let mut rhs_elems = elems.clone();
-
-        rhs_elems.push(SliceInfoElem::Slice {
-            start: 0,
-            end: Some(rhs_last_2_dim.0 as isize),
-            step: 1,
-        });
-
-        rhs_elems.push(SliceInfoElem::Slice {
-            start: 0,
-            end: Some(rhs_last_2_dim.1 as isize),
-            step: 1,
-        });
-
-        let mut output_elems = elems;
-        output_elems.push(SliceInfoElem::Slice {
-            start: 0,
-            end: Some(output_shape[output_shape.len() - 2] as isize),
-            step: 1,
-        });
-
-        output_elems.push(SliceInfoElem::Slice {
-            start: 0,
-            end: Some(output_shape[output_shape.len() - 1] as isize),
-            step: 1,
-        });
-
-        unsafe {
-            let lhs_info = SliceInfo::<_, IxDyn, IxDyn>::new(lhs_elems).unwrap();
-            let rhs_info = SliceInfo::<_, IxDyn, IxDyn>::new(rhs_elems).unwrap();
-            let output_info = SliceInfo::<_, IxDyn, IxDyn>::new(output_elems).unwrap();
-
-            let lhs_slice = lhs_raw_array
-                .slice(lhs_info.as_ref())
-                .into_dimensionality::<Ix2>()
-                .expect(
-                    "Error: Internal error, cannot retrieve data from higher dimensional tensor",
-                );
-
-            let rhs_slice = rhs_raw_array
-                .slice(rhs_info.as_ref())
-                .into_dimensionality::<Ix2>()
-                .expect(
-                    "Error: Internal error, cannot retrieve data from higher dimensional tensor",
-                );
-
-            let z = lhs_slice.dot(&rhs_slice);
-            output.slice_mut(output_info).assign(&z);
-        }
+        let z = lhs_slice.dot(&rhs_slice);
+        batched_output.slice_mut(s![batch, .., ..]).assign(&z);
     }
 
-    let tensor = Tensor::from_raw_array(output, false);
+    let final_output = batched_output
+        .into_shape_with_order(final_output_shape)
+        .expect("Error, cannot cast the final result of matrix multiplication into intended shape");
+
+    let tensor = Tensor::from_raw_array(final_output, false);
     return tensor;
 }
 
