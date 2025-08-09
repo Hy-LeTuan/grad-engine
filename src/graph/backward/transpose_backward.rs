@@ -118,22 +118,19 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::test_backward_node;
 
     #[test]
     fn transpose_backward_operation() {
         let a = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
         let z = a.transpose(None);
 
-        assert_eq!(
-            z.get_grad_fn().borrow().get_name(),
-            String::from("TransposeBackward"),
-            "TransposeBackward does not exist on tensor from exp operation"
-        );
-
-        assert_eq!(
-            z.get_shape().deref(),
-            &vec![2, 4],
-            "Test failed: Transpose shape does not match expected shape"
+        test_backward_node(
+            &a,
+            &z,
+            "TransposeBackward",
+            Tensor::new(vec![1, 1, 1, 1, 1, 1, 1, 1], vec![2, 4], false).as_float_32(),
+            Some(Tensor::new(vec![1, 3, 5, 7, 2, 4, 6, 8], vec![2, 4], false).as_float_32()),
         );
     }
 }
