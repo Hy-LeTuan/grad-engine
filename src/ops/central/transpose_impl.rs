@@ -32,7 +32,7 @@ pub fn transpose_impl<T>(
         }
         None => {
             panic!(
-                "Error, No input found, input is needed to calculate gradient of a sum operation."
+                "Error, No input found, input is needed to calculate gradient of a transpose operation."
             );
         }
     }
