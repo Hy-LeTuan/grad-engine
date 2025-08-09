@@ -39,3 +39,18 @@ pub mod mean_public;
 
 pub mod matmul;
 pub mod matmul_public;
+
+pub mod broadcast;
+pub mod broadcast_public;
+
+pub mod unsqueeze;
+pub mod unsqueeze_public;
+
+pub mod squeeze;
+pub mod squeeze_public;
+
+pub mod transpose;
+pub mod transpose_public;
+
+pub mod reshape;
+pub mod reshape_public;

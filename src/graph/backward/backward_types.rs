@@ -17,6 +17,11 @@ pub enum BackwardType {
     MeanBackward,
     SumBackward,
     MatmulBackward,
+    BroadcastBackward,
+    UnsqueezeBackward,
+    SqueezeBackward,
+    TransposeBackward,
+    ReshapeBackward,
 }
 
 impl fmt::Display for BackwardType {
@@ -37,6 +42,11 @@ impl fmt::Display for BackwardType {
             BackwardType::MeanBackward => write!(f, "MeanBackward"),
             BackwardType::SumBackward => write!(f, "SumBackward"),
             BackwardType::MatmulBackward => write!(f, "MatmulBackward"),
+            BackwardType::BroadcastBackward => write!(f, "BroadcastBackward"),
+            BackwardType::UnsqueezeBackward => write!(f, "UnsqueezeBackward"),
+            BackwardType::SqueezeBackward => write!(f, "SqueezeBackward"),
+            BackwardType::TransposeBackward => write!(f, "TransposeBackward"),
+            BackwardType::ReshapeBackward => write!(f, "ReshapeBackward"),
         }
     }
 }

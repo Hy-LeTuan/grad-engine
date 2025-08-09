@@ -84,7 +84,7 @@ where
     }
 }
 
-pub fn compute_transpose<T, E>(tensor: &Tensor<T>, axes_option: Option<Vec<usize>>) -> Tensor<T>
+pub fn compute_transpose<T>(tensor: &Tensor<T>, axes_option: Option<Vec<usize>>) -> Tensor<T>
 where
     T: DTComp + Debug + Clone,
 {
