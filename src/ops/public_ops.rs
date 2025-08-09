@@ -36,3 +36,6 @@ pub mod sum_public;
 
 pub mod mean;
 pub mod mean_public;
+
+pub mod matmul;
+pub mod matmul_public;

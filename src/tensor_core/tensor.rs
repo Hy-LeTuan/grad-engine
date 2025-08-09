@@ -6,8 +6,8 @@ use super::dtypes::{DTComp, DTypes};
 use super::storage::Storage;
 use super::tensor_impl::TensorImpl;
 
-use ndarray::Ix2;
 use ndarray::{ArrayBase, IxDyn, OwnedRepr};
+use ndarray::{Ix1, Ix2};
 use std::cell::{Ref, RefCell};
 use std::fmt::Debug;
 use std::ops::Add;
@@ -123,10 +123,6 @@ where
 
     pub fn get_version(&self) -> u64 {
         return self.__get_tensor_impl().borrow().version;
-    }
-
-    pub fn get_raw_data_as_ix2(&self) -> ArrayBase<OwnedRepr<T>, Ix2> {
-        return self.get_storage().get_data_as_ix2();
     }
 
     pub fn get_nbytes(&self) -> usize {
@@ -256,5 +252,13 @@ where
                 panic!("Error: Cannot broadcast the tensor to the intended shape.");
             }
         }
+    }
+
+    pub fn get_raw_data_as_ix2(&self) -> ArrayBase<OwnedRepr<T>, Ix2> {
+        return self.get_storage().get_data_as_ix2();
+    }
+
+    pub fn get_raw_data_as_ix1(&self) -> ArrayBase<OwnedRepr<T>, Ix1> {
+        return self.get_storage().get_data_as_ix1();
     }
 }
