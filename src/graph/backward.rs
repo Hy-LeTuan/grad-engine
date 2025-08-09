@@ -31,6 +31,11 @@ pub mod min_backward;
 pub mod sum_backward;
 
 // Broadcast & Reshape
+pub mod broadcast_backward;
+pub mod reshape_backward;
+pub mod squeeze_backward;
+pub mod transpose_backward;
+pub mod unsqueeze_backward;
 
 // Advance
 pub mod matmul_backward;
