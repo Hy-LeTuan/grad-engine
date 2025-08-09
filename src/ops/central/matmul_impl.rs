@@ -38,20 +38,14 @@ pub fn matmul_impl<T>(
                 r.__clone_ptr_to_tensor_impl(),
             ]);
         }
-        (Some(l), None) => {
-            if l.does_require_grad() {
-                node.add_to_edge_list(Edge::maybe_create_connect(l, 0));
-                node.save_input_refs(vec![l.__clone_ptr_to_tensor_impl()]);
-            }
+        (Some(_), None) => {
+            panic!("Error, matmul backward operation requires 2 tensors to calculate");
         }
-        (None, Some(r)) => {
-            if r.does_require_grad() {
-                node.add_to_edge_list(Edge::maybe_create_connect(r, 0));
-                node.save_input_refs(vec![r.__clone_ptr_to_tensor_impl()]);
-            }
+        (None, Some(_)) => {
+            panic!("Error, matmul backward operation requires 2 tensors to calculate");
         }
         (None, None) => {
-            return;
+            panic!("Error, matmul backward operation requires 2 tensors to calculate");
         }
     }
 

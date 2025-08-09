@@ -93,12 +93,19 @@ where
     if shape.len() == 1 {
         panic!("Error, cannot transpose a 1D tensor");
     } else if shape.len() == 2 {
-        return compute_reshape(tensor, vec![shape[1], shape[0]]);
+        let raw_array = tensor.get_raw_data_as_ix2();
+        let res_array_result = raw_array.permuted_axes((1, 0)).into_dyn();
+
+        let tensor = Tensor::from_raw_array(res_array_result, false);
+        return tensor;
     } else {
         match axes_option {
             Some(axes) => {
-                let shape: Vec<usize> = axes.iter().map(|axis| shape[*axis]).collect();
-                return compute_reshape(tensor, shape);
+                let raw_array = tensor.get_raw_data().to_owned();
+                let res_array_result = raw_array.permuted_axes(axes).into_dyn();
+
+                let tensor = Tensor::from_raw_array(res_array_result, false);
+                return tensor;
             }
             None => {
                 panic!(
@@ -121,12 +128,19 @@ where
     if shape.len() == 1 {
         panic!("Error, cannot transpose a 1D tensor");
     } else if shape.len() == 2 {
-        return compute_reshape_tensorimpl(tensorimpl, vec![shape[1], shape[0]]);
+        let raw_array = tensorimpl.borrow().get_raw_data_as_ix2_();
+        let res_array_result = raw_array.permuted_axes((1, 0)).into_dyn();
+
+        let tensor = Tensor::from_raw_array(res_array_result, false);
+        return tensor;
     } else {
         match axes_option {
             Some(axes) => {
-                let shape: Vec<usize> = axes.iter().map(|axis| shape[*axis]).collect();
-                return compute_reshape_tensorimpl(tensorimpl, shape);
+                let raw_array = tensorimpl.borrow().get_raw_data_().to_owned();
+                let res_array_result = raw_array.permuted_axes(axes).into_dyn();
+
+                let tensor = Tensor::from_raw_array(res_array_result, false);
+                return tensor;
             }
             None => {
                 panic!(
