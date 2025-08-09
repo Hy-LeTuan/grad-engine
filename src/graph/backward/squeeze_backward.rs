@@ -104,3 +104,24 @@ where
         self.dim = dim;
     }
 }
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+    use crate::utils::testing_utils::test_backward_node;
+
+    #[test]
+    fn squeeze_backward_operation() {
+        let a = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![1, 4, 2], true).as_float_32();
+        let z = a.squeeze(Axis(0));
+
+        test_backward_node(
+            &a,
+            &z,
+            "SqueezeBackward",
+            Tensor::new(vec![1, 1, 1, 1, 1, 1, 1, 1], vec![4, 2], false).as_float_32(),
+            Some(Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], false).as_float_32()),
+        );
+    }
+}

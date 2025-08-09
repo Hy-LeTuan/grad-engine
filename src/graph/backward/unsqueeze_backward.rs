@@ -111,7 +111,7 @@ pub mod test {
     use crate::utils::testing_utils::test_backward_node;
 
     #[test]
-    fn transpose_backward_operation() {
+    fn unsqueeze_backward_operation() {
         let a = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
         let z = a.unsqueeze(Axis(0));
 
