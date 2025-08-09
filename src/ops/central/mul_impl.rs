@@ -29,13 +29,16 @@ pub fn mul_impl<T, S>(
         (Some(l), Some(r)) => {
             if l.does_require_grad() {
                 node.add_to_edge_list(Edge::maybe_create_connect(l, 0));
-                node.save_input_refs(vec![l.__clone_ptr_to_tensor_impl()]);
             }
 
             if r.does_require_grad() {
                 node.add_to_edge_list(Edge::maybe_create_connect(r, 1));
-                node.save_input_refs(vec![r.__clone_ptr_to_tensor_impl()]);
             }
+
+            node.save_input_refs(vec![
+                l.__clone_ptr_to_tensor_impl(),
+                r.__clone_ptr_to_tensor_impl(),
+            ]);
         }
         (Some(l), None) => {
             if l.does_require_grad() {

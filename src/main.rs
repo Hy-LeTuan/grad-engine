@@ -2,6 +2,7 @@ pub mod config;
 pub mod graph;
 pub mod ops;
 pub mod tensor_core;
+pub mod utils;
 
 use ndarray::Axis;
 use tensor_core::tensor::Tensor;

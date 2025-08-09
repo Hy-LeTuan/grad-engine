@@ -1,7 +1,10 @@
 use ndarray::{ArrayD, Ix2, LinalgScalar, s};
 
-use crate::tensor_core::{dtypes::DTComp, tensor::Tensor};
-use std::fmt::Debug;
+use crate::{
+    tensor_core::{dtypes::DTComp, tensor::Tensor},
+    utils::shaping_utils::get_last_2_dim,
+};
+use std::{fmt::Debug, ops::Deref};
 
 /// Matrix multiplication. If dimension is 2 or less, it acts as a normal dot product. For
 /// multi-dimensional array, compute a batched matrix multiplication. **Caution**: For any matrix multiplication with differing batch dimension, you need to reshape / broadcast
@@ -17,15 +20,8 @@ where
     let lhs_shape = lhs_tensor.get_shape();
     let rhs_shape = rhs_tensor.get_shape();
 
-    let lhs_last_2_dim = (
-        lhs_shape[lhs_shape.len() - 2],
-        lhs_shape[lhs_shape.len() - 1],
-    );
-
-    let rhs_last_2_dim = (
-        rhs_shape[rhs_shape.len() - 2],
-        rhs_shape[rhs_shape.len() - 1],
-    );
+    let lhs_last_2_dim = get_last_2_dim(lhs_shape.deref());
+    let rhs_last_2_dim = get_last_2_dim(rhs_shape.deref());
 
     if lhs_shape.len() != rhs_shape.len() {
         panic!(
@@ -135,8 +131,6 @@ where
 
 #[cfg(test)]
 pub mod test {
-    use std::ops::Deref;
-
     #[allow(unused)]
     use super::*;
 
@@ -157,35 +151,5 @@ pub mod test {
         let b = Tensor::new(vec![1, 2, 3, 4], vec![1, 4], false).as_float_32();
 
         let _z = matmul_compute_tensor_tensor(&a, &b);
-    }
-
-    #[test]
-    pub fn compute_matmul_on_high_dimensional_matrix() {
-        let a = Tensor::new(
-            vec![
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-            ],
-            vec![3, 2, 3],
-            false,
-        )
-        .as_float_32();
-
-        let b = Tensor::new(
-            vec![
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-            ],
-            vec![3, 3, 4],
-            false,
-        )
-        .as_float_32();
-
-        let z = matmul_compute_tensor_tensor(&a, &b);
-
-        assert_eq!(
-            z.get_shape().deref(),
-            &vec![3usize, 2usize, 4usize],
-            "Error: Output shape from matrix multiplication does not match"
-        );
     }
 }

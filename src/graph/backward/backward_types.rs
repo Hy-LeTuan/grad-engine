@@ -16,6 +16,7 @@ pub enum BackwardType {
     MaxBackward,
     MeanBackward,
     SumBackward,
+    MatmulBackward,
 }
 
 impl fmt::Display for BackwardType {
@@ -35,6 +36,7 @@ impl fmt::Display for BackwardType {
             BackwardType::MaxBackward => write!(f, "MaxBackward"),
             BackwardType::MeanBackward => write!(f, "MeanBackward"),
             BackwardType::SumBackward => write!(f, "SumBackward"),
+            BackwardType::MatmulBackward => write!(f, "MatmulBackward"),
         }
     }
 }
