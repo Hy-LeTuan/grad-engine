@@ -22,6 +22,7 @@ pub mod sub_backward;
 pub mod exp_backward;
 pub mod ln_backward;
 pub mod log_backward;
+pub mod pow_backward;
 pub mod tanh_backward;
 
 // Reduction

@@ -7,9 +7,9 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::hyperbolic_compute::sech_compute_tensorimpl;
+use crate::ops::compute::mul_compute::mul_compute_tensor_scalar;
 use crate::ops::compute::mul_compute::mul_compute_tensor_tensor;
-use crate::ops::compute::pow_compute::pow_compute_tensor;
+use crate::ops::compute::pow_compute::pow_compute_tensorimpl;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
@@ -20,7 +20,7 @@ use std::ops::Mul;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-pub struct TanhBackward<T>
+pub struct PowBackward<T>
 where
     T: DTComp + Clone + Debug,
 {
@@ -28,11 +28,12 @@ where
     name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
+    scalar: Option<T>,
     #[allow(unused)]
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
-impl<T> Backward<T> for TanhBackward<T>
+impl<T> Backward<T> for PowBackward<T>
 where
     T: Clone + DTComp + Debug + 'static + Add<Output = T> + Mul<Output = T> + Float + ScalarOperand,
 {
@@ -55,13 +56,17 @@ where
         edge: Option<&Edge<T>>,
     ) -> Rc<Tensor<T>> {
         if let Some(_) = edge {
-            let self_tensor = Rc::clone(&self.input_refs[0]);
-            let self_tensor = sech_compute_tensorimpl(self_tensor.deref());
-            let self_tensor = pow_compute_tensor(&self_tensor, T::one() + T::one());
+            if let Some(scalar) = self.scalar.clone() {
+                let self_tensor = Rc::clone(&self.input_refs[0]);
+                let self_tensor = pow_compute_tensorimpl(self_tensor.deref(), scalar - T::one());
+                let self_tensor = mul_compute_tensor_scalar(&self_tensor, scalar);
 
-            let tensor = mul_compute_tensor_tensor(upstream_gradient.deref(), &self_tensor);
+                let tensor = mul_compute_tensor_tensor(&self_tensor, upstream_gradient);
 
-            return Rc::new(tensor);
+                return Rc::new(tensor);
+            } else {
+                panic!("Error, no scalar found on a exp operation of base different than base e");
+            }
         } else {
             panic!(
                 "Error, no edge found to connect to and calculate gradient because ln is a self operation"
@@ -90,20 +95,25 @@ where
     }
 }
 
-impl<T> TanhBackward<T>
+impl<T> PowBackward<T>
 where
     T: Clone + DTComp + Debug,
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
-        let node = TanhBackward {
-            name: BackwardType::TanhBackward,
+        let node = PowBackward {
+            name: BackwardType::PowBackward,
             input_refs: vec![],
             id,
             edge_list,
+            scalar: None,
             origin: Some(Rc::downgrade(origin)),
         };
 
         return node;
+    }
+
+    pub fn save_scalar(&mut self, scalar: T) {
+        self.scalar = Some(scalar);
     }
 }
 
@@ -111,18 +121,19 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
-    fn tanh_backward_operation() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        let z = a.tanh();
+    fn pow_backward_operation() {
+        let x1 = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
+        let z = x1.pow(2.0);
 
-        if z.does_require_grad() {
-            assert_eq!(
-                z.get_grad_fn().borrow().get_name(),
-                String::from("TanhBackward"),
-                "TanhBackward does not exist on tensor from tanh operation"
-            );
-        }
+        total_test_for_backward_operation(
+            vec![&x1],
+            vec![Tensor::new(vec![2, 4, 6, 8], vec![4, 1], false).as_float_32()],
+            &z,
+            "PowBackward",
+            Tensor::new(vec![1, 4, 9, 16], vec![4, 1], false).as_float_32(),
+        );
     }
 }

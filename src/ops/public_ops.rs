@@ -19,8 +19,8 @@ pub mod ln_public;
 pub mod log;
 pub mod log_public;
 
-pub mod exp;
-pub mod exp_public;
+pub mod pow;
+pub mod pow_public;
 
 pub mod tanh;
 pub mod tanh_public;
@@ -54,3 +54,6 @@ pub mod transpose_public;
 
 pub mod reshape;
 pub mod reshape_public;
+
+pub mod exp;
+pub mod exp_public;
