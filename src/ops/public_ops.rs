@@ -54,3 +54,6 @@ pub mod transpose_public;
 
 pub mod reshape;
 pub mod reshape_public;
+
+pub mod exp;
+pub mod exp_public;
