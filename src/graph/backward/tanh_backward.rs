@@ -7,9 +7,9 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
-use crate::ops::compute::exp_compute::exp_compute_tensor;
 use crate::ops::compute::hyperbolic_compute::sech_compute_tensorimpl;
 use crate::ops::compute::mul_compute::mul_compute_tensor_tensor;
+use crate::ops::compute::pow_compute::pow_compute_tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
@@ -57,7 +57,7 @@ where
         if let Some(_) = edge {
             let self_tensor = Rc::clone(&self.input_refs[0]);
             let self_tensor = sech_compute_tensorimpl(self_tensor.deref());
-            let self_tensor = exp_compute_tensor(&self_tensor, T::one() + T::one());
+            let self_tensor = pow_compute_tensor(&self_tensor, T::one() + T::one());
 
             let tensor = mul_compute_tensor_tensor(upstream_gradient.deref(), &self_tensor);
 

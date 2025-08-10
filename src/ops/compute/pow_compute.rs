@@ -7,7 +7,7 @@ use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
-pub fn exp_compute_tensor<T>(tensor: &Tensor<T>, base: T) -> Tensor<T>
+pub fn pow_compute_tensor<T>(tensor: &Tensor<T>, base: T) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + Float + 'static,
 {
@@ -19,7 +19,7 @@ where
     return tensor;
 }
 
-pub fn exp_compute_tensorimpl<T>(tensorimpl: &RefCell<TensorImpl<T>>, base: T) -> Tensor<T>
+pub fn pow_compute_tensorimpl<T>(tensorimpl: &RefCell<TensorImpl<T>>, base: T) -> Tensor<T>
 where
     T: DTComp + Clone + Debug + Float + 'static,
 {

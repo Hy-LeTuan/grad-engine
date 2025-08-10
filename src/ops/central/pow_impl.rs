@@ -7,12 +7,12 @@ use ndarray::ScalarOperand;
 use num_traits::Float;
 
 use crate::graph::backward::Backward;
-use crate::graph::backward::exp_backward::ExpBackward;
+use crate::graph::backward::pow_backward::PowBackward;
 use crate::graph::edge::Edge;
 use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 
-pub fn exp_impl<T>(lhs_tensor: Option<&Tensor<T>>, result_tensor: &Tensor<T>, scalar: Option<T>)
+pub fn pow_impl<T>(lhs_tensor: Option<&Tensor<T>>, result_tensor: &Tensor<T>, scalar: Option<T>)
 where
     T: Clone + DTComp + Debug + 'static + Add<Output = T> + Mul<Output = T> + Float + ScalarOperand,
 {
@@ -20,7 +20,7 @@ where
         return;
     }
 
-    let mut node = ExpBackward::new(0, vec![], result_tensor.__get_tensor_impl());
+    let mut node = PowBackward::new(0, vec![], result_tensor.__get_tensor_impl());
 
     match lhs_tensor {
         Some(l) => {

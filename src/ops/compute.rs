@@ -1,13 +1,13 @@
 pub mod add_compute;
 pub mod div_compute;
 pub mod dot_compute;
-pub mod exp_compute;
 pub mod hyperbolic_compute;
 pub mod log_compute;
 pub mod matmul_compute;
 pub mod max_min_compute;
 pub mod mul_compute;
 pub mod neg_compute;
+pub mod pow_compute;
 pub mod shape_compute;
 pub mod sub_compute;
 pub mod sum_mean_compute;

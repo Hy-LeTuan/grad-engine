@@ -19,9 +19,9 @@ pub mod mul_backward;
 pub mod sub_backward;
 
 // Element wise
-pub mod exp_backward;
 pub mod ln_backward;
 pub mod log_backward;
+pub mod pow_backward;
 pub mod tanh_backward;
 
 // Reduction
