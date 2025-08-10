@@ -2,11 +2,7 @@ use ndarray::{ArrayBase, IxDyn, OwnedRepr};
 use num_traits::One;
 
 use crate::tensor_core::{dtypes::DTComp, tensor::Tensor};
-use std::{
-    cell::Ref,
-    fmt::Debug,
-    ops::{Add, Deref},
-};
+use std::{cell::Ref, fmt::Debug, ops::Add};
 
 pub fn epsilon_test_for_tensor_similarity<T>(
     y_raw: Ref<ArrayBase<OwnedRepr<T>, IxDyn>>,
@@ -102,39 +98,4 @@ pub fn total_test_for_backward_operation<T>(
         output_tensor.get_raw_data(),
         epsilon,
     );
-}
-
-pub fn test_backward_node<T>(
-    input_tensor: &Tensor<T>,
-    output_tensor: &Tensor<T>,
-    node_name: &str,
-    backward_start: Tensor<T>,
-    check_correct_output: Option<Tensor<T>>,
-) where
-    T: DTComp + Debug + Clone + PartialEq + Add<Output = T>,
-{
-    // Test for correct node name
-    test_node_name(output_tensor, node_name);
-
-    output_tensor.backward(backward_start);
-
-    assert_eq!(
-        input_tensor
-            .get_autograd_ref()
-            .as_ref()
-            .unwrap()
-            .get_grad_as_tensor()
-            .get_shape()
-            .to_vec(),
-        input_tensor.get_shape().to_vec(),
-        "Test failed: Gradient of leaf tensor does not match its shape"
-    );
-
-    if let Some(correct_output) = check_correct_output {
-        assert_eq!(
-            correct_output.get_raw_data().deref(),
-            output_tensor.get_raw_data().deref(),
-            "Test failed: Incorrect output tensor"
-        )
-    }
 }
