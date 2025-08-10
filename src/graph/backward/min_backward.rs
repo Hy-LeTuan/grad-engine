@@ -138,19 +138,20 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
     fn min_backward_operation() {
-        let x = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
+        let x1 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
 
-        let z = x.min(Axis(0));
+        let z = x1.min(Axis(0));
 
-        if z.does_require_grad() {
-            assert_eq!(
-                z.get_grad_fn().borrow().get_name(),
-                String::from("MinBackward"),
-                "MinBackward does not exist on tensor min operation"
-            );
-        }
+        total_test_for_backward_operation(
+            vec![&x1],
+            vec![Tensor::new(vec![1, 1, 0, 0, 0, 0, 0, 0], vec![4, 2], false).as_float_32()],
+            &z,
+            "MinBackward",
+            Tensor::new(vec![1, 2], vec![2, 1], false).as_float_32(),
+        );
     }
 }
