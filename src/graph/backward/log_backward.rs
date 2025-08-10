@@ -122,18 +122,21 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
     fn log_backward_operation() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        let z = a.log(2.0);
+        let x1 = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
+        let z = x1.log(2.0);
 
-        if z.does_require_grad() {
-            assert_eq!(
-                z.get_grad_fn().borrow().get_name(),
-                String::from("LogBackward"),
-                "LogBackward does not exist on tensor from log operation"
-            );
-        }
+        total_test_for_backward_operation(
+            vec![&x1],
+            vec![
+                Tensor::new(vec![1.4427, 0.7213, 0.4809, 0.3607], vec![4, 1], false).as_float_32(),
+            ],
+            &z,
+            "LogBackward",
+            Tensor::new(vec![0.0000, 1.0000, 1.5850, 2.0000], vec![4, 1], false).as_float_32(),
+        );
     }
 }

@@ -102,24 +102,24 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
     fn sub_backward_creation() {
         let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        // let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
-        // let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
+        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
 
-        // let d = &a - &b - &c;
-        let e = &a - 3.0;
+        let z = &a - &b;
 
-        if e.does_require_grad() {
-            assert_eq!(
-                e.get_grad_fn().borrow().get_name(),
-                String::from("SubBackward"),
-                "SubBackward does not exist on tensor from sub operation"
-            );
-
-            // e.backward(Tensor::new(vec![1, 1, 1, 1], vec![4, 1], false).as_float_32());
-        }
+        total_test_for_backward_operation(
+            vec![&a, &b],
+            vec![
+                Tensor::new(vec![1, 1, 1, 1], vec![4, 1], false).as_float_32(),
+                Tensor::new(vec![-1, -1, -1, -1], vec![4, 1], false).as_float_32(),
+            ],
+            &z,
+            "SubBackward",
+            Tensor::new(vec![-4, -4, -4, -4], vec![4, 1], false).as_float_32(),
+        );
     }
 }

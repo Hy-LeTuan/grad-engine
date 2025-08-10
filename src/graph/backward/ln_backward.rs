@@ -106,18 +106,21 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
     fn ln_backward_operation() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        let z = a.ln();
+        let x1 = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
+        let z = x1.ln();
 
-        if z.does_require_grad() {
-            assert_eq!(
-                z.get_grad_fn().borrow().get_name(),
-                String::from("LnBackward"),
-                "LnBackward does not exist on tensor from ln operation"
-            );
-        }
+        total_test_for_backward_operation(
+            vec![&x1],
+            vec![
+                Tensor::new(vec![1.0000, 0.5000, 0.3333, 0.2500], vec![4, 1], false).as_float_32(),
+            ],
+            &z,
+            "LnBackward",
+            Tensor::new(vec![0.0000, 0.6931, 1.0986, 1.3863], vec![4, 1], false).as_float_32(),
+        );
     }
 }
