@@ -7,10 +7,9 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
+use crate::ops::compute::div_compute::div_compute_tensor_scalar;
 use crate::ops::compute::div_compute::div_compute_tensor_tensor;
-use crate::ops::compute::div_compute::{
-    div_compute_tensorimpl_scalar, div_compute_tensorimpl_tensorimpl,
-};
+use crate::ops::compute::div_compute::div_compute_tensorimpl_tensorimpl;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
 use crate::ops::compute::neg_compute::neg_compute_tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
@@ -103,10 +102,8 @@ where
                 );
             }
         } else {
-            let input_tensor = Rc::clone(&self.input_refs[0]);
-
-            let tensor = div_compute_tensorimpl_scalar(
-                input_tensor.deref(),
+            let tensor = div_compute_tensor_scalar(
+                upstream_gradient.deref(),
                 self.scalar
                     .as_ref()
                     .expect("Cannot calculate gradient, missing scalar")
@@ -165,22 +162,29 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
     fn div_backward_operation() {
-        let a = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
-        let b = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
-        let c = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
+        let x1 = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
+        let x2 = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
+        let x3 = Tensor::new(vec![5, 6, 7, 8], vec![4, 1], true).as_float_32();
 
-        let d = &a / &b / &c;
-        let e = &d / 3.0;
+        let x4 = &x1 / &x2 / &x3;
+        let z = &x4 / 3.0;
 
-        if e.does_require_grad() {
-            assert_eq!(
-                e.get_grad_fn().borrow().get_name(),
-                String::from("DivBackward"),
-                "DivBackward does not exist on tensor from div operation"
-            );
-        }
+        total_test_for_backward_operation(
+            vec![&x1, &x2, &x3],
+            vec![
+                Tensor::new(vec![0.0133, 0.0093, 0.0068, 0.0052], vec![4, 1], false).as_float_32(),
+                Tensor::new(vec![-0.0027, -0.0031, -0.0029, -0.0026], vec![4, 1], false)
+                    .as_float_32(),
+                Tensor::new(vec![-0.0027, -0.0031, -0.0029, -0.0026], vec![4, 1], false)
+                    .as_float_32(),
+            ],
+            &z,
+            "DivBackward",
+            Tensor::new(vec![0.0133, 0.0185, 0.0204, 0.0208], vec![4, 1], false).as_float_32(),
+        );
     }
 }
