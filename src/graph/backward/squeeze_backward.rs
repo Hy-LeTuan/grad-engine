@@ -109,19 +109,19 @@ where
 pub mod test {
     #[allow(unused)]
     use super::*;
-    use crate::utils::testing_utils::test_backward_node;
+    use crate::utils::testing_utils::total_test_for_backward_operation;
 
     #[test]
     fn squeeze_backward_operation() {
-        let a = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![1, 4, 2], true).as_float_32();
-        let z = a.squeeze(Axis(0));
+        let x1 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![1, 4, 2], true).as_float_32();
+        let z = x1.squeeze(Axis(0));
 
-        test_backward_node(
-            &a,
+        total_test_for_backward_operation(
+            vec![&x1],
+            vec![Tensor::new(vec![1, 1, 1, 1, 1, 1, 1, 1], vec![1, 4, 2], false).as_float_32()],
             &z,
             "SqueezeBackward",
-            Tensor::new(vec![1, 1, 1, 1, 1, 1, 1, 1], vec![4, 2], false).as_float_32(),
-            Some(Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], false).as_float_32()),
+            Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![1, 4, 2], false).as_float_32(),
         );
     }
 }
