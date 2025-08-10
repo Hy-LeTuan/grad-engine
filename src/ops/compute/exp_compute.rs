@@ -58,3 +58,17 @@ where
 
     return tensor;
 }
+
+#[cfg(test)]
+pub mod test {
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn compute_exp() {
+        let x1 = Tensor::new(vec![1, 2, 3, 4], vec![4, 1], true).as_float_32();
+        let z = exp_compute_tensor(&x1);
+
+        println!("z is: {:?}", z);
+    }
+}
