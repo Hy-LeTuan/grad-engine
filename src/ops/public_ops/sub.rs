@@ -19,6 +19,18 @@ where
     }
 }
 
+impl<T, S> Sub<S> for Tensor<T>
+where
+    T: DTComp + Sub<S, Output = T> + ScalarOperand + Signed + 'static + Debug + Clone,
+    S: ScalarOperand,
+{
+    type Output = Tensor<T>;
+
+    fn sub(self, rhs: S) -> Self::Output {
+        return &self - rhs;
+    }
+}
+
 impl<'tl_a, 'tl_b, T> Sub<&'tl_b Tensor<T>> for &'tl_a Tensor<T>
 where
     T: DTComp + Sub<T> + Signed + 'static + Debug + Clone,
@@ -38,5 +50,16 @@ where
 
     fn sub(self, rhs: &'tl_a Tensor<T>) -> Self::Output {
         return sub_tensor_tensor(&self, rhs);
+    }
+}
+
+impl<T> Sub<Tensor<T>> for Tensor<T>
+where
+    T: DTComp + Sub<T> + Signed + 'static + Debug + Clone,
+{
+    type Output = Tensor<T>;
+
+    fn sub(self, rhs: Tensor<T>) -> Self::Output {
+        return &self - &rhs;
     }
 }
