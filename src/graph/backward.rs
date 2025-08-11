@@ -41,6 +41,9 @@ pub mod unsqueeze_backward;
 // Advance
 pub mod matmul_backward;
 
+// Utils
+pub mod backward_utils;
+
 pub trait Backward<T>: Debug
 where
     T: DTComp + Debug,
