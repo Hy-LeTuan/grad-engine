@@ -16,7 +16,7 @@ where
 {
     fn visualize_graph(tensor: &Tensor<T>);
 
-    fn visualize(node: Rc<RefCell<dyn Backward<T>>>);
+    fn visualize_node_recursive(node: Rc<RefCell<dyn Backward<T>>>);
 }
 
 impl<T> VisualizerTrait<T> for Visualizer
@@ -35,11 +35,11 @@ where
             .get_grad_fn();
 
         if let Some(root) = root.as_ref() {
-            Visualizer::visualize(Rc::clone(root));
+            Visualizer::visualize_node_recursive(Rc::clone(root));
         }
     }
 
-    fn visualize(root: Rc<RefCell<dyn Backward<T>>>) {
+    fn visualize_node_recursive(root: Rc<RefCell<dyn Backward<T>>>) {
         let mut node_dequeue: VecDeque<(usize, Rc<RefCell<dyn Backward<T>>>)> = VecDeque::new();
 
         node_dequeue.push_back((0, root));
