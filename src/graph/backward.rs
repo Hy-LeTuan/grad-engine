@@ -5,7 +5,7 @@ use crate::tensor_core::tensor::Tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
 
 use std::cell::RefCell;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::rc::Rc;
 
 // Backward node types
@@ -80,4 +80,13 @@ where
     fn get_id(&self) -> usize;
 
     fn get_name(&self) -> String;
+}
+
+impl<T> Display for dyn Backward<T>
+where
+    T: DTComp + Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.get_name().as_str())
+    }
 }

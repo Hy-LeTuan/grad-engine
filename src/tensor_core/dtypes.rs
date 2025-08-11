@@ -110,3 +110,25 @@ impl DTComp for usize {
         return DTypes::Usize;
     }
 }
+
+impl std::fmt::Display for DTypes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DTypes::Bool => write!(f, "bool"),
+            DTypes::Float32 => write!(f, "float32"),
+            DTypes::Float64 => write!(f, "float64"),
+            DTypes::Int8 => write!(f, "int8"),
+            DTypes::Int16 => write!(f, "int16"),
+            DTypes::Int32 => write!(f, "int32"),
+            DTypes::Int64 => write!(f, "int64"),
+            DTypes::Int128 => write!(f, "int128"),
+            DTypes::Isize => write!(f, "isize"),
+            DTypes::Uint8 => write!(f, "uint8"),
+            DTypes::Uint16 => write!(f, "uint16"),
+            DTypes::Uint32 => write!(f, "uint32"),
+            DTypes::Uint64 => write!(f, "uint64"),
+            DTypes::Uint128 => write!(f, "uint128"),
+            DTypes::Usize => write!(f, "usize"),
+        }
+    }
+}

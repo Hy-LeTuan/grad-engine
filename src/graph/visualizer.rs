@@ -2,8 +2,7 @@ use crate::{
     graph::backward::Backward,
     tensor_core::{dtypes::DTComp, tensor::Tensor},
 };
-use std::collections::VecDeque;
-use std::ops::Deref;
+use colored::*;
 
 use num_traits::Zero;
 use std::{cell::RefCell, fmt::Debug, rc::Rc};
@@ -15,8 +14,7 @@ where
     T: Zero + Clone + DTComp + Debug + 'static,
 {
     fn visualize_graph(tensor: &Tensor<T>);
-
-    fn visualize(node: Rc<RefCell<dyn Backward<T>>>);
+    fn visualize_node_dfs(node: Rc<RefCell<dyn Backward<T>>>, level: usize, is_last: bool);
 }
 
 impl<T> VisualizerTrait<T> for Visualizer
@@ -35,31 +33,52 @@ where
             .get_grad_fn();
 
         if let Some(root) = root.as_ref() {
-            Visualizer::visualize(Rc::clone(root));
+            println!("## Backward computation graph ##");
+            println!("------------------------------");
+            println!("");
+            Visualizer::visualize_node_dfs(Rc::clone(root), 0, false);
+            println!("");
+            println!("------------------------------");
         }
     }
 
-    fn visualize(root: Rc<RefCell<dyn Backward<T>>>) {
-        let mut node_dequeue: VecDeque<(usize, Rc<RefCell<dyn Backward<T>>>)> = VecDeque::new();
+    fn visualize_node_dfs(node: Rc<RefCell<dyn Backward<T>>>, level: usize, is_last: bool) {
+        let borrowed = node.borrow();
+        let edges = borrowed.get_edge_list();
+        let edge_count = edges.len();
 
-        node_dequeue.push_back((0, root));
+        // Tree connector symbols
+        let connector = if level == 0 {
+            "".to_string()
+        } else if is_last {
+            format!("{:indent$}└── ", "", indent = (level - 1) * 4)
+        } else {
+            format!("{:indent$}├── ", "", indent = (level - 1) * 4)
+        };
 
-        while !node_dequeue.is_empty() {
-            if let Some((level, node)) = node_dequeue.pop_front() {
-                println!(
-                    "{:<indent$}-- {:?}",
-                    "",
-                    node.deref().borrow(),
-                    indent = level * 8
-                );
+        // Node label with color
+        let label = format!("{}", borrowed);
 
-                // add to queue
-                for edge in node.borrow().get_edge_list() {
-                    let next_node = edge.get_next_grad_fn();
+        if label == "GradAccum" {
+            println!(
+                "{}{} {}",
+                connector,
+                label.green(),
+                ("[ Leaf grad accumulation ]").yellow()
+            );
+        } else {
+            println!(
+                "{}{} {}",
+                connector,
+                label.green(),
+                format!("[ {} child nodes ]", edge_count).blue()
+            );
+        }
 
-                    node_dequeue.push_back((level + 1, next_node));
-                }
-            }
+        // Recurse into children
+        for (i, edge) in edges.into_iter().enumerate() {
+            let next_node = edge.get_next_grad_fn();
+            Visualizer::visualize_node_dfs(next_node, level + 1, i == edge_count - 1);
         }
     }
 }

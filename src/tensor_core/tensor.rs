@@ -9,7 +9,7 @@ use super::tensor_impl::TensorImpl;
 use ndarray::{ArrayBase, IxDyn, OwnedRepr};
 use ndarray::{Ix1, Ix2};
 use std::cell::{Ref, RefCell};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::ops::Add;
 use std::rc::Rc;
 
@@ -176,7 +176,7 @@ where
         match &borrowed_impl.autograd_meta {
             Some(meta) => match &meta.grad.borrow().as_ref() {
                 Some(grad) => {
-                    println!("Grad: {:?}", grad);
+                    println!("Grad: {}", grad);
                 }
                 None => {
                     println!("Grad has not been computed or is None.");
@@ -242,5 +242,24 @@ where
 
     pub fn get_raw_data_as_ix1(&self) -> ArrayBase<OwnedRepr<T>, Ix1> {
         return self.get_storage().get_data_as_ix1();
+    }
+}
+
+impl<T> Display for Tensor<T>
+where
+    T: DTComp + Debug + Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let shape = self.get_shape();
+        writeln!(
+            f,
+            "tensor(shape={:?}, dtype={}, data=",
+            shape,
+            self.get_type()
+        )?;
+
+        let raw_data = self.get_raw_data();
+        write!(f, "  {:?}", raw_data)?;
+        write!(f, ")")
     }
 }
