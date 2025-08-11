@@ -1,6 +1,7 @@
 pub mod add_impl;
 pub mod broadcast_impl;
 pub mod div_impl;
+pub mod exp_impl;
 pub mod ln_impl;
 pub mod log_impl;
 pub mod matmul_impl;
