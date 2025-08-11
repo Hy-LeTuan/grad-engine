@@ -43,16 +43,16 @@ pub fn mul_impl<T, S>(
         (Some(l), None) => {
             if l.does_require_grad() {
                 node.add_to_edge_list(Edge::maybe_create_connect(l, 0));
-                node.save_input_refs(vec![l.__clone_ptr_to_tensor_impl()]);
 
+                node.save_input_refs(vec![l.__clone_ptr_to_tensor_impl()]);
                 node.save_scalar(scalar.expect("Error, trying to set a MulBackward node on multiplication of tensor and scalar, but scalar is not found."));
             }
         }
         (None, Some(r)) => {
             if r.does_require_grad() {
                 node.add_to_edge_list(Edge::maybe_create_connect(r, 0));
-                node.save_input_refs(vec![r.__clone_ptr_to_tensor_impl()]);
 
+                node.save_input_refs(vec![r.__clone_ptr_to_tensor_impl()]);
                 node.save_scalar(scalar.expect("Error, trying to set a MulBackward node on multiplication of tensor and scalar, but scalar is not found."));
             }
         }

@@ -6,6 +6,7 @@ use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
+use crate::graph::backward::backward_utils::gradient_from_broadcast;
 use crate::graph::edge::Edge;
 use crate::ops::compute::div_compute::div_compute_tensor_scalar;
 use crate::ops::compute::div_compute::div_compute_tensor_tensor;
@@ -72,6 +73,7 @@ where
                 let edge_nr = edge.input_nr;
 
                 let tensor;
+                let intended_shape;
 
                 if edge_nr == 0 {
                     let other_tensor = Rc::clone(&self.input_refs[1]);
@@ -79,6 +81,7 @@ where
                         upstream_gradient.__get_tensor_impl(),
                         other_tensor.deref(),
                     );
+                    intended_shape = self.input_refs[0].borrow().get_raw_shape();
                 } else {
                     let other_tensor = Rc::clone(&self.input_refs[0]);
                     let self_tensor = Rc::clone(&self.input_refs[1]);
@@ -93,8 +96,9 @@ where
                     );
 
                     tensor = div_compute_tensor_tensor(&product_tensor, &self_tensor);
+                    intended_shape = self.input_refs[1].borrow().get_raw_shape();
                 }
-                return Rc::new(tensor);
+                return Rc::new(gradient_from_broadcast(&tensor, &intended_shape));
             } else {
                 panic!(
                     "Cannot calculate gradient because of wrong number of inputs. Expected 2 inputs, received {} inputs.",
@@ -110,7 +114,10 @@ where
                     .clone(),
             );
 
-            return Rc::new(tensor);
+            return Rc::new(gradient_from_broadcast(
+                &tensor,
+                &self.input_refs[0].borrow().get_raw_shape(),
+            ));
         }
     }
 

@@ -3,6 +3,7 @@ use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
+use crate::graph::backward::backward_utils::gradient_from_broadcast;
 use crate::graph::edge::Edge;
 use crate::ops::compute::neg_compute::neg_compute_tensor;
 use crate::tensor_core::tensor_impl::TensorImpl;
@@ -18,6 +19,7 @@ pub struct SubBackward<T>
 where
     T: DTComp + Clone + Debug + 'static,
 {
+    input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>,
     name: BackwardType,
     id: usize,
     edge_list: Vec<Edge<T>>,
@@ -48,16 +50,23 @@ where
         edge: Option<&Edge<T>>,
     ) -> Rc<Tensor<T>> {
         if let Some(edge) = edge {
-            let input_nr = edge.input_nr;
+            let edge_nr = edge.input_nr;
 
-            if input_nr == 0 {
-                return Rc::clone(upstream_gradient);
+            if edge_nr == 0 {
+                return Rc::new(gradient_from_broadcast(
+                    upstream_gradient.deref(),
+                    &self.input_refs[0].borrow().get_raw_shape(),
+                ));
             } else {
                 let subtrahend_grad = neg_compute_tensor(upstream_gradient.deref());
-                return Rc::new(subtrahend_grad);
+
+                return Rc::new(gradient_from_broadcast(
+                    &subtrahend_grad,
+                    &self.input_refs[1].borrow().get_raw_shape(),
+                ));
             }
         } else {
-            panic!("No edge positinal data found to calculate gradient")
+            panic!("Cannot calculate gradient for add operation because of missing inputs");
         }
     }
 
@@ -69,8 +78,8 @@ where
         self.edge_list.push(edge);
     }
 
-    fn save_input_refs(&mut self, _input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>) {
-        return;
+    fn save_input_refs(&mut self, input_refs: Vec<Rc<RefCell<TensorImpl<T>>>>) {
+        self.input_refs.extend(input_refs);
     }
 
     fn get_id(&self) -> usize {
@@ -88,6 +97,7 @@ where
 {
     pub fn new(id: usize, edge_list: Vec<Edge<T>>, origin: &Rc<RefCell<TensorImpl<T>>>) -> Self {
         let node = SubBackward {
+            input_refs: vec![],
             name: BackwardType::SubBackward,
             id,
             edge_list,
