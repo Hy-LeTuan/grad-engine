@@ -27,7 +27,7 @@ where
 
     if tensor.does_require_grad() {
         result_tensor
-            .requires_grad_intermediate("Intermediate tensor expoential with arbitrary base");
+            .requires_grad_intermediate("Intermediate tensor from exponential with arbitrary base");
 
         exp_impl(Some(tensor), &result_tensor, natural)
     }
