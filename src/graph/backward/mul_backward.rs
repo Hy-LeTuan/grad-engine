@@ -5,6 +5,7 @@ use super::Tensor;
 
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
+use crate::graph::backward::backward_utils::gradient_from_broadcast;
 use crate::graph::edge::Edge;
 use crate::ops::compute::mul_compute::mul_compute_tensor_scalar;
 use crate::ops::compute::mul_compute::mul_compute_tensorimpl_tensorimpl;
@@ -58,6 +59,7 @@ where
             if let Some(edge) = edge {
                 let edge_nr = edge.input_nr;
 
+                let intended_shape;
                 let tensor;
 
                 if edge_nr == 0 {
@@ -66,15 +68,18 @@ where
                         input_tensor.deref(),
                         upstream_gradient.__get_tensor_impl(),
                     );
+
+                    intended_shape = self.input_refs[0].borrow().get_raw_shape();
                 } else {
                     let input_tensor = Rc::clone(&self.input_refs[0]);
                     tensor = mul_compute_tensorimpl_tensorimpl(
                         input_tensor.deref(),
                         upstream_gradient.__get_tensor_impl(),
                     );
+                    intended_shape = self.input_refs[1].borrow().get_raw_shape();
                 }
 
-                return Rc::new(tensor);
+                return Rc::new(gradient_from_broadcast(&tensor, &intended_shape));
             } else {
                 panic!("Cannot calculate gradient because of missing inputs");
             }
@@ -87,7 +92,10 @@ where
                     .clone(),
             );
 
-            return Rc::new(tensor);
+            return Rc::new(gradient_from_broadcast(
+                &tensor,
+                &self.input_refs[0].borrow().get_raw_shape(),
+            ));
         }
     }
 

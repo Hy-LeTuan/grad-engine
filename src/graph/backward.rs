@@ -11,34 +11,36 @@ use std::rc::Rc;
 // Backward node types
 pub mod backward_types;
 
-// All backward node
+// Accum
+pub mod grad_accum;
+
+// Binary operations
 pub mod add_backward;
 pub mod div_backward;
-pub mod grad_accum;
 pub mod mul_backward;
 pub mod sub_backward;
 
-// Element wise
+// Element wise operations
 pub mod exp_backward;
 pub mod ln_backward;
 pub mod log_backward;
 pub mod pow_backward;
 pub mod tanh_backward;
 
-// Reduction
+// Reduction operations
 pub mod max_backward;
 pub mod mean_backward;
 pub mod min_backward;
 pub mod sum_backward;
 
-// Broadcast & Reshape
+// Broadcast & Reshape operations
 pub mod broadcast_backward;
 pub mod reshape_backward;
 pub mod squeeze_backward;
 pub mod transpose_backward;
 pub mod unsqueeze_backward;
 
-// Advance
+// Advance operations
 pub mod matmul_backward;
 
 // Utils
