@@ -18,6 +18,18 @@ where
     }
 }
 
+impl<T, S> Mul<S> for Tensor<T>
+where
+    T: DTComp + Clone + Debug + Mul<Output = T> + Mul<S, Output = T> + Add<Output = T> + 'static,
+    S: ScalarOperand + Debug + Clone,
+{
+    type Output = Tensor<T>;
+
+    fn mul(self, rhs: S) -> Self::Output {
+        return &self * rhs;
+    }
+}
+
 impl<'tl_in, 'tl_out, T> Mul<&'tl_out Tensor<T>> for &'tl_in Tensor<T>
 where
     T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static + ScalarOperand,
@@ -37,5 +49,16 @@ where
 
     fn mul(self, rhs: &'tl Tensor<T>) -> Self::Output {
         return mul_tensor_tensor(&self, rhs);
+    }
+}
+
+impl<T> Mul<Tensor<T>> for Tensor<T>
+where
+    T: DTComp + Clone + Debug + Mul<Output = T> + Add<Output = T> + 'static + ScalarOperand,
+{
+    type Output = Tensor<T>;
+
+    fn mul(self, rhs: Tensor<T>) -> Self::Output {
+        return &self * &rhs;
     }
 }

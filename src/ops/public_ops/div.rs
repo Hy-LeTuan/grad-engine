@@ -26,6 +26,25 @@ where
     }
 }
 
+impl<T, S> Div<S> for Tensor<T>
+where
+    T: DTComp
+        + Clone
+        + Debug
+        + Div<Output = T>
+        + Div<S, Output = T>
+        + Add<Output = T>
+        + 'static
+        + Signed,
+    S: ScalarOperand + Debug + Clone,
+{
+    type Output = Tensor<T>;
+
+    fn div(self, rhs: S) -> Self::Output {
+        return &self / rhs;
+    }
+}
+
 impl<'tl_in, 'tl_out, T> Div<&'tl_out Tensor<T>> for &'tl_in Tensor<T>
 where
     T: DTComp
@@ -59,5 +78,23 @@ where
 
     fn div(self, rhs: &'tl Tensor<T>) -> Self::Output {
         return div_tensor_tensor(&self, rhs);
+    }
+}
+
+impl<T> Div<Tensor<T>> for Tensor<T>
+where
+    T: DTComp
+        + Clone
+        + Debug
+        + Div<Output = T>
+        + Add<Output = T>
+        + 'static
+        + ScalarOperand
+        + Signed,
+{
+    type Output = Tensor<T>;
+
+    fn div(self, rhs: Tensor<T>) -> Self::Output {
+        return &self / &rhs;
     }
 }
