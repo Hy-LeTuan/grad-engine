@@ -176,7 +176,7 @@ where
         match &borrowed_impl.autograd_meta {
             Some(meta) => match &meta.grad.borrow().as_ref() {
                 Some(grad) => {
-                    println!("Grad: {:?}", grad);
+                    println!("Grad: {}", grad);
                 }
                 None => {
                     println!("Grad has not been computed or is None.");
@@ -259,7 +259,7 @@ where
         )?;
 
         let raw_data = self.get_raw_data();
-        writeln!(f, "  {:?}", raw_data)?;
+        write!(f, "  {:?}", raw_data)?;
         write!(f, ")")
     }
 }
