@@ -1,7 +1,10 @@
 pub mod config;
 pub mod graph;
+#[allow(unused)]
 use crate::graph::visualizer::VisualizerTrait;
+#[allow(unused)]
 use crate::ops::public_ops::matmul::matmul;
+#[allow(unused)]
 use graph::visualizer::Visualizer;
 use tensor_core::tensor::Tensor;
 
@@ -17,7 +20,7 @@ fn main() {
 
     let z = matmul(&(&x1 + 3.0), &(&x2 - &x3));
 
-    z.backward(Tensor::ones_like(&z));
+    z.backward(Tensor::ones_like(&z), true);
     Visualizer::visualize_graph(&z);
 
     x1.display_grad();

@@ -6,6 +6,7 @@ use super::Tensor;
 use crate::graph::backward::Backward;
 use crate::graph::backward::backward_types::BackwardType;
 use crate::graph::edge::Edge;
+use crate::ops::compute::add_compute::add_compute_tensor_tensor;
 use crate::ops::compute::exp_compute::exp_compute_tensorimpl;
 use crate::ops::compute::exp_compute::exp2_compute_tensorimpl;
 use crate::ops::compute::mul_compute::mul_compute_tensor_tensor;
@@ -27,7 +28,6 @@ where
     id: usize,
     edge_list: Vec<Edge<T>>,
     natural: bool,
-    #[allow(unused)]
     origin: Option<Weak<RefCell<TensorImpl<T>>>>,
 }
 
@@ -35,16 +35,40 @@ impl<T> Backward<T> for ExpBackward<T>
 where
     T: Clone + DTComp + Debug + 'static + Add<Output = T> + Float,
 {
-    fn save_grad_to_origin_tensor(&self, _grad: &Rc<Tensor<T>>) {
-        return;
+    fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>) {
+        if let Some(origin_as_option_ref) = self.origin.as_ref() {
+            if let Some(origin_as_strong_rc) = origin_as_option_ref.upgrade() {
+                if let Some(origin_ref) = origin_as_strong_rc.borrow().get_autograd_ref_().as_ref()
+                {
+                    if origin_ref.grad_is_set() {
+                        let old_grad = origin_ref.get_grad_as_tensor();
+                        let new_grad = add_compute_tensor_tensor(old_grad.deref(), grad.deref());
+
+                        origin_ref.set_grad(Rc::new(new_grad));
+                    } else {
+                        origin_ref.set_grad(Rc::clone(grad));
+                    }
+                }
+            }
+        } else {
+            panic!(
+                "Dangling graph node, no origin tensor found at node: {} with id: {}",
+                self.get_name(),
+                self.get_id(),
+            );
+        }
     }
 
-    fn apply(&self, upstream_gradient: Rc<Tensor<T>>) {
+    fn apply(&self, upstream_gradient: Rc<Tensor<T>>, retain_graph: bool) {
+        if retain_graph {
+            self.save_grad_to_origin_tensor(&upstream_gradient);
+        }
+
         for edge in self.get_edge_list().iter() {
             let next_grad = self.calculate_gradient_for_next_node(&upstream_gradient, Some(&edge));
 
             let next_node = edge.get_next_grad_fn();
-            next_node.borrow().apply(next_grad);
+            next_node.borrow().apply(next_grad, retain_graph);
         }
     }
 

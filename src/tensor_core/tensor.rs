@@ -225,10 +225,10 @@ impl<T> Tensor<T>
 where
     T: DTComp + Debug + Clone + Add<Output = T>,
 {
-    pub fn backward(&self, starting_gradient: Tensor<T>) {
+    pub fn backward(&self, starting_gradient: Tensor<T>, retain_graph: bool) {
         self.__get_tensor_impl()
             .borrow()
-            .backward_(starting_gradient);
+            .backward_(starting_gradient, retain_graph);
     }
 }
 

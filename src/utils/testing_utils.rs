@@ -39,6 +39,13 @@ pub fn test_for_correct_gradient<T>(
         .zip(target_gradients.iter())
         .enumerate()
     {
+        if !y.get_autograd_ref().as_ref().unwrap().grad_is_set() {
+            panic!(
+                "graph is not set on tensor number: {i}\n The tensor is: {:?}",
+                y
+            );
+        }
+
         let y_grad_tensor = y.get_autograd_ref().as_ref().unwrap().get_grad_as_tensor();
         let y_raw = y_grad_tensor.get_raw_data();
 
@@ -89,7 +96,7 @@ pub fn total_test_for_backward_operation<T>(
     test_node_name(output_tensor, node_name);
 
     // call backward and propagate gradient to input
-    output_tensor.backward(Tensor::ones_like(output_tensor));
+    output_tensor.backward(Tensor::ones_like(output_tensor), false);
 
     test_for_correct_gradient(input_tensors, target_gradients, epsilon);
 

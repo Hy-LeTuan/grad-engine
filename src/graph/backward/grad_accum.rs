@@ -45,13 +45,14 @@ where
             }
         } else {
             panic!(
-                "Dangling graph node, no origin tensor found at node: {}",
-                self.get_id()
+                "Dangling graph node, no origin tensor found at node: {} with id: {}",
+                self.get_name(),
+                self.get_id(),
             );
         }
     }
 
-    fn apply(&self, upstream_gradient: Rc<Tensor<T>>) {
+    fn apply(&self, upstream_gradient: Rc<Tensor<T>>, _retain_graph: bool) {
         let next_grad = self.calculate_gradient_for_next_node(&upstream_gradient, None);
         self.save_grad_to_origin_tensor(&next_grad);
     }
