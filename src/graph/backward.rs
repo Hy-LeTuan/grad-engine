@@ -80,6 +80,8 @@ where
     fn get_id(&self) -> usize;
 
     fn get_name(&self) -> String;
+
+    fn get_origin(&self) -> Option<Rc<RefCell<TensorImpl<T>>>>;
 }
 
 impl<T> Display for dyn Backward<T>
