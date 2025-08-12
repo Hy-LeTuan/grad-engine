@@ -17,9 +17,10 @@ where
 {
     pub name: String,
     pub grad: RefCell<Option<Rc<Tensor<T>>>>,
-    pub requires_grad: bool,
     pub grad_fn: Option<Rc<RefCell<dyn Backward<T>>>>,
     pub grad_accum: Option<Rc<RefCell<GradAccum<T>>>>,
+    pub requires_grad: bool,
+    pub is_leaf: bool,
 }
 
 impl<T> AutogradMeta<T>
@@ -33,6 +34,7 @@ where
             requires_grad: true,
             grad_fn: None,
             grad_accum: None,
+            is_leaf: false,
         };
 
         return autograd_meta;
@@ -50,19 +52,14 @@ where
             requires_grad: true,
             grad_fn: None,
             grad_accum: Some(Rc::clone(&grad_accum)),
+            is_leaf: true,
         };
 
         return autograd_meta;
     }
 
     pub fn is_leaf(&self) -> bool {
-        if self.grad_fn.is_some() {
-            return false;
-        } else if self.grad_accum.is_some() {
-            return true;
-        } else {
-            return false;
-        }
+        return self.is_leaf;
     }
 
     pub fn set_grad_fn_to_node(&mut self, node: Rc<RefCell<dyn Backward<T>>>) {
@@ -115,18 +112,23 @@ impl<T> AutogradMeta<T>
 where
     T: DTComp + Clone + Debug + Add<Output = T>,
 {
-    pub fn start_backprop_chain(&self, starting_gradient: Rc<Tensor<T>>) {
-        if let Some(node_arc_ref) = self.get_grad_accum() {
-            node_arc_ref.borrow().apply(starting_gradient);
-            return;
-        }
-
-        if let Some(node_arc_ref) = self.get_grad_fn() {
-            node_arc_ref.borrow().apply(starting_gradient);
-        } else {
+    pub fn start_backprop_chain(&self, starting_gradient: Rc<Tensor<T>>, retain_graph: bool) {
+        if self.is_leaf() {
             println!(
-                "Warning! Calling backward on a tensor that is not a leaf tensor and not an intermediate tensor. This tensor has no connection to the computation graph."
+                "Warning: Calling backward on leaf tensor will directly set the gradient of the tensor to the starting gradient of backpropagation"
             );
+            if let Some(node_arc_ref) = self.get_grad_accum() {
+                node_arc_ref.borrow().apply(starting_gradient, retain_graph);
+                return;
+            }
+        } else {
+            if let Some(node_arc_ref) = self.get_grad_fn() {
+                node_arc_ref.borrow().apply(starting_gradient, retain_graph);
+            } else {
+                panic!(
+                    "Warning: Calling backward on a tensor that is not a leaf tensor and not an intermediate tensor. This tensor has no connection to the computation graph."
+                );
+            }
         }
     }
 }

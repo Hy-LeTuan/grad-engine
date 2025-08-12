@@ -54,7 +54,7 @@ where
     fn save_grad_to_origin_tensor(&self, grad: &Rc<Tensor<T>>);
 
     /// Save received gradient to origin tensor; calculate gradient and traverse through the graph
-    fn apply(&self, upstream_gradient: Rc<Tensor<T>>);
+    fn apply(&self, upstream_gradient: Rc<Tensor<T>>, retain_graph: bool);
 
     /// Function for actual mathemtical calculation of next node's gradients
     fn calculate_gradient_for_next_node(

@@ -189,13 +189,14 @@ impl<T> TensorImpl<T>
 where
     T: DTComp + Debug + Clone + Add<Output = T>,
 {
-    pub fn backward_(&self, starting_gradient: Tensor<T>) {
+    pub fn backward_(&self, starting_gradient: Tensor<T>, retain_graph: bool) {
         match self.get_autograd_ref_() {
             Some(autograd_meta_arc_ref) => {
-                autograd_meta_arc_ref.start_backprop_chain(Rc::new(starting_gradient));
+                autograd_meta_arc_ref
+                    .start_backprop_chain(Rc::new(starting_gradient), retain_graph);
             }
             None => {
-                println!(
+                panic!(
                     "Warning! Calling backward on a tensor that does not have gradient tracking enabled. Please call `requires_grad()` on the tensor and try again."
                 );
             }

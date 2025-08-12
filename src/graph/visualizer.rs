@@ -64,7 +64,7 @@ where
                 "{}{} {}",
                 connector,
                 label.green(),
-                ("[ Leaf grad accumulation ]").yellow()
+                ("[ Gradient accumulation ]").yellow()
             );
         } else {
             println!(
