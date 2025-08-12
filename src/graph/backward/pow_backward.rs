@@ -117,6 +117,18 @@ where
     fn get_name(&self) -> String {
         return self.name.to_string();
     }
+
+    fn get_origin(&self) -> Option<Rc<RefCell<TensorImpl<T>>>> {
+        match &self.origin {
+            Some(origin_weak) => {
+                let origin_rc = origin_weak.upgrade();
+                return origin_rc;
+            }
+            None => {
+                panic!("no origin found on this tensor");
+            }
+        }
+    }
 }
 
 impl<T> PowBackward<T>

@@ -1,3 +1,3 @@
 pub mod backward;
 pub mod edge;
-pub mod visualizer;
+pub mod visualize;
