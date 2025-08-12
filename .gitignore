@@ -25,3 +25,5 @@ media
 medias
 media/**/*
 medias/**/*
+__pycache__
+__pycache__/*/**
