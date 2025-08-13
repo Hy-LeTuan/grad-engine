@@ -26,3 +26,10 @@ def create_anim_node_from_forward_node(node: ForwardNode):
     node = VGroup(node_circle, node_text)
 
     return node
+
+
+def create_arrow_to_connect_node(start_node, end_node, color=WHITE, stroke_width=0.8, tip_length=0.2, buff=1.5):
+    arrow = Arrow(start=start_node.get_center(), end=end_node.get_center(
+    ), color=color, stroke_width=stroke_width, tip_length=tip_length, buff=buff)
+
+    return arrow

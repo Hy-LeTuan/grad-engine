@@ -1,7 +1,7 @@
 from manim import *
 from graph.graph_structures import Graph
 from graph.parse_utils import parse_graph_from_json
-from graph.graph_anim_structures import create_anim_computation_node
+from graph.graph_anim_structures import create_anim_computation_node, create_arrow_to_connect_node
 
 
 class CreateGraph(Scene):
@@ -27,6 +27,10 @@ class CreateGraph(Scene):
             self.play(FadeIn(child_node), )
             self.add(child_node)
 
-            anchor = child_node
+            arrow = create_arrow_to_connect_node(root, child_node)
 
+            self.play(FadeIn(arrow))
+            self.add(arrow)
+
+            anchor = child_node
             self.wait(0.5)
