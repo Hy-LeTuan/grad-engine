@@ -1,7 +1,7 @@
 import json
 import os
 
-from graph_structure import Graph
+from graph_structure import Graph, Node
 
 
 def parse_graph_from_json():
@@ -19,4 +19,6 @@ if __name__ == "__main__":
     graph = Graph(**content)
 
     root = graph.get_root()
-    print(root)
+    reverse_graph = graph.graph_reverse()
+
+    print(reverse_graph)
