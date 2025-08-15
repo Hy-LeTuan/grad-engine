@@ -44,7 +44,10 @@ class ControlLayer:
         self.convert_args = convert_args
 
     def __repr__(self):
-        return f"Layer(members:{len(self.members)}, edges:{len(self.edges)})"
+        return f"{self.get_name()}(members:{len(self.members)}, edges:{len(self.edges)})"
+
+    def get_name(self):
+        return "Layer"
 
     def get_edges(self):
         return self.edges
@@ -94,7 +97,13 @@ class NodeLayer(ControlLayer):
     def __init__(self, convert=lambda x: x, **convert_args):
         super().__init__(convert=convert, **convert_args)
 
+    def get_name(self):
+        return "NodeLayer"
+
 
 class TensorLayer(ControlLayer):
     def __init__(self, convert=lambda x: x, **convert_args):
         super().__init__(convert=convert, **convert_args)
+
+    def get_name(self):
+        return "TensorLayer"
