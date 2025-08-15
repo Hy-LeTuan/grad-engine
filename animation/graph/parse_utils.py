@@ -1,7 +1,7 @@
 import json
 import os
 
-from graph.graph_structures import Graph
+from graph.graph_raw_representations import Graph
 
 
 def parse_graph_from_json() -> Graph:

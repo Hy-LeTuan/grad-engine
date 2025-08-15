@@ -1,4 +1,5 @@
 from graph.graph_anim_structures import ForwardNode, BackwardNode
+from manim import *
 
 
 class DirectionInfo:
@@ -43,6 +44,10 @@ class ControlLayer:
 
         self.convert_args = convert_args
 
+        self.is_setup = False
+
+        self.display_group = []
+
     def __repr__(self):
         return f"{self.get_name()}(members:{len(self.members)}, edges:{len(self.edges)})"
 
@@ -66,6 +71,12 @@ class ControlLayer:
 
     def get_members(self):
         return self.members
+
+    def get_is_setup(self) -> bool:
+        return self.is_setup
+
+    def get_display_group(self) -> VGroup:
+        return self.display_group
 
     def set_edges(self, new_edges: iter):
         self.edges.extend(new_edges)
@@ -91,6 +102,25 @@ class ControlLayer:
             return (self.map_raw_to_member_index[new_raw_mem], self.get_mem_from_raw(new_raw_mem))
         else:
             return self.get_mem_from_raw(new_raw_mem)
+
+    def format_display(self, scene: Scene):
+        scene.add(self.display_group)
+        scene.play(FadeIn(self.display_group))
+
+    def setup(self):
+        self.display_group = VGroup(
+            *self.members).arrange(DOWN, buff=0.8).move_to(ORIGIN)
+
+        max_height = config.frame_height * 0.9
+
+        # Only scale if there's more than one element and it's too tall
+        if len(self.members) > 1 and self.display_group.height > max_height:
+            self.display_group.scale(max_height / self.display_group.height)
+
+        self.is_setup = True
+
+    def display(self, scene: Scene):
+        self.format_display(scene)
 
 
 class NodeLayer(ControlLayer):
