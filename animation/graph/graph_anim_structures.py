@@ -41,27 +41,28 @@ def create_anim_node_from_forward_node(node: ForwardNode) -> VGroup:
     return node
 
 
-def create_origin_anim_tensor_from_backward_node(node: BackwardNode) -> MobjectMatrix:
-    origin: np.ndarray = node.get_origin().get_data()
-    shape = Text("(" + ", ".join([str(d) for d in origin.shape]) + ")")
+def create_anim_tensor(node: ForwardNode | BackwardNode, forward=False, tensor_type="gradient") -> MobjectMatrix:
+    if tensor_type == "gradient":
+        tensor: np.ndarray = node.get_backward().get_gradient(
+        ).get_data() if forward else node.get_gradient().get_data()
+    else:
+        tensor: np.ndarray = node.get_backward().get_origin(
+        ).get_data() if forward else node.get_origin().get_data()
 
-    if origin.ndim == 0:
+    if tensor.ndim == 0:
         name = Text("Sca")
-    elif origin.ndim == 1:
+    elif tensor.ndim == 1:
         name = Text("Vec")
     else:
         name = Text("Mat")
 
+    shape = Text("(" + ", ".join([str(d) for d in tensor.shape]) + ")")
     cell_content = VGroup(name, shape).arrange(
         DOWN, buff=0.5)
 
     matrix = MobjectMatrix([[cell_content]])
 
     return matrix
-
-
-def create_origin_anim_tensor_from_forward_node(node: ForwardNode) -> MobjectMatrix:
-    return create_origin_anim_tensor_from_backward_node(node.get_backward())
 
 
 def create_arrow_to_connect_node(start_node, end_node, color=WHITE, stroke_width=0.8, tip_length=0.2, buff=1.5):
@@ -73,7 +74,7 @@ def create_arrow_to_connect_node(start_node, end_node, color=WHITE, stroke_width
 
 def build_anim_backward_graph(starting_nodes, parent_node_layer, layer_list: list):
     tensor_layer = TensorLayer(
-        convert=create_origin_anim_tensor_from_backward_node)
+        convert=create_anim_tensor, forward=False, tensor_type="gradient")
 
     if tensor_layer not in layer_list:
         layer_list.append(tensor_layer)
