@@ -6,6 +6,15 @@ class DirectionInfo:
         self.layer = layer
         self.id = id
 
+    def get_layer(self):
+        return self.layer
+
+    def get_id(self):
+        return self.id
+
+    def get_conneted_mem(self):
+        return self.layer.get_mem(self.id)
+
 
 class EdgeBetweenLayerMembers:
     def __init__(self, layer1, id1, layer2, id2):
@@ -33,6 +42,9 @@ class ControlLayer:
         self.edges: list[EdgeBetweenLayerMembers] = []
 
         self.convert_args = convert_args
+
+    def __repr__(self):
+        return f"Layer(members:{len(self.members)}, edges:{len(self.edges)})"
 
     def get_edges(self):
         return self.edges
