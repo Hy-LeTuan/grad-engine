@@ -1,8 +1,8 @@
 from manim import *
 from graph.graph_structures import Graph
 from graph.parse_utils import parse_graph_from_json
-from graph.graph_anim_structures import create_anim_computation_node, create_arrow_to_connect_node, create_origin_anim_tensor_from_backward_node
-from graph.graph_control_structure import NodeLayer
+from graph.graph_anim_structures import create_anim_computation_node, create_arrow_to_connect_node, create_origin_anim_tensor_from_forward_node
+from graph.graph_control_structure import NodeLayer, TensorLayer, EdgeBetweenLayerMembers
 
 
 class CreateGraph(Scene):
@@ -14,33 +14,40 @@ class CreateGraph(Scene):
 
     def animate_forward_graph(self):
         starting_nodes = self.graph.get_forward_nodes()
+        parent_node_layer = NodeLayer(convert=create_anim_computation_node)
+        tensor_layer = TensorLayer(
+            convert=create_origin_anim_tensor_from_forward_node)
 
         for node in starting_nodes:
-            tensor = create_origin_anim_tensor_from_backward_node(
-                node.get_backward())
+            (parent_anim_node_id, parent_anim_node) = parent_node_layer.safe_append_and_return(
+                node, with_id=True)
 
-            print(tensor.get_center())
-            self.play(FadeIn(tensor))
+            (tensor_anim_id, tensor_anim) = tensor_layer.safe_append_and_return(
+                node, with_id=True)
 
-            node_layer = NodeLayer(
+            parent_node_layer.append_edge(EdgeBetweenLayerMembers(
+                parent_node_layer, parent_anim_node_id, tensor_layer, tensor_anim_id))
+
+            self.play(FadeIn(tensor_anim))
+            self.add(tensor_anim)
+            self.wait(1)
+
+            # parent node -> tensor (result of that node) -> compute function that the tensor contributes to
+
+            next_node_layer = NodeLayer(
                 convert=create_anim_computation_node, forward=True)
 
             for child in node.get_children():
-                child_anim_node = node_layer.safe_append_and_return(child)
+                (child_anim_node_id, child_anim_node) = next_node_layer.safe_append_and_return(
+                    child, with_id=True)
+
+                tensor_layer.append_edge(EdgeBetweenLayerMembers(
+                    tensor_layer, tensor_anim_id, next_node_layer, child_anim_node_id))
 
                 self.play(FadeIn(child_anim_node))
                 self.add(child_anim_node)
 
-                arrow = create_arrow_to_connect_node(
-                    tensor, child_anim_node)
-
-                self.play(FadeIn(arrow))
-                self.add(arrow)
-
             break
-
-        print(next_layer_nodes)
-        print(next_layer_anim_nodes)
 
     def animate_backward_graph(self):
         root = self.graph.get_root()
