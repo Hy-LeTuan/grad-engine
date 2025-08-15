@@ -17,7 +17,7 @@ class TensorRepr:
 
         return data_np_reshape
 
-    def get_data(self):
+    def get_data(self) -> np.ndarray:
         return self.data
 
     def get_shape(self):
@@ -81,13 +81,13 @@ class ForwardNode:
         self.children = []
 
     def __repr__(self):
-        return f"ForwardNode(name={self.get_name()}, num_contributes_to={len(self.get_children())}"
+        return f"ForwardNode(name={self.get_name()}, num_contributes_to={len(self.get_children())})"
 
     def format_name(backward_node_name: str):
         if backward_node_name == "GradAccum":
             return "LeafCreation"
         else:
-            backward_node_name_split = backward_node_name.split("Backward")[0]
+            backward_node_name_split = backward_node_name.split("Backward")
             return backward_node_name_split[0] + "Forward"
 
     def get_backward(self):
