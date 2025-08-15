@@ -54,7 +54,7 @@ class ControlLayer:
     def get_name(self):
         return "Layer"
 
-    def get_edges(self):
+    def get_edges(self) -> list[EdgeBetweenLayerMembers]:
         return self.edges
 
     def get_mem_id_from_raw(self, raw_mem: ForwardNode | BackwardNode) -> int:
@@ -109,9 +109,9 @@ class ControlLayer:
 
     def setup(self):
         self.display_group = VGroup(
-            *self.members).arrange(DOWN, buff=0.8).move_to(ORIGIN)
+            *self.members).arrange(DOWN, buff=1.5).move_to(ORIGIN)
 
-        max_height = config.frame_height * 0.9
+        max_height = config.frame_height * 0.95
 
         # Only scale if there's more than one element and it's too tall
         if len(self.members) > 1 and self.display_group.height > max_height:

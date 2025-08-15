@@ -72,45 +72,45 @@ def create_arrow_to_connect_node(start_node, end_node, color=WHITE, stroke_width
     return arrow
 
 
-def build_anim_backward_graph(starting_nodes, parent_node_layer, layer_list: list):
-    tensor_layer = TensorLayer(
-        convert=create_anim_tensor, forward=False, tensor_type="gradient")
-
-    if tensor_layer not in layer_list:
-        layer_list.append(tensor_layer)
-
-    if parent_node_layer not in layer_list:
-        layer_list.append(parent_node_layer)
-
-    next_node_layer = NodeLayer(
+def build_anim_backward_graph(starting_nodes, parent_tensor_layer, layer_list: list):
+    node_layer = NodeLayer(
         convert=create_anim_computation_node, forward=False)
+
+    if parent_tensor_layer not in layer_list:
+        layer_list.append(parent_tensor_layer)
+
+    if node_layer not in layer_list:
+        layer_list.append(node_layer)
+
+    next_tensor_layer = TensorLayer(
+        convert=create_anim_tensor, forward=False, tensor_type="gradient")
 
     next_starting_nodes = []
 
     for node in starting_nodes:
-        (parent_anim_node_id, parent_anim_node) = parent_node_layer.safe_append_and_return(
+        (tensor_anim_id, tensor_anim) = parent_tensor_layer.safe_append_and_return(
             node, with_id=True)
 
-        (tensor_anim_id, tensor_anim) = tensor_layer.safe_append_and_return(
+        (node_anim_id, node_anim) = node_layer.safe_append_and_return(
             node, with_id=True)
 
-        parent_node_layer.append_edge(EdgeBetweenLayerMembers(
-            tensor_layer, tensor_anim_id, parent_node_layer, parent_anim_node_id))
+        # upstream gradient -> backward node
+        parent_tensor_layer.append_edge(EdgeBetweenLayerMembers(
+            parent_tensor_layer, tensor_anim_id, node_layer, node_anim_id))
 
         if len(node.get_children()) > 0:
-
             for child in node.get_children():
-                (child_anim_node_id, child_anim_node) = next_node_layer.safe_append_and_return(
+                (child_tensor_id, child_tensor_anim) = next_tensor_layer.safe_append_and_return(
                     child, with_id=True)
 
-                tensor_layer.append_edge(EdgeBetweenLayerMembers(
-                    tensor_layer, tensor_anim_id, next_node_layer, child_anim_node_id))
+                parent_tensor_layer.append_edge(EdgeBetweenLayerMembers(
+                    node_layer, node_anim_id, next_tensor_layer, child_tensor_id))
 
                 next_starting_nodes.append(child)
 
     if len(next_starting_nodes) > 0:
         build_anim_backward_graph(
-            next_starting_nodes, next_node_layer, layer_list)
+            next_starting_nodes, next_tensor_layer, layer_list)
 
 
 def position_layer_list_horizontal(layer_list: list[NodeLayer | TensorLayer], total_width: float, spacing: float):
