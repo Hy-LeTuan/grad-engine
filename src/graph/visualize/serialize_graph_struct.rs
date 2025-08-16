@@ -21,3 +21,10 @@ pub struct TensorJSON<T> {
     pub offset: Option<usize>,
     pub shape: Vec<usize>,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NodeJSONAcyclic {
+    pub name: String,
+    pub origin: String,
+    pub gradient: String,
+}
