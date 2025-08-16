@@ -1,4 +1,4 @@
-from graph.graph_raw_representations import ForwardNode, BackwardNode
+from graph.graph_raw_representations import ForwardNode, BackwardNode, Node, TensorRepr
 from graph.graph_control_structure import NodeLayer, TensorLayer, EdgeBetweenLayerMembers
 
 from manim import *
@@ -114,8 +114,6 @@ def build_anim_backward_graph(starting_nodes, parent_tensor_layer, layer_list: l
 
 
 def position_layer_list_horizontal(layer_list: list[NodeLayer | TensorLayer], total_width: float, spacing: float):
-    max_obj_width = 0
-
     max_obj_width = 0
 
     for layer in layer_list:
