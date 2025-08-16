@@ -1,5 +1,7 @@
 import numpy as np
 from collections import deque
+from manim import *
+import re
 
 
 class TensorRepr:
@@ -189,15 +191,87 @@ class Graph:
         return ending_list
 
 
+def create_anim_tensor_from_tensor(tensor: TensorRepr) -> MobjectMatrix:
+    tensor: np.ndarray = tensor.get_data()
+
+    if tensor.ndim == 0:
+        name = Text("Sca")
+    elif tensor.ndim == 1:
+        name = Text("Vec")
+    else:
+        name = Text("Mat")
+
+    shape = Text("(" + ", ".join([str(d) for d in tensor.shape]) + ")")
+
+    cell_content = VGroup(name, shape).arrange(
+        DOWN, buff=0.5)
+
+    matrix = MobjectMatrix([[cell_content]])
+
+    return matrix
+
+
+def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
+    if node.get_name() == "GradAccum":
+        node_text = Text("Accum", color=WHITE).scale(0.8)
+    else:
+        split_string = re.findall('[A-Z][a-z]*', node.get_name())
+
+        start_text = Text(split_string[0], color=WHITE).scale(0.8)
+
+        end_text = Text(split_string[1], color=WHITE).scale(0.8)
+
+        node_text = VGroup(start_text, end_text).arrange(DOWN, buff=0.2)
+
+    node_circle = Circle(color=BLUE, stroke_width=4, stroke_color=BLUE,
+                         fill_color=BLUE, fill_opacity=0.8, radius=1.8)
+
+    node_text.move_to(node_circle.get_center())
+    new_node = VGroup(node_circle, node_text)
+
+    return new_node
+
+
 class AcyclicGraph:
     def __init__(self, tensor_map, node_map, edges):
         self.tensor_map = tensor_map
         self.node_map = node_map
+
+        self.anim_tensor_map = self.create_anim_tensor_map(tensor_map)
+        self.anim_node_map = self.create_anim_node_map(node_map)
+
         self.edges = edges
         self.reversed_edges = self.reverse_edge(edges)
 
     def __repr__(self):
         return f"AcyclicGraph(nodes={len(self.node_map)}, edges={len(self.edges)})"
+
+    def reverse_edge(self, edges) -> list[(str, str)]:
+        reversed_edges = []
+        for edge in edges:
+            reversed_edge = (edge[1], edge[0])
+
+            reversed_edges.append(reversed_edge)
+
+        return reversed_edges
+
+    def create_anim_node_map(self, node_map: dict[str, Node]):
+        anim_node_map = {}
+        for (id, node) in node_map.items():
+            anim_node = create_anim_node_from_acyclic_node(node)
+
+            anim_node_map[id] = anim_node
+
+        return anim_node_map
+
+    def create_anim_tensor_map(self, tensor_map: dict[str, TensorRepr]):
+        anim_tensor_map = {}
+
+        for (id, tensor) in tensor_map.items():
+            anim_tensor = create_anim_tensor_from_tensor(tensor)
+            anim_tensor_map[id] = anim_tensor
+
+        return anim_tensor_map
 
     def get_tensor_map(self) -> dict[str, TensorRepr]:
         return self.tensor_map
@@ -208,11 +282,20 @@ class AcyclicGraph:
     def get_edges(self) -> list[(str, str)]:
         return self.edges
 
-    def reverse_edge(self, edges) -> list[(str, str)]:
-        reversed_edges = []
-        for edge in edges:
-            reversed_edge = (edge[1], edge[0])
+    def get_anim_node_map(self) -> dict[str, VGroup]:
+        return self.anim_node_map
 
-            reversed_edges.append(reversed_edge)
+    def get_anim_tensor_map(self) -> dict[str, MobjectMatrix]:
+        return self.anim_tensor_map
 
-        return reversed_edges
+    def query_tensor(self, tensor_id: str) -> TensorRepr:
+        return self.tensor_map[tensor_id]
+
+    def query_node(self, node_id: str) -> Node:
+        return self.node_map[node_id]
+
+    def query_anim_tensor(self, tensor_id: str) -> MobjectMatrix:
+        return self.anim_tensor_map[tensor_id]
+
+    def query_anim_node(self, node_id: str) -> VGroup:
+        return self.anim_node_map[node_id]
