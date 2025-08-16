@@ -65,9 +65,28 @@ def create_anim_tensor(node: ForwardNode | BackwardNode, forward=False, tensor_t
     return matrix
 
 
-def create_arrow_to_connect_node(start_node, end_node, color=WHITE, stroke_width=0.8, tip_length=0.2, buff=1.5):
-    arrow = Arrow(start=start_node.get_center(), end=end_node.get_center(
-    ), color=color, stroke_width=stroke_width, tip_length=tip_length, buff=buff)
+def create_arrow_to_connect_node(
+    start_node: VGroup,
+    end_node: VGroup,
+    color=WHITE,
+    stroke_width=2.5,   # very slim for neat appearance
+    tip_length=0.1,    # small, proportional arrowhead
+    buff=0.2            # tight buffer to avoid clipping
+):
+    start_point = start_node.get_boundary_point(RIGHT)
+    end_point = end_node.get_boundary_point(LEFT)
+
+    arrow = Arrow(
+        start_point,
+        end_point,
+        buff=buff,
+        stroke_width=stroke_width,
+        color=color,
+        tip_length=tip_length
+    )
+
+    arrow.set_opacity(0.75)  # subtle transparency for clean look
+    arrow.set_z_index(-1)
 
     return arrow
 

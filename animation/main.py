@@ -69,7 +69,7 @@ class CreateAcyclicGraph(Scene):
             destination_node = self.acyclic_graph.query_anim_node(edge[1])
 
             arrow = create_arrow_to_connect_node(
-                start_node=origin_node, end_node=destination_node)
+                start_node=origin_node, end_node=destination_node, buff=0)
 
             self.add(arrow)
             self.play(FadeIn(arrow))
@@ -105,8 +105,6 @@ class CreateAcyclicGraph(Scene):
                          max_height=max_height, layer=layer)
 
             self.play(FadeIn(layer))
-
-            print(f"at rank: {rank}, nodes are: {anim_node_list}")
 
         # draw arrows
         self.draw_arrows()
