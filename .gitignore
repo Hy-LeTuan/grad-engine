@@ -29,5 +29,7 @@ __pycache__
 
 __pycache__/*/**
 
+output/tensors
+output/nodes
 output/tensors/*/**
 output/nodes/*/**
