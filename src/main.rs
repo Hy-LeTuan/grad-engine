@@ -1,6 +1,9 @@
 pub mod config;
 pub mod graph;
-use crate::graph::visualize::serialize_graph_fn::serialize_and_export_graph;
+#[allow(unused)]
+use crate::graph::visualize::serialize_graph_fn::{
+    export_graph_acyclic, serialize_and_export_graph,
+};
 use crate::graph::visualize::visualizer::VisualizerTrait;
 use crate::ops::public_ops::matmul::matmul;
 use graph::visualize::visualizer::Visualizer;
@@ -19,8 +22,9 @@ fn main() {
     let x4 = &x1 + 3.0;
     let x5 = &x2 - &x3;
 
-    let x6 = matmul(&x4, &x5);
+    let x6 = matmul(&x4, &x5) - &x3;
     let x7 = Tensor::ones_like(&x6);
+
     x7.requires_grad();
 
     let z = x6.ln() + &x7.exp();
@@ -33,5 +37,6 @@ fn main() {
     x3.display_grad();
     x7.display_grad();
 
-    serialize_and_export_graph(&z);
+    // serialize_and_export_graph(&z);
+    export_graph_acyclic(&z);
 }
