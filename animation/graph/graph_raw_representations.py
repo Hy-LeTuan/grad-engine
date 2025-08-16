@@ -3,10 +3,11 @@ from collections import deque
 
 
 class TensorRepr:
-    def __init__(self, data, shape, offset):
+    def __init__(self, data=[], shape=(), offset=0, id=""):
         self.shape = shape
         self.offset = offset
         self.data = TensorRepr.create_array_from_raw(data, shape)
+        self.id = id
 
     def __repr__(self):
         return f"Tensor(data={self.get_data()}, shape={self.get_shape()}, offset={self.get_offset()})"
@@ -25,6 +26,12 @@ class TensorRepr:
 
     def get_offset(self):
         return self.offset
+
+    def get_id(self) -> str:
+        return self.id
+
+    def set_id(self, id: str):
+        self.id = id
 
 
 class BackwardNode:
@@ -106,6 +113,44 @@ class ForwardNode:
         self.children.append(child)
 
 
+class Node:
+    def __init__(self, name="", origin="", gradient="", id=""):
+        self.name = name
+        self.origin = origin
+        self.gradient = gradient
+        self.id = id
+
+    def __repr__(self):
+        return f"Node(name={self.get_name()}, origin={self.origin}, gradient={self.gradient})"
+
+    def get_name(self) -> str:
+        return self.name
+
+    def get_origin(self) -> str:
+        return self.origin
+
+    def get_gradient(self) -> str:
+        return self.gradient
+
+    def get_origin_tensor(self) -> TensorRepr:
+        return self.origin_tensor
+
+    def get_gradient_tensor(self) -> TensorRepr:
+        return self.gradient_tensor
+
+    def get_id(self) -> str:
+        return self.id
+
+    def set_origin(self, tensor: TensorRepr):
+        self.origin_tensor = tensor
+
+    def set_gradient(self, tensor: TensorRepr):
+        self.gradient_tensor = tensor
+
+    def set_id(self, id: str):
+        self.id = id
+
+
 class Graph:
     def __init__(self, root: BackwardNode):
         self.root = BackwardNode(**root)
@@ -142,3 +187,32 @@ class Graph:
                 ending_list.append(parent_forward)
 
         return ending_list
+
+
+class AcyclicGraph:
+    def __init__(self, tensor_map, node_map, edges):
+        self.tensor_map = tensor_map
+        self.node_map = node_map
+        self.edges = edges
+        self.reversed_edges = self.reverse_edge(edges)
+
+    def __repr__(self):
+        return f"AcyclicGraph(nodes={len(self.node_map)}, edges={len(self.edges)})"
+
+    def get_tensor_map(self) -> dict[str, TensorRepr]:
+        return self.tensor_map
+
+    def get_node_map(self) -> dict[str, Node]:
+        return self.node_map
+
+    def get_edges(self) -> list[(str, str)]:
+        return self.edges
+
+    def reverse_edge(self, edges) -> list[(str, str)]:
+        reversed_edges = []
+        for edge in edges:
+            reversed_edge = (edge[1], edge[0])
+
+            reversed_edges.append(reversed_edge)
+
+        return reversed_edges
