@@ -276,6 +276,9 @@ class AcyclicGraph:
 
         return anim_tensor_map
 
+    def sort_edge(self, rank_map: dict[str, int]):
+        self.edges = sorted(self.edges, key=lambda x: rank_map[x[0]])
+
     def get_tensor_map(self) -> dict[str, TensorRepr]:
         return self.tensor_map
 
