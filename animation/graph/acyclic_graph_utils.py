@@ -2,7 +2,7 @@ from manim import *
 from graph.graph_raw_representations import AcyclicGraph
 
 
-def rank_nodes_in_acyclic_graph(acyclic_graph: AcyclicGraph) -> (dict[str, int], int):
+def rank_nodes_in_acyclic_graph(acyclic_graph: AcyclicGraph) -> tuple[int, dict[str, int]]:
     """
     Create and return the ranking of all animation nodes in a map. The map is based on the node id.
     """
@@ -41,8 +41,8 @@ def scale_nodes_horizontally(total_width: float, max_rank: int, anim_node_map: d
             anim_node.scale(scale_factor)
 
 
-def create_rank_first_anim_nod_map(node_rank: dict[str, int], acylic_graph: AcyclicGraph) -> dict[int, list[(str, VGroup)]]:
-    position_node_list: dict[int, list[(str, VGroup)]] = {}
+def create_rank_first_anim_nod_map(node_rank: dict[str, int], acylic_graph: AcyclicGraph) -> dict[int, list[tuple[str, VGroup]]]:
+    position_node_list: dict[int, list[tuple[str, VGroup]]] = {}
 
     for (anim_node_id, anim_node_ranking) in node_rank.items():
         if anim_node_ranking in position_node_list:

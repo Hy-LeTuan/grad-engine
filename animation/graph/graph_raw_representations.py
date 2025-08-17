@@ -212,20 +212,22 @@ def create_anim_tensor_from_tensor(tensor: TensorRepr) -> MobjectMatrix:
 
 
 def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
+    accum = False
     if node.get_name() == "GradAccum":
-        node_text = Text("Accum", color=WHITE, weight=BOLD).scale(0.7)
+        node_text = Text("GradAccum", color=WHITE).scale(0.7)
+        accum = True
     else:
         split_string = re.findall('[A-Z][a-z]*', node.get_name())
-        start_text = Text(split_string[0], color=WHITE, weight=BOLD).scale(0.7)
+        start_text = Text(split_string[0], color=WHITE).scale(0.7)
         end_text = Text(split_string[1], color=WHITE).scale(0.7)
         node_text = VGroup(start_text, end_text).arrange(DOWN, buff=0.15)
 
     node_circle = Circle(
         radius=1.6,
-        color=BLUE,
+        color=PURPLE_E if accum else BLUE,
         stroke_width=2.5,
-        stroke_color=WHITE,   # crisp outline
-        fill_color=BLUE,
+        stroke_color=ORANGE if accum else WHITE,
+        fill_color=PURPLE_E if accum else BLUE,
         fill_opacity=1.0      # fully opaque, hides arrows behind
     )
 
