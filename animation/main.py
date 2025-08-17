@@ -1,10 +1,10 @@
 from manim import *
+from graph.acyclic_graph_utils import rank_nodes_in_acyclic_graph, scale_nodes_horizontally, create_rank_first_anim_nod_map, scale_vgroup
+from graph.graph_anim_structures import create_arrow_to_connect_node, position_layer_list_horizontal, create_anim_tensor, build_anim_backward_graph
+from graph.graph_control_structure import NodeLayer, TensorLayer
 from graph.graph_raw_representations import Graph, AcyclicGraph
 from graph.parse_utils import parse_graph_from_json, create_acyclic_graph
-from graph.graph_anim_structures import create_anim_computation_node, create_arrow_to_connect_node, position_layer_list_horizontal, create_arrow_to_connect_node, create_anim_tensor, build_anim_backward_graph
-from graph.graph_control_structure import NodeLayer, TensorLayer, EdgeBetweenLayerMembers
-
-from graph.acyclic_graph_utils import rank_nodes_in_acyclic_graph, scale_nodes_horizontally, create_rank_first_anim_nod_map, scale_vgroup
+from utils.anim_utils import pulse
 
 
 class CreateGraph(Scene):
@@ -59,23 +59,6 @@ class CreateGraph(Scene):
         self.animate_backward_graph()
 
 
-def pulse(node: VGroup, flash_color=ORANGE, base_color=BLUE, scale_factor=1.1, run_time=0.8):
-    circle, label = node[0], node[1]
-
-    return Succession(
-        AnimationGroup(
-            Transform(circle, circle.copy().set_fill(flash_color, opacity=1)),
-            node.animate.scale(scale_factor),
-            run_time=run_time / 2
-        ),
-        AnimationGroup(
-            Transform(circle, circle.copy().set_fill(base_color, opacity=1)),
-            node.animate.scale(1 / scale_factor),
-            run_time=run_time / 2
-        )
-    )
-
-
 class CreateAcyclicGraph(Scene):
     def setup(self):
         self.acyclic_graph: AcyclicGraph = create_acyclic_graph()
@@ -103,6 +86,41 @@ class CreateAcyclicGraph(Scene):
                   Write(caption, run_time=1.2))
         self.play(FadeOut(caption_group, run_time=0.8))
 
+    def display_gradient_change(self, edge, arrow):
+        # display matrix movement
+        origin_gradient = self.acyclic_graph.query_anim_tensor(self.acyclic_graph.query_node(
+            edge[0]).get_gradient()).copy().scale(0.5)
+
+        destination_gradient = self.acyclic_graph.query_anim_tensor(self.acyclic_graph.query_node(
+            edge[1]).get_gradient()).copy().scale(0.5)
+
+        # add temporary glow effect to tensor
+        glowing_tensor = origin_gradient.set_color(YELLOW)
+        self.add(glowing_tensor)
+
+        # animate tensor moving from origin to destination along arrow with glow
+        self.play(
+            MoveAlongPath(
+                destination_gradient,
+                arrow,
+                run_time=1.5,  # slightly longer for smoother effect
+                rate_func=smooth  # smoother rate function
+            ),
+            MoveAlongPath(
+                glowing_tensor,
+                arrow,
+                run_time=1.5,
+                rate_func=smooth
+            ),
+            FadeIn(glowing_tensor, run_time=0.5),  # fade in glow at start
+        )
+
+        # fade out both tensor and glow
+        self.play(
+            FadeOut(destination_gradient, run_time=0.5),
+            FadeOut(glowing_tensor, run_time=0.5)
+        )
+
     def draw_arrows(self):
         for edge in self.acyclic_graph.get_edges():
             origin_node = self.acyclic_graph.query_anim_node(edge[0])
@@ -121,6 +139,7 @@ class CreateAcyclicGraph(Scene):
                 )
             )
 
+            # display caption
             if "Accum" in self.acyclic_graph.query_node(edge[1]).get_name():
                 self.play(pulse(destination_node,
                           flash_color=ORANGE, base_color=BLUE))
@@ -129,7 +148,10 @@ class CreateAcyclicGraph(Scene):
                     destination_node=destination_node, text="Accumulate Gradient", fill_color=GREEN)
             else:
                 self.display_caption_for_node(
-                    destination_node=destination_node, text="Calculate Gradient", fill_color=GREEN)
+                    destination_node=destination_node, text="Calculate Gradient", fill_color=BLUE)
+
+            # display gradient change
+            self.display_gradient_change(edge, arrow)
 
             self.wait(0.25)
 
@@ -151,7 +173,7 @@ class CreateAcyclicGraph(Scene):
 
         for (rank, node_list) in rank_first_anim_node_map.items():
             layer_position = LEFT * (total_width / 2) + \
-                RIGHT * rank * spacing
+                (RIGHT * rank * spacing)
 
             anim_node_list = list(map(lambda x: x[1], node_list))
 
@@ -164,7 +186,9 @@ class CreateAcyclicGraph(Scene):
             scale_vgroup(num_elem=len(anim_node_list),
                          max_height=max_height, layer=layer)
 
-            self.play(FadeIn(layer))
+            self.play(Create(layer, lag_ratio=1.2))
+
+            self.wait(0.5)
 
     def construct(self):
         introduction = Text("Backward Computation Graph").move_to(ORIGIN)
