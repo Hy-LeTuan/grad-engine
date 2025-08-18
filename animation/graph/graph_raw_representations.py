@@ -217,6 +217,7 @@ def create_anim_tensor_from_tensor(tensor: TensorRepr) -> MobjectMatrix:
 def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
     accum = False
     node_title_text = ""
+    ops_type = ""
 
     if node.get_name() == "GradAccum":
         node_text = VGroup(Text("Grad", color="#333333").scale(0.7), Text(
@@ -224,29 +225,84 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
         accum = True
     else:
         splitted = re.findall('[A-Z][a-z]*', node.get_name())
-        ops_type = splitted[0]
+        ops_name = splitted[0]
 
-        if ops_type == "Ln":
+        if ops_name == "Ln":
             node_title_text = "Nat. Log"
         else:
-            node_title_text = ops_type
+            node_title_text = ops_name
+
+        print("checking for ops name: ", ops_name)
+        if ops_name in ["Add", "Sub", "Mul", "Div"]:
+            ops_type = "binary"
+        elif ops_name in ["Sum", "Mean", "Min", "Max"]:
+            ops_type = "reduction"
+        elif ops_name in ["Ln", "Log", "Exp", "Tanh"]:
+            ops_type = "self-element"
+        else:
+            ops_type = "advanced"
 
         node_title = Text(node_title_text, color="#333333").scale(0.7)
         node_text = VGroup(node_title, Text(
             "Backward", color="#333333").scale(0.7)).arrange(DOWN, buff=0.15)
 
-    node_circle = Circle(
-        radius=1.6,
-        color=DARK_GREY,
-        stroke_width=1.0,
-        stroke_color="#FFC107" if accum else "#444444",
-        fill_color="#CBAACB" if accum else "#A7C7E7",
-        fill_opacity=1.0
-    )
+    if accum:
+        node_shape = Circle(
+            radius=1.6,
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#A052A0",        # muted purple stroke
+            fill_color="#D8BFD8",          # pastel thistle fill
+            fill_opacity=1.0
+        )
+    elif ops_type == "binary":
+        node_shape = RoundedRectangle(
+            width=2.8,
+            height=2.0,
+            corner_radius=0.4,             # slightly rounded
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#4B4B4B",
+            fill_color="#87CEFA",          # pastel sky blue
+            fill_opacity=1.0
+        )
+    elif ops_type == "reduction":
+        node_shape = RoundedRectangle(
+            side_length=3.0,               # slightly smaller for balance
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#4B4B4B",
+            fill_color="#FFB6C1",          # light pink
+            fill_opacity=1.0
+        )
+    elif ops_type == "self-element":
+        node_shape = RoundedRectangle(
+            width=2.8,
+            height=2.0,
+            corner_radius=0.4,
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#4B4B4B",
+            fill_color="#98FB98",          # pale green
+            fill_opacity=1.0
+        )
+    elif ops_type == "advanced":
+        node_shape = RoundedRectangle(
+            width=3.0,
+            height=2.0,
+            corner_radius=0.5,             # slightly more rounded for distinction
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#4B4B4B",
+            fill_color="#FFDAB9",          # peach puff
+            fill_opacity=1.0
+        )
+    else:
+        raise ValueError(f"Unknown ops_type: {ops_type}, ops_name: {ops_name}")
 
-    node_text.move_to(node_circle.get_center())
+    node_text.move_to(node_shape.get_center())
+    new_node = VGroup(node_shape, node_text)
 
-    new_node = VGroup(node_circle, node_text)
     return new_node
 
 
