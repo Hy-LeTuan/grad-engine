@@ -118,6 +118,7 @@ class ForwardNode:
 class Node:
     def __init__(self, name="", origin="", gradient="", id=""):
         self.name = name
+        self.ops_name = re.findall('[A-Z][a-z]*', name)[0]
         self.origin = origin
         self.gradient = gradient
         self.id = id
@@ -142,6 +143,9 @@ class Node:
 
     def get_id(self) -> str:
         return self.id
+
+    def get_ops_name(self) -> str:
+        return self.ops_name
 
     def set_origin(self, tensor: TensorRepr):
         self.origin_tensor = tensor
@@ -232,7 +236,6 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
         else:
             node_title_text = ops_name
 
-        print("checking for ops name: ", ops_name)
         if ops_name in ["Add", "Sub", "Mul", "Div"]:
             ops_type = "binary"
         elif ops_name in ["Sum", "Mean", "Min", "Max"]:
@@ -244,11 +247,11 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
 
         node_title = Text(node_title_text, color="#333333").scale(0.7)
         node_text = VGroup(node_title, Text(
-            "Backward", color="#333333").scale(0.7)).arrange(DOWN, buff=0.15)
+            "Bwd", color="#333333").scale(0.7)).arrange(DOWN, buff=0.15)
 
     if accum:
         node_shape = Circle(
-            radius=1.6,
+            radius=1.5,
             color=BLACK,
             stroke_width=1.0,
             stroke_color="#A052A0",        # muted purple stroke
