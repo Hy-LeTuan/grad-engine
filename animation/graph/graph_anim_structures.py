@@ -50,17 +50,17 @@ def create_anim_tensor(node: ForwardNode | BackwardNode, forward=False, tensor_t
         ).get_data() if forward else node.get_origin().get_data()
 
     if tensor.ndim == 0:
-        name = Text("Sca")
+        name = Text("Sca", color=BLACK)
     elif tensor.ndim == 1:
-        name = Text("Vec")
+        name = Text("Vec", color=BLACK)
     else:
-        name = Text("Mat")
+        name = Text("Mat", color=BLACK)
 
     shape = Text("(" + ", ".join([str(d) for d in tensor.shape]) + ")")
     cell_content = VGroup(name, shape).arrange(
         DOWN, buff=0.5)
 
-    matrix = MobjectMatrix([[cell_content]])
+    matrix = MobjectMatrix([[cell_content]], color=BLACK)
 
     return matrix
 
@@ -68,13 +68,14 @@ def create_anim_tensor(node: ForwardNode | BackwardNode, forward=False, tensor_t
 def create_arrow_to_connect_node(
     start_node: VGroup,
     end_node: VGroup,
-    color=WHITE,
-    stroke_width=2.5,   # very slim for neat appearance
+    color="#BBBBBB",
+    stroke_width=3,   # very slim for neat appearance
     tip_length=0.1,    # small, proportional arrowhead
-    buff=0.2            # tight buffer to avoid clipping
+    buff=0.2,
+    mid=False  # tight buffer to avoid clipping
 ):
-    start_point = start_node.get_boundary_point(RIGHT)
-    end_point = end_node.get_boundary_point(LEFT)
+    start_point = start_node.get_center() if mid else start_node.get_boundary_point(RIGHT)
+    end_point = end_node.get_center() if mid else end_node.get_boundary_point(LEFT)
 
     arrow = Arrow(
         start_point,
@@ -85,7 +86,7 @@ def create_arrow_to_connect_node(
         tip_length=tip_length
     )
 
-    arrow.set_opacity(0.75)  # subtle transparency for clean look
+    arrow.set_opacity(0.8)  # subtle transparency for clean look
     arrow.set_z_index(-1)
 
     return arrow

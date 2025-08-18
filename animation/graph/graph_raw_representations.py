@@ -195,40 +195,53 @@ def create_anim_tensor_from_tensor(tensor: TensorRepr) -> MobjectMatrix:
     tensor: np.ndarray = tensor.get_data()
 
     if tensor.ndim == 0:
-        name = Text("Sca")
+        name = Text("Sca", color="#333333")
     elif tensor.ndim == 1:
-        name = Text("Vec")
+        name = Text("Vec", color="#333333")
     else:
-        name = Text("Mat")
+        name = Text("Mat", color="#333333")
 
-    shape = Text("(" + ", ".join([str(d) for d in tensor.shape]) + ")")
+    shape = Text("(" + ", ".join([str(d)
+                 for d in tensor.shape]) + ")", color="#333333")
 
     cell_content = VGroup(name, shape).arrange(
         DOWN, buff=0.5)
 
-    matrix = MobjectMatrix([[cell_content]])
+    matrix = MobjectMatrix([[cell_content]], color="#333333", bracket_config={
+        "color": "#333333"
+    })
 
     return matrix
 
 
 def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
     accum = False
+    node_title_text = ""
+
     if node.get_name() == "GradAccum":
-        node_text = Text("GradAccum", color=WHITE).scale(0.7)
+        node_text = VGroup(Text("Grad", color="#333333").scale(0.7), Text(
+            "Accum", color="#333333").scale(0.7)).arrange(DOWN, buff=0.15)
         accum = True
     else:
-        split_string = re.findall('[A-Z][a-z]*', node.get_name())
-        start_text = Text(split_string[0], color=WHITE).scale(0.7)
-        end_text = Text(split_string[1], color=WHITE).scale(0.7)
-        node_text = VGroup(start_text, end_text).arrange(DOWN, buff=0.15)
+        splitted = re.findall('[A-Z][a-z]*', node.get_name())
+        ops_type = splitted[0]
+
+        if ops_type == "Ln":
+            node_title_text = "Nat. Log"
+        else:
+            node_title_text = ops_type
+
+        node_title = Text(node_title_text, color="#333333").scale(0.7)
+        node_text = VGroup(node_title, Text(
+            "Backward", color="#333333").scale(0.7)).arrange(DOWN, buff=0.15)
 
     node_circle = Circle(
         radius=1.6,
-        color=PURPLE_E if accum else BLUE,
-        stroke_width=2.5,
-        stroke_color=ORANGE if accum else WHITE,
-        fill_color=PURPLE_E if accum else BLUE,
-        fill_opacity=1.0      # fully opaque, hides arrows behind
+        color=DARK_GREY,
+        stroke_width=1.0,
+        stroke_color="#FFC107" if accum else "#444444",
+        fill_color="#CBAACB" if accum else "#A7C7E7",
+        fill_opacity=1.0
     )
 
     node_text.move_to(node_circle.get_center())
