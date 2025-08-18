@@ -63,9 +63,9 @@ class CreateAcyclicGraph(Scene):
     def setup(self):
         self.acyclic_graph: AcyclicGraph = create_acyclic_graph()
 
-    def display_caption_for_node(self, destination_node, text="Gradient Accumulation", fill_color="#A7C7E7"):
+    def display_caption_for_node(self, destination_node, text="Gradient Accumulation", fill_color="#A7C7E7", direction=DOWN):
         caption = Tex(text, color="#333333", font_size=20).next_to(
-            destination_node, DOWN, buff=0.3)
+            destination_node, direction, buff=0.3)
 
         # Add a semi-transparent background rectangle with rounded corners
         background = RoundedRectangle(
@@ -122,7 +122,7 @@ class CreateAcyclicGraph(Scene):
             FadeOut(glowing_tensor, run_time=0.5)
         )
 
-    def draw_arrows(self):
+    def animate_connection(self):
         for (edge_nr, edge) in enumerate(self.acyclic_graph.get_edges()):
             # get animation node
             origin_node = self.acyclic_graph.query_anim_node(edge[0])
@@ -151,10 +151,6 @@ class CreateAcyclicGraph(Scene):
                 # fade in starting gradient
                 self.play(FadeIn(starting_gradient_group, run_time=0.5))
 
-                # caption for root node to denote starting gradient received
-                self.display_caption_for_node(
-                    destination_node=origin_node, text="Get Loss Gradient")
-
                 self.wait(0.25)
 
                 # move gradient to
@@ -166,6 +162,12 @@ class CreateAcyclicGraph(Scene):
                         rate_func=smooth  # smoother rate function
                     ),
                 )
+
+                self.wait(0.25)
+
+                # caption for root node to denote starting gradient received
+                self.display_caption_for_node(
+                    destination_node=origin_node, text="Loss Gradient")
 
                 self.wait(0.25)
 
@@ -195,11 +197,26 @@ class CreateAcyclicGraph(Scene):
                 self.play(pulse(destination_node,
                                 flash_color=ORANGE, base_color=BLUE))
 
-                self.display_caption_for_node(
-                    destination_node=destination_node, text="Accumulate Gradient", fill_color=GREEN)
+                if self.node_rank[edge[1]] == self.max_rank and self.rank_first_anim_node_map[self.node_rank[edge[1]]][-1][1] == destination_node:
+                    self.display_caption_for_node(
+                        destination_node=destination_node, text="Accumulate Grad", fill_color=GREEN, direction=UP)
+                else:
+                    self.display_caption_for_node(
+                        destination_node=destination_node, text="Accumulate Grad", fill_color=GREEN)
             else:
+                origin_ops_name = self.acyclic_graph.query_node(
+                    edge[0]).get_ops_name()
+                destination_ops_name = self.acyclic_graph.query_node(
+                    edge[1]).get_ops_name()
+
+                compute_caption = f"Derive grad from {origin_ops_name}"
+                receive_caption = f"Grad received for {destination_ops_name}"
+
                 self.display_caption_for_node(
-                    destination_node=destination_node, text="Calculate Gradient", fill_color=BLUE)
+                    destination_node=origin_node, text=compute_caption, fill_color=BLUE)
+
+                self.display_caption_for_node(
+                    destination_node=destination_node, text=receive_caption, fill_color=BLUE)
 
             self.wait(0.25)
 
@@ -211,10 +228,14 @@ class CreateAcyclicGraph(Scene):
     def backward_graph_construct(self):
         (max_rank, node_rank) = rank_nodes_in_acyclic_graph(self.acyclic_graph)
         self.acyclic_graph.sort_edge(node_rank)
+        self.node_rank = node_rank
+        self.max_rank = max_rank
 
         # rank base representation
         rank_first_anim_node_map = create_rank_first_anim_nod_map(
             node_rank, acylic_graph=self.acyclic_graph)
+
+        self.rank_first_anim_node_map = rank_first_anim_node_map
 
         # scale
         max_height = config.frame_height * 0.95
@@ -253,4 +274,13 @@ class CreateAcyclicGraph(Scene):
 
         self.backward_graph_construct()
         self.wait(1)
-        self.draw_arrows()
+        self.animate_connection()
+
+        self.wait(1)
+        self.clear()
+        outtro = Text(
+            "All grads propagated to leaf tensors", color=BLACK).move_to(ORIGIN)
+
+        self.play(FadeIn(outtro))
+        self.wait(1)
+        self.play(FadeOut(outtro))
