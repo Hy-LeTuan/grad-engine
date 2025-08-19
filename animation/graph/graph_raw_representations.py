@@ -252,11 +252,11 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
 
     if accum:
         node_shape = Circle(
-            radius=1.3,
+            radius=1.2,
             color=BLACK,
             stroke_width=3.0,
-            stroke_color=get_darker_hex("#D6A99D"),
-            fill_color="#D6A99D",          # pastel thistle fill
+            stroke_color=get_darker_hex("#EED3D9"),
+            fill_color="#EED3D9",
             fill_opacity=1.0
         )
     elif ops_type == "binary":
@@ -265,18 +265,18 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
             height=1.6,
             corner_radius=0.4,
             color=BLACK,
-            stroke_width=3.0,
-            stroke_color=get_darker_hex("#FBF3D5"),
-            fill_color="#FBF3D5",
+            stroke_width=2.5,
+            stroke_color=get_darker_hex("#CCD3CA"),
+            fill_color="#CCD3CA",
             fill_opacity=1.0
         )
     elif ops_type == "reduction":
         node_shape = RoundedRectangle(
-            side_length=2.4,               # slightly smaller for balance
+            side_length=2.4,
             color=BLACK,
-            stroke_width=3.0,
-            stroke_color=get_darker_hex("#D6DAC8"),
-            fill_color="#D6DAC8",          # light pink
+            stroke_width=2.5,
+            stroke_color=get_darker_hex("#B5C0D0"),
+            fill_color="#B5C0D0",
             fill_opacity=1.0
         )
     elif ops_type == "self-element":
@@ -285,27 +285,27 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
             height=1.6,
             corner_radius=0.4,
             color=BLACK,
-            stroke_width=3.0,
-            stroke_color=get_darker_hex("#9CAFAA"),
-            fill_color="#9CAFAA",          # pale green
+            stroke_width=2.5,
+            stroke_color=get_darker_hex("#F7DED0"),
+            fill_color="#F7DED0",
             fill_opacity=1.0
         )
     elif ops_type == "advanced":
         node_shape = RoundedRectangle(
             width=2.4,
             height=1.6,
-            corner_radius=0.4,             # slightly more rounded for distinction
+            corner_radius=0.4,
             color=BLACK,
-            stroke_width=3.0,
+            stroke_width=2.5,
             stroke_color=get_darker_hex("#FAD691"),
-            fill_color="#FAD691",          # peach puff
+            fill_color="#FAD691",
             fill_opacity=1.0
         )
     else:
         raise ValueError(f"Unknown ops_type: {ops_type}, ops_name: {ops_name}")
 
     node_text.move_to(node_shape.get_center())
-    new_node = VGroup(node_shape, node_text)
+    new_node = VGroup(node_shape, node_text).scale(0.8)
 
     return new_node
 

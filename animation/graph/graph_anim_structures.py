@@ -69,10 +69,10 @@ def create_arrow_to_connect_node(
     start_node: VGroup,
     end_node: VGroup,
     color="#BBBBBB",
-    stroke_width=3,   # very slim for neat appearance
-    tip_length=0.1,    # small, proportional arrowhead
+    stroke_width=3.5,   # very slim for neat appearance
+    tip_length=0.15,    # small, proportional arrowhead
     buff=0.2,
-    mid=False  # tight buffer to avoid clipping
+    mid=False
 ):
     start_point = start_node.get_center() if mid else start_node.get_boundary_point(RIGHT)
     end_point = end_node.get_center() if mid else end_node.get_boundary_point(LEFT)
@@ -145,5 +145,6 @@ def position_layer_list_horizontal(layer_list: list[NodeLayer | TensorLayer], to
 
     if max_obj_width > slot_width:
         scale_factor = slot_width / max_obj_width
+
         for layer in layer_list:
             layer.get_display_group().scale(scale_factor)

@@ -18,7 +18,7 @@ def pulse(node: VGroup, flash_color=ORANGE, base_color=BLUE, scale_factor=1.1, r
     )
 
 
-def get_darker_hex(hex_color: str, factor: float = 0.6) -> str:
+def get_darker_hex(hex_color: str, factor: float = 0.8) -> str:
     """
     Takes a hexadecimal color string and returns a new hex string
     that is a darker version of the original.
