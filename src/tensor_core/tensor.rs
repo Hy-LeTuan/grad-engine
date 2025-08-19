@@ -38,50 +38,9 @@ where
             tensor_impl.get_storage_().get_data()
         });
     }
-}
 
-impl<T> Tensor<T>
-where
-    T: DTComp + Debug + Clone,
-{
     pub fn new(x: Vec<T>, shape: Vec<usize>, requires_grad: bool) -> Self {
         let tensor_impl = TensorImpl::new(x, shape);
-
-        let tensor = Tensor {
-            tensor_impl: TensorImpl::generate_pointer_for_tensor(tensor_impl),
-        };
-
-        if requires_grad {
-            let autograd_meta = AutogradMeta::<T>::new_for_leaf(
-                String::from("leaf_grad_meta"),
-                tensor.__clone_ptr_to_tensor_impl(),
-            );
-
-            tensor.set_autograd_meta(autograd_meta);
-        }
-
-        return tensor;
-    }
-
-    /// Turns on grad tracking for a leaf tensor. Any intermediate tensor will always be
-    /// created with gradient, so this method does not apply for them.
-    pub fn requires_grad(&self) {
-        let autograd_meta = AutogradMeta::<T>::new_for_leaf(
-            String::from("leaf_grad_meta"),
-            self.__clone_ptr_to_tensor_impl(),
-        );
-
-        self.set_autograd_meta(autograd_meta);
-    }
-
-    pub fn requires_grad_intermediate(&self, name: &str) {
-        let autograd_meta = AutogradMeta::<T>::new_for_intermediate(name);
-
-        self.set_autograd_meta(autograd_meta);
-    }
-
-    pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>, requires_grad: bool) -> Self {
-        let tensor_impl = TensorImpl::from_raw_array_(x);
 
         let tensor = Tensor {
             tensor_impl: TensorImpl::generate_pointer_for_tensor(tensor_impl),
@@ -139,34 +98,8 @@ where
         });
     }
 
-    pub fn set_autograd_meta(&self, autograd_meta: AutogradMeta<T>) {
-        self.__get_tensor_impl()
-            .borrow_mut()
-            .set_autograd_meta_(autograd_meta);
-    }
-
     pub fn does_require_grad(&self) -> bool {
         return self.__get_tensor_impl().borrow().autograd_meta.is_some();
-    }
-
-    pub fn is_leaf(&self) -> bool {
-        return self.__get_tensor_impl().borrow().is_leaf_();
-    }
-
-    pub fn get_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
-        return self.__get_tensor_impl().borrow().get_grad_fn_();
-    }
-
-    pub fn get_grad_accum(&self) -> Rc<RefCell<GradAccum<T>>> {
-        return self.__get_tensor_impl().borrow().get_grad_accum_();
-    }
-
-    pub fn set_grad_fn(&self, node: Rc<RefCell<dyn Backward<T>>>) {
-        self.__get_tensor_impl().borrow_mut().set_grad_fn_(node);
-    }
-
-    pub fn set_grad_accum(&self, node: Rc<RefCell<GradAccum<T>>>) {
-        self.__get_tensor_impl().borrow_mut().set_grad_accum_(node);
     }
 
     // DISPLAY FUNCTIONS
@@ -219,6 +152,68 @@ where
             }
         }
     }
+
+    pub fn set_autograd_meta(&self, autograd_meta: AutogradMeta<T>) {
+        self.__get_tensor_impl()
+            .borrow_mut()
+            .set_autograd_meta_(autograd_meta);
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        return self.__get_tensor_impl().borrow().is_leaf_();
+    }
+
+    pub fn get_grad_fn(&self) -> Rc<RefCell<dyn Backward<T>>> {
+        return self.__get_tensor_impl().borrow().get_grad_fn_();
+    }
+
+    pub fn get_grad_accum(&self) -> Rc<RefCell<GradAccum<T>>> {
+        return self.__get_tensor_impl().borrow().get_grad_accum_();
+    }
+
+    pub fn set_grad_fn(&self, node: Rc<RefCell<dyn Backward<T>>>) {
+        self.__get_tensor_impl().borrow_mut().set_grad_fn_(node);
+    }
+
+    pub fn set_grad_accum(&self, node: Rc<RefCell<GradAccum<T>>>) {
+        self.__get_tensor_impl().borrow_mut().set_grad_accum_(node);
+    }
+
+    /// Turns on grad tracking for a leaf tensor. Any intermediate tensor will always be
+    /// created with gradient, so this method does not apply for them.
+    pub fn requires_grad(&self) {
+        let autograd_meta = AutogradMeta::<T>::new_for_leaf(
+            String::from("leaf_grad_meta"),
+            self.__clone_ptr_to_tensor_impl(),
+        );
+
+        self.set_autograd_meta(autograd_meta);
+    }
+
+    pub fn requires_grad_intermediate(&self, name: &str) {
+        let autograd_meta = AutogradMeta::<T>::new_for_intermediate(name);
+
+        self.set_autograd_meta(autograd_meta);
+    }
+
+    pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>, requires_grad: bool) -> Self {
+        let tensor_impl = TensorImpl::from_raw_array_(x);
+
+        let tensor = Tensor {
+            tensor_impl: TensorImpl::generate_pointer_for_tensor(tensor_impl),
+        };
+
+        if requires_grad {
+            let autograd_meta = AutogradMeta::<T>::new_for_leaf(
+                String::from("leaf_grad_meta"),
+                tensor.__clone_ptr_to_tensor_impl(),
+            );
+
+            tensor.set_autograd_meta(autograd_meta);
+        }
+
+        return tensor;
+    }
 }
 
 impl<T> Tensor<T>
@@ -247,7 +242,7 @@ where
 
 impl<T> Display for Tensor<T>
 where
-    T: DTComp + Debug + Clone,
+    T: DTComp + Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let shape = self.get_shape();

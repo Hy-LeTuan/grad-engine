@@ -25,7 +25,7 @@ where
 
 impl<T> AutogradMeta<T>
 where
-    T: DTComp + Clone + Debug,
+    T: DTComp + Debug,
 {
     pub fn new_for_intermediate(name: &str) -> Self {
         let autograd_meta = AutogradMeta {
@@ -58,10 +58,6 @@ where
         return autograd_meta;
     }
 
-    pub fn is_leaf(&self) -> bool {
-        return self.is_leaf;
-    }
-
     pub fn set_grad_fn_to_node(&mut self, node: Rc<RefCell<dyn Backward<T>>>) {
         self.grad_fn = Some(Rc::clone(&node));
     }
@@ -73,7 +69,23 @@ where
     pub fn get_grad_as_ref(&self) -> &RefCell<Option<Rc<Tensor<T>>>> {
         return &self.grad;
     }
+    pub fn get_grad_accum(&self) -> &Option<Rc<RefCell<GradAccum<T>>>> {
+        return &self.grad_accum;
+    }
 
+    pub fn get_grad_fn(&self) -> &Option<Rc<RefCell<dyn Backward<T>>>> {
+        return &self.grad_fn;
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        return self.is_leaf;
+    }
+}
+
+impl<T> AutogradMeta<T>
+where
+    T: DTComp + Clone + Debug,
+{
     /// Get the actual grad behind the tensor. Must check for existence of grad first before
     /// caling
     pub fn get_grad_as_tensor(&self) -> Rc<Tensor<T>> {
@@ -97,14 +109,6 @@ where
         } else {
             *tensor_grad = Some(grad);
         }
-    }
-
-    pub fn get_grad_accum(&self) -> &Option<Rc<RefCell<GradAccum<T>>>> {
-        return &self.grad_accum;
-    }
-
-    pub fn get_grad_fn(&self) -> &Option<Rc<RefCell<dyn Backward<T>>>> {
-        return &self.grad_fn;
     }
 }
 

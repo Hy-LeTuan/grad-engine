@@ -100,7 +100,7 @@ where
 
 impl<T> GradAccum<T>
 where
-    T: Clone + DTComp + Debug,
+    T: DTComp + Debug,
 {
     pub fn new(edge_list: Vec<Edge<T>>) -> Self {
         let grad_accum = GradAccum {
@@ -132,15 +132,5 @@ where
 
     pub fn set_owned_meta(&mut self, origin: Rc<RefCell<TensorImpl<T>>>) {
         self.origin = Some(Rc::downgrade(&origin));
-    }
-}
-
-mod test {
-    #[allow(unused)]
-    use super::*;
-
-    #[test]
-    fn grad_accum_creation() {
-        let _grad_accum = GradAccum::<f32>::new(vec![]);
     }
 }

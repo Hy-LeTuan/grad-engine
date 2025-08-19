@@ -16,7 +16,7 @@ fn main() {
 
     let z = &x1 + &x2 - &x3;
 
-    z.backward(Tensor::ones_like(&z), true);
+    z.backward(Tensor::ones_like(&z, None), true);
     Visualizer::visualize_graph(&z);
 
     x1.display_grad();

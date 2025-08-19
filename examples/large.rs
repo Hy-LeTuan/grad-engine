@@ -20,13 +20,13 @@ fn main() {
     let x5 = &x2 - &x3;
 
     let x6 = matmul(&x4, &x5) - &x3;
-    let x7 = Tensor::ones_like(&x6);
+    let x7 = Tensor::ones_like(&x6, Some(true));
 
-    x7.requires_grad();
+    // x7.requires_grad();
 
     let z = x6.ln() + &x7.exp();
 
-    z.backward(Tensor::ones_like(&z), true);
+    z.backward(Tensor::ones_like(&z, None), true);
     Visualizer::visualize_graph(&z);
 
     x1.display_grad();
