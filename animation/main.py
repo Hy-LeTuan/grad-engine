@@ -64,7 +64,7 @@ class CreateAcyclicGraph(Scene):
         self.acyclic_graph: AcyclicGraph = create_acyclic_graph()
 
     def display_caption_for_node(self, destination_node, text="Gradient Accumulation", fill_color="#A7C7E7", direction=DOWN):
-        caption = Tex(text, color="#333333", font_size=20).next_to(
+        caption = Tex(text, color=BLACK, font_size=20).next_to(
             destination_node, direction, buff=0.3)
 
         # Add a semi-transparent background rectangle with rounded corners
@@ -271,7 +271,7 @@ class CreateAcyclicGraph(Scene):
                             color=BLACK).move_to(ORIGIN)
         self.play(FadeIn(introduction))
         self.play(FadeOut(introduction))
-        self.wait(1.5)
+        self.wait(1)
 
         self.backward_graph_construct()
         self.wait(1)

@@ -2,6 +2,7 @@ import numpy as np
 from collections import deque
 from manim import *
 import re
+from utils.anim_utils import get_darker_hex
 
 
 class TensorRepr:
@@ -251,52 +252,52 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
 
     if accum:
         node_shape = Circle(
-            radius=1.4,
+            radius=1.3,
             color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#A052A0",
+            stroke_width=3.0,
+            stroke_color=get_darker_hex("#D6A99D"),
             fill_color="#D6A99D",          # pastel thistle fill
             fill_opacity=1.0
         )
     elif ops_type == "binary":
         node_shape = RoundedRectangle(
-            width=2.6,
-            height=1.8,
+            width=2.4,
+            height=1.6,
             corner_radius=0.4,
             color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#4B4B4B",
+            stroke_width=3.0,
+            stroke_color=get_darker_hex("#FBF3D5"),
             fill_color="#FBF3D5",
             fill_opacity=1.0
         )
     elif ops_type == "reduction":
         node_shape = RoundedRectangle(
-            side_length=2.6,               # slightly smaller for balance
+            side_length=2.4,               # slightly smaller for balance
             color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#4B4B4B",
+            stroke_width=3.0,
+            stroke_color=get_darker_hex("#D6DAC8"),
             fill_color="#D6DAC8",          # light pink
             fill_opacity=1.0
         )
     elif ops_type == "self-element":
         node_shape = RoundedRectangle(
-            width=2.6,
-            height=1.8,
+            width=2.4,
+            height=1.6,
             corner_radius=0.4,
             color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#4B4B4B",
+            stroke_width=3.0,
+            stroke_color=get_darker_hex("#9CAFAA"),
             fill_color="#9CAFAA",          # pale green
             fill_opacity=1.0
         )
     elif ops_type == "advanced":
         node_shape = RoundedRectangle(
-            width=3.0,
-            height=2.0,
-            corner_radius=0.5,             # slightly more rounded for distinction
+            width=2.4,
+            height=1.6,
+            corner_radius=0.4,             # slightly more rounded for distinction
             color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#4B4B4B",
+            stroke_width=3.0,
+            stroke_color=get_darker_hex("#FAD691"),
             fill_color="#FAD691",          # peach puff
             fill_opacity=1.0
         )
