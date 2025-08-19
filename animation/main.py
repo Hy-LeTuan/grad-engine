@@ -260,7 +260,8 @@ class CreateAcyclicGraph(Scene):
             scale_vgroup(num_elem=len(anim_node_list),
                          max_height=max_height, layer=layer)
 
-            self.play(FadeIn(layer, lag_ratio=2))
+            self.play(FadeIn(layer, lag_ratio=2,
+                      run_time=1 * len(anim_node_list)))
 
             self.wait(0.5)
 
