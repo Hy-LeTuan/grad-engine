@@ -236,7 +236,7 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
         else:
             node_title_text = ops_name
 
-        if ops_name in ["Add", "Sub", "Mul", "Div"]:
+        if ops_name in ["Add", "Sub", "Mul", "Div", "Matmul"]:
             ops_type = "binary"
         elif ops_name in ["Sum", "Mean", "Min", "Max"]:
             ops_type = "reduction"
@@ -251,42 +251,42 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
 
     if accum:
         node_shape = Circle(
-            radius=1.5,
+            radius=1.4,
             color=BLACK,
             stroke_width=1.0,
-            stroke_color="#A052A0",        # muted purple stroke
-            fill_color="#D8BFD8",          # pastel thistle fill
+            stroke_color="#A052A0",
+            fill_color="#D6A99D",          # pastel thistle fill
             fill_opacity=1.0
         )
     elif ops_type == "binary":
         node_shape = RoundedRectangle(
-            width=2.8,
-            height=2.0,
-            corner_radius=0.4,             # slightly rounded
-            color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#4B4B4B",
-            fill_color="#87CEFA",          # pastel sky blue
-            fill_opacity=1.0
-        )
-    elif ops_type == "reduction":
-        node_shape = RoundedRectangle(
-            side_length=3.0,               # slightly smaller for balance
-            color=BLACK,
-            stroke_width=1.0,
-            stroke_color="#4B4B4B",
-            fill_color="#FFB6C1",          # light pink
-            fill_opacity=1.0
-        )
-    elif ops_type == "self-element":
-        node_shape = RoundedRectangle(
-            width=2.8,
-            height=2.0,
+            width=2.6,
+            height=1.8,
             corner_radius=0.4,
             color=BLACK,
             stroke_width=1.0,
             stroke_color="#4B4B4B",
-            fill_color="#98FB98",          # pale green
+            fill_color="#FBF3D5",
+            fill_opacity=1.0
+        )
+    elif ops_type == "reduction":
+        node_shape = RoundedRectangle(
+            side_length=2.6,               # slightly smaller for balance
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#4B4B4B",
+            fill_color="#D6DAC8",          # light pink
+            fill_opacity=1.0
+        )
+    elif ops_type == "self-element":
+        node_shape = RoundedRectangle(
+            width=2.6,
+            height=1.8,
+            corner_radius=0.4,
+            color=BLACK,
+            stroke_width=1.0,
+            stroke_color="#4B4B4B",
+            fill_color="#9CAFAA",          # pale green
             fill_opacity=1.0
         )
     elif ops_type == "advanced":
@@ -297,7 +297,7 @@ def create_anim_node_from_acyclic_node(node: Node) -> VGroup:
             color=BLACK,
             stroke_width=1.0,
             stroke_color="#4B4B4B",
-            fill_color="#FFDAB9",          # peach puff
+            fill_color="#FAD691",          # peach puff
             fill_opacity=1.0
         )
     else:
