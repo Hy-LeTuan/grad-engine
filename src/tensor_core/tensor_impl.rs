@@ -30,8 +30,12 @@ where
 
 impl<T> TensorImpl<T>
 where
-    T: DTComp + Debug + Clone,
+    T: DTComp + Debug,
 {
+    pub fn get_storage_(&self) -> &Storage<T> {
+        return &self.storage;
+    }
+
     pub fn new(x: Vec<T>, shape: Vec<usize>) -> Self {
         let numel = x.len();
         let type_signature = T::dtype();
@@ -63,9 +67,77 @@ where
         return Rc::new(RefCell::new(tensor_impl));
     }
 
-    /// Turns on grad tracking for a leaf tensor. Any intermediate tensor will always be
-    /// created with gradient, so this method does not apply for them.
+    pub fn set_autograd_meta_(&mut self, autograd_meta: AutogradMeta<T>) {
+        self.autograd_meta = Some(autograd_meta);
+    }
 
+    /// Dangerously set grad_fn, will panic if grad_fn does not exist
+    pub fn set_grad_fn_(&mut self, node: Rc<RefCell<dyn Backward<T>>>) {
+        self.get_autograd_ref_as_mut_().set_grad_fn_to_node(node);
+    }
+
+    pub fn set_grad_accum_(&mut self, node: Rc<RefCell<GradAccum<T>>>) {
+        self.get_autograd_ref_as_mut_()
+            .set_grad_accum_to_accum(node);
+    }
+
+    pub fn get_autograd_ref_(&self) -> &Option<AutogradMeta<T>> {
+        return &self.autograd_meta;
+    }
+
+    pub fn get_autograd_ref_as_mut_(&mut self) -> &mut AutogradMeta<T> {
+        return self.autograd_meta.as_mut().expect(
+            "Attmepting to get AutogradMeta on a tensor that does not require gradient tracking.",
+        );
+    }
+
+    pub fn get_autograd_and_expect_res(&self) -> &AutogradMeta<T> {
+        return &self
+            .autograd_meta
+            .as_ref()
+            .expect("Straight access to AutogradMeta failed, value does not exist");
+    }
+
+    /// UTILITIES
+
+    pub fn is_leaf_(&self) -> bool {
+        if let Some(autograd_ref) = self.get_autograd_ref_().as_ref() {
+            return autograd_ref.is_leaf();
+        } else {
+            println!(
+                "Attempting to check for leaf tensor on a tensor that does not require gradient tracking. Returning false now."
+            );
+            return false;
+        }
+    }
+
+    pub fn get_grad_fn_(&self) -> Rc<RefCell<dyn Backward<T>>> {
+        let grad_fn_option = self
+            .get_autograd_ref_()
+            .as_ref()
+            .expect("Attempting to get grad_fn on a tensor that does not require gradient tracking")
+            .get_grad_fn()
+            .as_ref();
+
+        return Rc::clone(grad_fn_option.expect("Attempting to get grad_fn on a fucntion that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
+    }
+
+    pub fn get_grad_accum_(&self) -> Rc<RefCell<GradAccum<T>>> {
+        let grad_accum_option = self
+            .get_autograd_ref_()
+            .as_ref()
+            .expect("Attempting to get grad_fn on a tensor that does not require gradient tracking")
+            .get_grad_accum()
+            .as_ref();
+
+        return Rc::clone(grad_accum_option.expect("Attempting to get grad_fn on a tensor that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
+    }
+}
+
+impl<T> TensorImpl<T>
+where
+    T: DTComp + Debug + Clone,
+{
     pub fn from_raw_array_(x: ArrayBase<OwnedRepr<T>, IxDyn>) -> Self {
         let shape = x.shape().to_vec();
         let numel = x.len();
@@ -105,83 +177,6 @@ where
 
     pub fn get_type_(&self) -> DTypes {
         return self.get_storage_().get_dtype();
-    }
-
-    pub fn get_autograd_ref_(&self) -> &Option<AutogradMeta<T>> {
-        return &self.autograd_meta;
-    }
-
-    pub fn get_autograd_ref_as_mut_(&mut self) -> &mut AutogradMeta<T> {
-        return self.autograd_meta.as_mut().expect(
-            "Attmepting to get AutogradMeta on a tensor that does not require gradient tracking.",
-        );
-    }
-
-    pub fn get_autograd_and_expect_res(&self) -> &AutogradMeta<T> {
-        return &self
-            .autograd_meta
-            .as_ref()
-            .expect("Straight access to AutogradMeta failed, value does not exist");
-    }
-
-    pub fn get_grad_fn_(&self) -> Rc<RefCell<dyn Backward<T>>> {
-        let grad_fn_option = self
-            .get_autograd_ref_()
-            .as_ref()
-            .expect("Attempting to get grad_fn on a tensor that does not require gradient tracking")
-            .get_grad_fn()
-            .as_ref();
-
-        return Rc::clone(grad_fn_option.expect("Attempting to get grad_fn on a fucntion that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
-    }
-
-    pub fn get_grad_accum_(&self) -> Rc<RefCell<GradAccum<T>>> {
-        let grad_accum_option = self
-            .get_autograd_ref_()
-            .as_ref()
-            .expect("Attempting to get grad_fn on a tensor that does not require gradient tracking")
-            .get_grad_accum()
-            .as_ref();
-
-        return Rc::clone(grad_accum_option.expect("Attempting to get grad_fn on a tensor that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
-    }
-
-    pub fn set_autograd_meta_(&mut self, autograd_meta: AutogradMeta<T>) {
-        self.autograd_meta = Some(autograd_meta);
-    }
-
-    /// Dangerously set grad_fn, will panic if grad_fn does not exist
-    pub fn set_grad_fn_(&mut self, node: Rc<RefCell<dyn Backward<T>>>) {
-        self.get_autograd_ref_as_mut_().set_grad_fn_to_node(node);
-    }
-
-    pub fn set_grad_accum_(&mut self, node: Rc<RefCell<GradAccum<T>>>) {
-        self.get_autograd_ref_as_mut_()
-            .set_grad_accum_to_accum(node);
-    }
-
-    /// UTILITIES
-
-    pub fn is_leaf_(&self) -> bool {
-        if let Some(autograd_ref) = self.get_autograd_ref_().as_ref() {
-            return autograd_ref.is_leaf();
-        } else {
-            println!(
-                "Attempting to check for leaf tensor on a tensor that does not require gradient tracking. Returning false now."
-            );
-            return false;
-        }
-    }
-
-    // BACKWARD FUNCTION
-}
-
-impl<T> TensorImpl<T>
-where
-    T: DTComp + Debug,
-{
-    pub fn get_storage_(&self) -> &Storage<T> {
-        return &self.storage;
     }
 }
 

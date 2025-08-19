@@ -100,7 +100,7 @@ where
 
 impl<T> GradAccum<T>
 where
-    T: Clone + DTComp + Debug,
+    T: DTComp + Debug,
 {
     pub fn new(edge_list: Vec<Edge<T>>) -> Self {
         let grad_accum = GradAccum {

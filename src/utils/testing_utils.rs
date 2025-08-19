@@ -96,7 +96,7 @@ pub fn total_test_for_backward_operation<T>(
     test_node_name(output_tensor, node_name);
 
     // call backward and propagate gradient to input
-    output_tensor.backward(Tensor::ones_like(output_tensor), false);
+    output_tensor.backward(Tensor::ones_like(output_tensor, None), false);
 
     test_for_correct_gradient(input_tensors, target_gradients, epsilon);
 

@@ -1,4 +1,6 @@
-use crate::tensor_core::{dtypes::DTComp, tensor::Tensor, tensor_impl::TensorImpl};
+use crate::tensor_core::{
+    dtypes::DTComp, tensor::Tensor, tensor_impl::TensorImpl, tensor_utils::handle_requires_grad,
+};
 use ndarray::{ArrayD, IxDyn};
 use num_traits::{AsPrimitive, One, Zero};
 
@@ -74,7 +76,7 @@ impl<T> Tensor<T>
 where
     T: DTComp + Debug + Zero + Clone,
 {
-    pub fn zeros(shape: &Vec<usize>) -> Self {
+    pub fn zeros(shape: &Vec<usize>, requires_grad: Option<bool>) -> Self {
         let dyn_shape = IxDyn(shape);
         let data = ArrayD::<T>::zeros(dyn_shape);
 
@@ -83,12 +85,14 @@ where
 
         let tensor = Tensor { tensor_impl };
 
+        handle_requires_grad(&tensor, requires_grad);
+
         return tensor;
     }
 
-    pub fn zeros_like(tensor: &Tensor<T>) -> Self {
+    pub fn zeros_like(tensor: &Tensor<T>, requires_grad: Option<bool>) -> Self {
         let shape = tensor.get_shape();
-        return Tensor::zeros(shape.deref());
+        return Tensor::zeros(shape.deref(), requires_grad);
     }
 }
 
@@ -96,13 +100,12 @@ impl<T> Tensor<T>
 where
     T: DTComp + Debug + Clone + One,
 {
-    pub fn ones_like(tensor: &Tensor<T>) -> Self {
+    pub fn ones_like(tensor: &Tensor<T>, requires_grad: Option<bool>) -> Self {
         let shape = tensor.get_shape();
-
-        return Tensor::ones(shape.deref());
+        return Tensor::ones(shape.deref(), requires_grad);
     }
 
-    pub fn ones(shape: &Vec<usize>) -> Self {
+    pub fn ones(shape: &Vec<usize>, requires_grad: Option<bool>) -> Self {
         let dyn_shape = IxDyn(shape);
         let data = ArrayD::<T>::ones(dyn_shape);
 
@@ -110,6 +113,8 @@ where
             TensorImpl::generate_pointer_for_tensor(TensorImpl::from_raw_array_(data));
 
         let tensor = Tensor { tensor_impl };
+
+        handle_requires_grad(&tensor, requires_grad);
 
         return tensor;
     }
