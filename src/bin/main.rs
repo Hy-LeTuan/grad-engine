@@ -1,18 +1,11 @@
-pub mod config;
-pub mod graph;
 #[allow(unused)]
-use crate::graph::visualize::serialize_graph_fn::{
+use grad_engine::graph::visualize::serialize_graph_fn::{
     export_graph_acyclic, serialize_and_export_graph,
 };
-use crate::graph::visualize::visualizer::VisualizerTrait;
-use crate::ops::public_ops::matmul::matmul;
-use graph::visualize::visualizer::Visualizer;
-use tensor_core::tensor::Tensor;
-
-// important modules
-pub mod ops;
-pub mod tensor_core;
-pub mod utils;
+use grad_engine::graph::visualize::visualizer::Visualizer;
+use grad_engine::graph::visualize::visualizer::VisualizerTrait;
+use grad_engine::ops::public_ops::matmul::matmul;
+use grad_engine::tensor_core::tensor::Tensor;
 
 fn main() {
     let x1 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
@@ -37,6 +30,5 @@ fn main() {
     x3.display_grad();
     x7.display_grad();
 
-    // serialize_and_export_graph(&z);
     export_graph_acyclic(&z);
 }
