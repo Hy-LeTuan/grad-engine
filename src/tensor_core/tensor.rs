@@ -195,23 +195,7 @@ where
 
         self.set_autograd_meta(autograd_meta);
     }
-}
 
-impl<T> Tensor<T>
-where
-    T: DTComp + Debug + Clone + Add<Output = T>,
-{
-    pub fn backward(&self, starting_gradient: Tensor<T>, retain_graph: bool) {
-        self.__get_tensor_impl()
-            .borrow()
-            .backward_(starting_gradient, retain_graph);
-    }
-}
-
-impl<T> Tensor<T>
-where
-    T: DTComp + Debug + Clone,
-{
     pub fn from_raw_array(x: ArrayBase<OwnedRepr<T>, IxDyn>, requires_grad: bool) -> Self {
         let tensor_impl = TensorImpl::from_raw_array_(x);
 
@@ -230,6 +214,23 @@ where
 
         return tensor;
     }
+}
+
+impl<T> Tensor<T>
+where
+    T: DTComp + Debug + Clone + Add<Output = T>,
+{
+    pub fn backward(&self, starting_gradient: Tensor<T>, retain_graph: bool) {
+        self.__get_tensor_impl()
+            .borrow()
+            .backward_(starting_gradient, retain_graph);
+    }
+}
+
+impl<T> Tensor<T>
+where
+    T: DTComp + Debug + Clone,
+{
     pub fn get_raw_data_as_ix2(&self) -> ArrayBase<OwnedRepr<T>, Ix2> {
         return self.get_storage().get_data_as_ix2();
     }

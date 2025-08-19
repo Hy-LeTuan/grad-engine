@@ -132,12 +132,7 @@ where
 
         return Rc::clone(grad_accum_option.expect("Attempting to get grad_fn on a tensor that does not have grad_fn. This could occur when taking grad_fn on a leaf tensor."));
     }
-}
 
-impl<T> TensorImpl<T>
-where
-    T: DTComp + Debug + Clone,
-{
     pub fn from_raw_array_(x: ArrayBase<OwnedRepr<T>, IxDyn>) -> Self {
         let shape = x.shape().to_vec();
         let numel = x.len();
@@ -157,7 +152,12 @@ where
 
         return tensor_impl;
     }
+}
 
+impl<T> TensorImpl<T>
+where
+    T: DTComp + Debug + Clone,
+{
     // GETTERS AND SETTERS
     pub fn get_raw_shape(&self) -> Vec<usize> {
         return self.get_storage_().get_raw_shape();

@@ -6,6 +6,38 @@ use num_traits::{AsPrimitive, One, Zero};
 
 use std::{fmt::Debug, ops::Deref};
 
+#[macro_export]
+macro_rules! tensor {
+    ( $($x:expr),*$(,)*;requires_grad=$requires_grad:expr ) => {{
+        let tensor = $crate::tensor_core::tensor::Tensor::new_from_1d(vec![$($x,)*], $requires_grad);
+        tensor
+    }};
+}
+
+impl<T> Tensor<T>
+where
+    T: DTComp + Debug,
+{
+    pub fn new_from_1d(x: Vec<T>, requires_grad: bool) -> Tensor<T> {
+        let data_size: usize = x.len();
+
+        let tensor = Tensor::new(x, vec![data_size], requires_grad);
+
+        return tensor;
+    }
+
+    pub fn new_from_2d(x: Vec<Vec<T>>, requires_grad: bool) -> Tensor<T> {
+        let batch_dim: usize = x.len();
+        let repeat_dim = x[0].len();
+
+        let flattend_x: Vec<T> = x.into_iter().flatten().collect();
+
+        let tensor = Tensor::new(flattend_x, vec![batch_dim, repeat_dim], requires_grad);
+
+        return tensor;
+    }
+}
+
 impl<T> Tensor<T>
 where
     T: DTComp + Debug + AsPrimitive<f32>,
@@ -117,5 +149,27 @@ where
         handle_requires_grad(&tensor, requires_grad);
 
         return tensor;
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    use crate::utils::testing_utils;
+
+    #[allow(unused)]
+    use super::*;
+
+    #[test]
+    fn test_macro_on_1d() {
+        let tensor = tensor!(1, 2, 3, 4, 5; requires_grad=false);
+        let target = Tensor::new(vec![1, 2, 3, 4, 5], vec![5], false);
+
+        testing_utils::epsilon_test_for_tensor_similarity(
+            tensor.get_raw_data(),
+            target.get_raw_data(),
+            1e-4,
+        );
+
+        println!("tensor: {}", tensor);
     }
 }
