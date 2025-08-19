@@ -25,6 +25,6 @@ fn main() {
 
     let is_export = cli_args_for_export(args);
     if is_export {
-        export_graph_acyclic(&z);
+        export_graph_acyclic(&z, None);
     }
 }

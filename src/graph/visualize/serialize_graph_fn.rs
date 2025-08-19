@@ -104,6 +104,7 @@ pub fn export_single_node<T>(
     node: Rc<RefCell<dyn Backward<T>>>,
     node_id: String,
     tensor_registry: &mut HashMap<*const (), String>,
+    root_dir: &str,
 ) where
     T: DTComp + Debug + Clone + 'static + Add<Output = T> + Serialize,
 {
@@ -120,7 +121,7 @@ pub fn export_single_node<T>(
                 tensor_registry.insert(ptr, String::clone(&origin_id));
 
                 // export newly recorded tensor
-                export_single_tensor(origin, String::clone(&origin_id));
+                export_single_tensor(origin, String::clone(&origin_id), root_dir);
 
                 origin_id
             }
@@ -145,7 +146,7 @@ pub fn export_single_node<T>(
                 tensor_registry.insert(ptr, String::clone(&grad_id));
 
                 // export newly recorded tensor
-                export_single_tensor(grad, String::clone(&grad_id));
+                export_single_tensor(grad, String::clone(&grad_id), root_dir);
 
                 grad_id
             }
@@ -160,7 +161,7 @@ pub fn export_single_node<T>(
     };
 
     if let Ok(node_json_str) = to_string_pretty(&node_serialized) {
-        let file = File::create(format!("output/nodes/{}.json", node_id))
+        let file = File::create(format!("{}/nodes/{}.json", root_dir, node_id))
             .expect("Error: Creating graph.json for serializing graph failed");
         let mut writer = BufWriter::new(file);
         match writer.write_all(node_json_str.as_bytes()) {
@@ -172,14 +173,17 @@ pub fn export_single_node<T>(
     }
 }
 
-pub fn export_single_tensor<T>(tensorimpl: Rc<RefCell<TensorImpl<T>>>, tensor_id: String)
-where
+pub fn export_single_tensor<T>(
+    tensorimpl: Rc<RefCell<TensorImpl<T>>>,
+    tensor_id: String,
+    root_dir: &str,
+) where
     T: DTComp + Debug + Clone + 'static + Add<Output = T> + Serialize,
 {
     let serialized_tensor = serialize_tensor(tensorimpl);
 
     if let Ok(tensor_json_str) = to_string_pretty(&serialized_tensor) {
-        let file = File::create(format!("output/tensors/{}.json", tensor_id))
+        let file = File::create(format!("{}/tensors/{}.json", root_dir, tensor_id))
             .expect("Error: Creating graph.json for serializing graph failed");
         let mut writer = BufWriter::new(file);
         match writer.write_all(tensor_json_str.as_bytes()) {
@@ -195,6 +199,7 @@ pub fn populate_and_record_tensors_and_nodes<T>(
     node_registry: &mut HashMap<*const (), String>,
     adjacency_list: &mut Vec<(String, String)>,
     tensor_registry: &mut HashMap<*const (), String>,
+    root_dir: &str,
 ) where
     T: DTComp + Debug + Clone + 'static + Add<Output = T> + Serialize,
 {
@@ -208,7 +213,12 @@ pub fn populate_and_record_tensors_and_nodes<T>(
         node_name = format!("n-{}", node_registry.len());
         node_registry.insert(node_ptr, String::clone(&node_name));
 
-        export_single_node(Rc::clone(&node), String::clone(&node_name), tensor_registry);
+        export_single_node(
+            Rc::clone(&node),
+            String::clone(&node_name),
+            tensor_registry,
+            root_dir,
+        );
     }
 
     for edge in node.borrow().get_edge_list().iter() {
@@ -226,6 +236,7 @@ pub fn populate_and_record_tensors_and_nodes<T>(
                 Rc::clone(&next_node),
                 String::clone(&next_node_name),
                 tensor_registry,
+                root_dir,
             );
         }
 
@@ -235,14 +246,25 @@ pub fn populate_and_record_tensors_and_nodes<T>(
             node_registry,
             adjacency_list,
             tensor_registry,
+            root_dir,
         );
     }
 }
 
-pub fn export_graph_acyclic<T>(tensor: &Tensor<T>)
+pub fn export_graph_acyclic<T>(tensor: &Tensor<T>, root: Option<String>)
 where
     T: DTComp + Debug + Clone + 'static + Add<Output = T> + Serialize,
 {
+    let root_dir;
+    match root {
+        Some(root) => {
+            root_dir = root;
+        }
+        None => {
+            root_dir = String::from("output");
+        }
+    };
+
     let mut node_registry: HashMap<*const (), String> = HashMap::new();
     let mut adjacency_list: Vec<(String, String)> = vec![];
     let mut tensor_registry: HashMap<*const (), String> = HashMap::new();
@@ -259,10 +281,11 @@ where
             &mut node_registry,
             &mut adjacency_list,
             &mut tensor_registry,
+            &root_dir,
         );
 
         if let Ok(graph_json_str) = to_string_pretty(&adjacency_list) {
-            let file = File::create("output/graph_acyclic.json")
+            let file = File::create(root_dir + "/graph_acyclic.json")
                 .expect("Error: Creating graph.json for serializing graph failed");
             let mut writer = BufWriter::new(file);
             match writer.write_all(graph_json_str.as_bytes()) {
