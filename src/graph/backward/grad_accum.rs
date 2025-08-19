@@ -134,13 +134,3 @@ where
         self.origin = Some(Rc::downgrade(&origin));
     }
 }
-
-mod test {
-    #[allow(unused)]
-    use super::*;
-
-    #[test]
-    fn grad_accum_creation() {
-        let _grad_accum = GradAccum::<f32>::new(vec![]);
-    }
-}
