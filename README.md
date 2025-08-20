@@ -101,6 +101,9 @@ cd grad-engine
 
 ```bash
 cargo build
+
+# to test functionalities of all backward nodes
+cargo test
 ```
 
 ### Install Animation Component Dependencies
