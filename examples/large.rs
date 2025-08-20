@@ -6,6 +6,7 @@ use grad_engine::graph::visualize::serialize_graph_fn::{
 use grad_engine::graph::visualize::visualizer::Visualizer;
 use grad_engine::graph::visualize::visualizer::VisualizerTrait;
 use grad_engine::ops::public_ops::matmul::matmul;
+use grad_engine::tensor;
 use grad_engine::tensor_core::tensor::Tensor;
 use std::env;
 
@@ -14,7 +15,8 @@ fn main() {
 
     let x1 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
     let x2 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 4], true).as_float_32();
-    let x3 = Tensor::new(vec![3, 3, 3, 3], vec![4], true).as_float_32();
+
+    let x3 = tensor!(3.0, 3.0, 3.0, 3.0; requires_grad=true);
 
     let x4 = &x1 + 3.0;
     let x5 = &x2 - &x3;

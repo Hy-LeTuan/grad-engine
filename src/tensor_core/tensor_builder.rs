@@ -286,6 +286,8 @@ pub mod test {
             target.get_raw_data(),
             1e-4,
         );
+
+        println!("tensor: {tensor}");
     }
 
     #[test]
