@@ -29,12 +29,12 @@ fn main() {
     let z = x6.ln() + &x7.exp();
 
     z.backward(Tensor::ones_like(&z, None), true);
-    Visualizer::visualize_graph(&z);
-
-    x1.display_grad();
-    x2.display_grad();
-    x3.display_grad();
-    x7.display_grad();
+    // Visualizer::visualize_graph(&z);
+    //
+    // x1.display_grad();
+    // x2.display_grad();
+    // x3.display_grad();
+    // x7.display_grad();
 
     let is_export = cli_args_for_export(args);
     if is_export {
