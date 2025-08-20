@@ -1,4 +1,8 @@
-# GradEngine
+<p align="center">
+    <img src="/docs/static/grad-engine-logo-dark.png" alt="GradEngine Logo" width="100%">
+</p>
+
+---
 
 **GradEngine** _(crate: grad_engine)_ is a Rust based implementation of an **automatic differentiation engine** coupled with a **computational graph visualizer**.
 
