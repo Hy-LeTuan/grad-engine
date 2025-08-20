@@ -246,4 +246,5 @@ will read the graph stored at `output/` and compute the animation. If your graph
 # License
 
 [License: MIT](https://choosealicense.com/licenses/mit/)
+
 ![Rust 2024](https://img.shields.io/badge/rust-2024-orange)
