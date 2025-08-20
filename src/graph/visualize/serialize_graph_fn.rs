@@ -14,7 +14,7 @@ use std::{
     io::{BufWriter, Write},
     rc::Rc,
 };
-use std::{fmt::Debug, ops::Add};
+use std::{fmt::Debug, fs, ops::Add, path::Path};
 
 impl<T> NodeJSON<T> {
     pub fn add_to_children(&mut self, other: NodeJSON<T>) {
@@ -265,6 +265,38 @@ where
         }
     };
 
+    println!("Root dir: {root_dir}");
+
+    // create full output directory
+    let output_dir_path = Path::new(root_dir.as_str());
+    let tensor_dir = String::clone(&root_dir) + "/tensors";
+    let node_dir = String::clone(&root_dir) + "/nodes";
+
+    let tensor_dir_path = Path::new(&tensor_dir);
+    let node_dir_path = Path::new(&node_dir);
+
+    if !output_dir_path.is_dir() {
+        match fs::create_dir_all(output_dir_path) {
+            Ok(_) => {}
+            Err(e) => eprintln!("Export Error: Failed to output directory: {}", e),
+        }
+    }
+
+    if !tensor_dir_path.is_dir() {
+        match fs::create_dir_all(tensor_dir_path) {
+            Ok(_) => {}
+            Err(e) => eprintln!("Export Error: Failed to output directory: {}", e),
+        }
+    }
+
+    if !node_dir_path.is_dir() {
+        match fs::create_dir_all(node_dir_path) {
+            Ok(_) => {}
+            Err(e) => eprintln!("Export Error: Failed to output directory: {}", e),
+        }
+    }
+
+    // create node registry and populate graph
     let mut node_registry: HashMap<*const (), String> = HashMap::new();
     let mut adjacency_list: Vec<(String, String)> = vec![];
     let mut tensor_registry: HashMap<*const (), String> = HashMap::new();
