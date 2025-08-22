@@ -8,6 +8,8 @@
 
 The project aims to implement the core components that power modern neural network training while also providing users a special viewpoint into how different components play together to form a coherent system.
 
+# Table of Contents
+
 <!--toc-->
 
 -   [Quickstart](#quick-start)
@@ -40,8 +42,13 @@ The project aims to implement the core components that power modern neural netwo
 For a quick visualization of the computation graph, you can run the **small exmaple** to generate a small computation graph
 
 ```bash
-cargo run --example small
+git clone https://github.com/Hy-LeTuan/grad-engine.git
+cd grad-engine
+
+# -- export will export graph at /output
+cargo run --example small -- export
 cd animation
+
 manim -pqh main.py CreateAcyclicGraph
 ```
 
@@ -80,6 +87,10 @@ The Visualizer located in `animation` requires:
 
 1. Python 3.11 or later
 2. [Manim](https://github.com/ManimCommunity/manim) 0.19 or later if you are installing it separately from `pip`
+3. `Manim` dependencies which you can refer to `Manim`'s guidelines to install:
+    1. CMake
+    2. pkgconfig
+    3. pangocairo
 
 ## Getting GradEngine Source
 
@@ -94,16 +105,22 @@ cd grad-engine
 
 ```bash
 cargo build
+
+# to test functionalities of all backward nodes
+cargo test
 ```
 
 ### Install Animation Component Dependencies
 
-_It's best if you create a virtual environment first before installing requirements.txt_
+Before installing `animation`I recommend creating a virtual environment first. In local environment, I used `conda` to create the virtual environment, but `manim` suggests using `uv`, which you can install [here](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
 # manim is included in requirements.txt
 cd animation
 pip install -r requirements.txt
+
+# if you're using uv
+uv pip install -r requirements.txt
 ```
 
 # Usage
@@ -121,6 +138,10 @@ I have built out some example computation graph in `/examples`, which you can ru
 # cargo run --example [example_name]
 cargo run --example small
 cargo run --example large
+
+# export args to export computation graph to /output
+cargo run --example small -- export
+cargo run --example large -- export
 ```
 
 and the computation graph will be exported to their signified location. You will also see a terminal-based visualization of the graph displaying right after running these commands.
@@ -129,7 +150,8 @@ Visualize these examples through
 
 ```bash
 cd animation
-manim -pqh main.py CreateAcyclicGraph
+manim -pqh main.py CreateAcyclicGraph # for high quality render
+manim -pql main.py CreateAcyclicGraph # for low quality render
 ```
 
 ## Interacting with tensors
