@@ -58,7 +58,7 @@ where
         return tensor;
     }
 
-    fn get_storage(&self) -> Ref<Storage<T>> {
+    pub fn get_storage(&self) -> Ref<Storage<T>> {
         return Ref::map(self.__get_tensor_impl().borrow(), |tensor_impl| {
             &tensor_impl.storage
         });
