@@ -13,9 +13,8 @@ use std::env;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let x1 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![4, 2], true).as_float_32();
-    let x2 = Tensor::new(vec![1, 2, 3, 4, 5, 6, 7, 8], vec![2, 4], true).as_float_32();
-
+    let x1 = tensor!([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]]; requires_grad=true);
+    let x2 = tensor!([[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]]; requires_grad=true);
     let x3 = tensor!(3.0, 3.0, 3.0, 3.0; requires_grad=true);
 
     let x4 = &x1 + 3.0;
