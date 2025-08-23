@@ -47,6 +47,10 @@ cd grad-engine
 
 # -- export will export graph at /output
 cargo run --example small -- export
+# or try out the example from my blog
+cargo run --example blog -- export
+
+# create animation
 cd animation
 
 manim -pqh main.py CreateAcyclicGraph

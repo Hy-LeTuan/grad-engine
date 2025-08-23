@@ -4,7 +4,7 @@ use std::ops::Add;
 use ndarray::Axis;
 
 use crate::ops::central::stack_impl::stack_impl;
-use crate::ops::compute::stack_cat_compute::stack_compute;
+use crate::ops::compute::stack_concat_compute::stack_compute;
 use crate::tensor_core::dtypes::DTComp;
 use crate::tensor_core::tensor::Tensor;
 

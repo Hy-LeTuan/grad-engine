@@ -10,6 +10,6 @@ pub mod mul_compute;
 pub mod neg_compute;
 pub mod pow_compute;
 pub mod shape_compute;
-pub mod stack_cat_compute;
+pub mod stack_concat_compute;
 pub mod sub_compute;
 pub mod sum_mean_compute;

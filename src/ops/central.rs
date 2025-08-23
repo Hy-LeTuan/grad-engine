@@ -1,6 +1,6 @@
 pub mod add_impl;
 pub mod broadcast_impl;
-pub mod cat_impl;
+pub mod concat_impl;
 pub mod div_impl;
 pub mod exp_impl;
 pub mod ln_impl;
