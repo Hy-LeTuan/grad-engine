@@ -275,26 +275,50 @@ where
     let tensor_dir_path = Path::new(&tensor_dir);
     let node_dir_path = Path::new(&node_dir);
 
-    if !output_dir_path.is_dir() {
-        match fs::create_dir_all(output_dir_path) {
+    // check for existence, clear and create
+    if output_dir_path.is_dir() {
+        match fs::remove_dir_all(output_dir_path) {
             Ok(_) => {}
-            Err(e) => eprintln!("Export Error: Failed to output directory: {}", e),
+            Err(e) => eprintln!(
+                "Export Error: Failed to clear out current output directory for tensors {}",
+                e
+            ),
         }
     }
+    match fs::create_dir_all(output_dir_path) {
+        Ok(_) => {}
+        Err(e) => eprintln!("Export Error: Failed to create output directory: {}", e),
+    };
 
-    if !tensor_dir_path.is_dir() {
-        match fs::create_dir_all(tensor_dir_path) {
+    // check for existence, clear and create
+    if tensor_dir_path.is_dir() {
+        match fs::remove_dir_all(tensor_dir_path) {
             Ok(_) => {}
-            Err(e) => eprintln!("Export Error: Failed to output directory: {}", e),
+            Err(e) => eprintln!(
+                "Export Error: Failed to clear out current output directory for tensors {}",
+                e
+            ),
         }
     }
+    match fs::create_dir_all(tensor_dir_path) {
+        Ok(_) => {}
+        Err(e) => eprintln!("Export Error: Failed to create output directory: {}", e),
+    };
 
-    if !node_dir_path.is_dir() {
-        match fs::create_dir_all(node_dir_path) {
+    // check for existence, clear and create
+    if node_dir_path.is_dir() {
+        match fs::remove_dir_all(node_dir_path) {
             Ok(_) => {}
-            Err(e) => eprintln!("Export Error: Failed to output directory: {}", e),
+            Err(e) => eprintln!(
+                "Export Error: Failed to clear out current output directory for tensors {}",
+                e
+            ),
         }
     }
+    match fs::create_dir_all(node_dir_path) {
+        Ok(_) => {}
+        Err(e) => eprintln!("Export Error: Failed to create output directory: {}", e),
+    };
 
     // create node registry and populate graph
     let mut node_registry: HashMap<*const (), String> = HashMap::new();

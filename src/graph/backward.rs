@@ -35,8 +35,10 @@ pub mod sum_backward;
 
 // Broadcast & Reshape operations
 pub mod broadcast_backward;
+pub mod cat_backward;
 pub mod reshape_backward;
 pub mod squeeze_backward;
+pub mod stack_backward;
 pub mod transpose_backward;
 pub mod unsqueeze_backward;
 
