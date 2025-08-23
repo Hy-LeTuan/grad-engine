@@ -61,5 +61,5 @@ pub mod exp_public;
 pub mod stack;
 pub mod stack_public;
 
-pub mod cat;
-pub mod cat_public;
+pub mod concat;
+pub mod concat_public;

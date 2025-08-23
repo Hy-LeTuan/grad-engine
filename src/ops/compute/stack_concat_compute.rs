@@ -33,7 +33,7 @@ where
     }
 }
 
-pub fn concatenate_compute<T>(v: &[&Tensor<T>], dim: Axis) -> Tensor<T>
+pub fn concat_compute<T>(v: &[&Tensor<T>], dim: Axis) -> Tensor<T>
 where
     T: DTComp + Debug + Clone,
 {
