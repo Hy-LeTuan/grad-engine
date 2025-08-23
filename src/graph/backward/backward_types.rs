@@ -23,6 +23,8 @@ pub enum BackwardType {
     SqueezeBackward,
     TransposeBackward,
     ReshapeBackward,
+    StackBackward,
+    ConcatBackward,
 }
 
 impl fmt::Display for BackwardType {
@@ -49,6 +51,8 @@ impl fmt::Display for BackwardType {
             BackwardType::SqueezeBackward => write!(f, "SqueezeBackward"),
             BackwardType::TransposeBackward => write!(f, "TransposeBackward"),
             BackwardType::ReshapeBackward => write!(f, "ReshapeBackward"),
+            BackwardType::StackBackward => write!(f, "StackBackward"),
+            BackwardType::ConcatBackward => write!(f, "ConcatBackward"),
         }
     }
 }

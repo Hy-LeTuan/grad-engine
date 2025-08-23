@@ -14,7 +14,7 @@ where
     let new_tensor = tanh_compute_tensor(tensor);
 
     if tensor.does_require_grad() {
-        new_tensor.requires_grad_intermediate("Intermediate tensor expoential with arbitrary base");
+        new_tensor.requires_grad_intermediate("Intermediate tensor from tanh operation");
 
         tanh_impl(Some(tensor), &new_tensor);
     }

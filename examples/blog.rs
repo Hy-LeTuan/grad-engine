@@ -5,8 +5,10 @@ use grad_engine::graph::visualize::serialize_graph_fn::{
 };
 use grad_engine::graph::visualize::visualizer::Visualizer;
 use grad_engine::graph::visualize::visualizer::VisualizerTrait;
+use grad_engine::ops::public_ops::stack::stack;
 use grad_engine::tensor;
 use grad_engine::tensor_core::tensor::Tensor;
+use ndarray::Axis;
 use std::env;
 
 fn main() {
@@ -19,7 +21,7 @@ fn main() {
     let x4 = x1.pow(2.0) + (&x2 * &x3);
     let x5 = &x1 + &x2.pow(2.0);
 
-    let z = &x4 + &x5;
+    let z = stack(&vec![&x4, &x5], Axis(0));
 
     z.backward(Tensor::ones_like(&z, None), true);
     Visualizer::visualize_graph(&z);

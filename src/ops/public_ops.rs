@@ -57,3 +57,9 @@ pub mod reshape_public;
 
 pub mod exp;
 pub mod exp_public;
+
+pub mod stack;
+pub mod stack_public;
+
+pub mod cat;
+pub mod cat_public;
